@@ -1201,3 +1201,24 @@ a.card:hover{
   background:var(--accent);
   color:#0b0b0b;
 }
+/* ===== ФОТО В СТАТЬЯХ ===== */
+.article-body .note-figure{
+  margin:32px 0;
+  max-width:640px;
+}
+.article-body .note-figure img{
+  width:100%;
+  height:auto;
+  display:block;
+  border:1px solid var(--line);
+}
+.article-body .note-figure figcaption{
+  font-family:'Courier New',monospace;
+  font-size:.68rem;
+  letter-spacing:.06em;
+  color:var(--text-dim);
+  padding-top:8px;
+}
+.article-body .video-embed{
+  max-width:640px;
+}
