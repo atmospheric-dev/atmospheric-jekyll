@@ -19,5 +19,8 @@ collections:
   articles:
     output: true
     permalink: /articles/:name/
+  places:
+    output: true
+    permalink: /places/:name/
 exclude:
   - README.md
