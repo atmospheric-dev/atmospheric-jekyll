@@ -1,0 +1,28 @@
+---
+layout: default
+---
+<div class="page-head">
+  <div class="wrap">
+    <p class="kicker">{{ page.type }}</p>
+    <h1>{{ page.heading }}</h1>
+    <p>Обзоров: {{ page.items.size }}</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="releases">
+    {% for album in page.items %}
+    <div class="release">
+      <a href="{{ site.baseurl }}{{ album.url }}">
+        <img class="release-cover" src="{{ site.baseurl }}/{{ album.cover }}" alt="{{ album.artist }} — {{ album.title }}">
+      </a>
+      <h3><a href="{{ site.baseurl }}{{ album.url }}">{{ album.artist }} — {{ album.title }} ({{ album.year }})</a></h3>
+      <p class="release-excerpt">{{ album.excerpt | strip_html | truncatewords: 40 }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <p class="album-back" style="margin-top:32px">
+    <a class="back" href="{{ site.baseurl }}/releases.html">← Все обзоры</a>
+  </p>
+</div>
