@@ -40,6 +40,7 @@ title: Атмосферные места
   if(!el || !window.L) return;
 
   var map = L.map(el, {scrollWheelZoom:false}).setView([60.0, 90.0], 3);
+    map.attributionControl.setPrefix(false);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: 'Карта: OpenStreetMap',
     maxZoom: 19
