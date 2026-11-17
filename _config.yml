@@ -13,5 +13,8 @@ collections:
   notes:
     output: true
     permalink: /notes/:name/
+     interviews:
+    output: true
+    permalink: /interviews/:name/
 exclude:
   - README.md
