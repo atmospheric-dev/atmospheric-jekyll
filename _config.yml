@@ -16,5 +16,8 @@ collections:
   interviews:
     output: true
     permalink: /interviews/:name/
+  articles:
+    output: true
+    permalink: /articles/:name/
 exclude:
   - README.md
