@@ -11,11 +11,13 @@ layout: default
 
       <div>
         <dl class="album-info">
-          <li><dt>Группа</dt><dd>{{ page.artist }}</dd></li>
+          <li><dt>Группа</dt><dd><a href="{{ site.baseurl }}{{ page.artist_url }}">{{ page.artist }}</a></dd></li>
           <li><dt>Название</dt><dd>{{ page.title }}</dd></li>
           <li><dt>Год</dt><dd>{{ page.year }}</dd></li>
-          <li><dt>Страна</dt><dd>{{ page.country }}</dd></li>
-          {% if page.label %}<li><dt>Лейбл</dt><dd>{{ page.label }}</dd></li>{% endif %}
+          <li><dt>Страна</dt><dd>{% if page.country_url %}<a href="{{ site.baseurl }}{{ page.country_url }}">{{ page.country }}</a>{% else %}{{ page.country }}{% endif %}</dd></li>
+          {% if page.label %}
+          <li><dt>Лейбл</dt><dd><a href="{{ site.baseurl }}{{ page.label_url }}">{{ page.label }}</a></dd></li>
+          {% endif %}
         </dl>
 
         <div class="band-links">
@@ -60,6 +62,9 @@ layout: default
       <a href="{{ site.baseurl }}{{ page.artist_url }}">{{ page.artist }}</a>
       {% if page.country_url %}
       <a href="{{ site.baseurl }}{{ page.country_url }}">{{ page.country }}</a>
+      {% endif %}
+      {% if page.label_url %}
+      <a href="{{ site.baseurl }}{{ page.label_url }}">{{ page.label }}</a>
       {% endif %}
     </div>
 
