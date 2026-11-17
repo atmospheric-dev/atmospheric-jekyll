@@ -1,165 +1,32 @@
 ---
 layout: default
+title: Обзоры
+description: Все обзоры релизов на Atmospheric
 ---
-<header>
+<div class="page-head">
   <div class="wrap">
-    <div class="head-top">
-      <img class="logo" src="{{ site.baseurl }}/logo.png" alt="Atmospheric — логотип">
-
-      <div class="head-socials">
-        <a href="https://t.me/atmospheric_zine" target="_blank" rel="noopener" title="Telegram" aria-label="Telegram">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.8 4.3L18.6 19c-.2 1.1-.9 1.4-1.8.9l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.4-5 9.1-8.2c.4-.3-.1-.5-.6-.2L6.2 13.1 1.4 11.6c-1-.3-1-1 .2-1.5L20.4 3c.9-.3 1.6.2 1.4 1.3z"/></svg>
-        </a>
-        <a href="https://vk.ru/atmospheric_zine" target="_blank" rel="noopener" title="ВКонтакте" aria-label="ВКонтакте">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.1 17.3c-5.4 0-8.5-3.7-8.6-9.9h2.7c.1 4.6 2.1 6.5 3.7 6.9V7.4h2.5v4c1.6-.2 3.3-2 3.9-4h2.5c-.4 2.5-2.2 4.3-3.5 5 1.3.6 3.3 2.2 4.1 4.9h-2.8c-.6-1.9-2.2-3.4-4.2-3.6v3.6z"/></svg>
-        </a>
-      </div>
-    </div>
-
-    <p class="kicker">сообщество · блог · zine</p>
-    <h1>Atmospheric</h1>
-    <p class="lead">
-      Сообщество и блог о тяжёлой и тёмной музыке: блэк-метал, сладж,
-      пост- и дум-метал, дарк-фолк, дарк-эмбиент, данжен-синт и близкие жанры.
-    </p>
+    <h1>Обзоры</h1>
+    <p>Все рецензии, которые вышли у нас на сайте. Новые — сверху.</p>
   </div>
-</header>
+</div>
 
-<main>
-  <section>
-    <div class="wrap">
-      <h2>Выбор редакции</h2>
+<div class="wrap">
+  <div class="releases">
 
-      <div class="top-layout">
-        <div>
-          <div class="picks">
-            {% assign featured = site.albums | where: "featured", true %}
-            {% for album in featured limit: 3 %}
-            <div class="pick">
-              <h3 class="pick-title"><a href="{{ site.baseurl }}{{ album.url }}">{{ album.artist }} — {{ album.title }} ({{ album.year }})</a></h3>
-              <a href="{{ site.baseurl }}{{ album.url }}">
-                <img class="pick-cover" src="{{ site.baseurl }}/{{ album.cover }}" alt="{{ album.artist }} — {{ album.title }}">
-              </a>
-            </div>
-            {% endfor %}
-          </div>
-
-          <p style="margin-top:28px;font-family:'Courier New',monospace;font-size:.7rem;letter-spacing:.08em;color:var(--text-dim)">
-            Лучшие обзоры за последнее время.
-          </p>
-
-          <p style="margin-top:20px">
-            <a class="back" href="{{ site.baseurl }}/releases.html">Все обзоры →</a>
-          </p>
-        </div>
-
-        <aside class="concert-block">
-          <p class="section-heading">Ближайшие концерты</p>
-
-          <div class="concerts-list">
-
-            <a class="concert-card" href="ССЫЛКА_1"
-               style="--poster:url('{{ site.baseurl }}/covers/posters/poster-1.jpg')">
-              <div class="concert-inner">
-                <p class="concert-title">Birth of the Monolith, Самара</p>
-                <p class="concert-date">11 ноября 2026</p>
-              </div>
-            </a>
-
-            <a class="concert-card" href="ССЫЛКА_2"
-               style="--poster:url('{{ site.baseurl }}/covers/posters/poster-2.jpg')">
-              <div class="concert-inner">
-                <p class="concert-title">Birth of the Monolith, Екатеринбург</p>
-                <p class="concert-date">13 ноября 2026</p>
-              </div>
-            </a>
-
-            <a class="concert-card" href="ССЫЛКА_3"
-               style="--poster:url('{{ site.baseurl }}/covers/posters/poster-3.jpg')">
-              <div class="concert-inner">
-                <p class="concert-title">Birth of the Monolith, Омск</p>
-                <p class="concert-date">14 ноября 2026</p>
-              </div>
-            </a>
-
-          </div>
-        </aside>
-
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="wrap">
-      <h2>О нас</h2>
-      <p style="max-width:680px">
-        Мы публикуем обзоры релизов, заметки с концертов, тематические подборки
-        и материалы о жанрах, до которых добираемся сами — со всеми сомнениями
-        и без готовых списков. Отдельное направление — наш печатный журнал
-        с неописуемым типографским запахом.
-      </p>
-
-      <div class="genres" style="margin-top:32px">
-        {% assign allgenres = site.albums | map: "genres" | join: "," | split: "," | uniq | sort %}
-        {% for g in allgenres %}
-        <a class="genre" href="{{ site.baseurl }}/tag-{{ g | slugify }}.html">{{ g }}</a>
+    {% for album in site.albums reversed %}
+    <div class="release">
+      <a href="{{ site.baseurl }}{{ album.url }}">
+        <img class="release-cover" src="{{ site.baseurl }}/{{ album.cover }}" alt="{{ album.artist }} — {{ album.title }}">
+      </a>
+      <h3><a href="{{ site.baseurl }}{{ album.url }}">{{ album.artist }} — {{ album.title }} ({{ album.year }})</a></h3>
+      <p class="release-excerpt">{{ album.excerpt | strip_html | truncatewords: 40 }}</p>
+      <div class="release-tags">
+        {% for g in album.genre_links %}
+        <a href="{{ site.baseurl }}{{ g.url }}">{{ g.name }}</a>
         {% endfor %}
       </div>
     </div>
-  </section>
+    {% endfor %}
 
-  <section>
-    <div class="wrap">
-      <h2>Что публикуем</h2>
-      <div class="grid">
-
-        <div class="card">
-          <h3><a href="{{ site.baseurl }}/releases.html">Обзоры релизов</a></h3>
-          <p>Новые записи и то, что прошло мимо. Слушаем сами, пишем о том,
-             что зацепило — и о том, что нет.</p>
-        </div>
-
-        <div class="card">
-          <h3>Заметки с концертов</h3>
-          <p>То, что остаётся после живого звука: зал, свет, воздух
-             и пара нетипичных деталей.</p>
-        </div>
-
-        <div class="card">
-          <h3>Подборки</h3>
-          <p>Тематические списки — сезонные и не только. Собраны по смыслу,
-             а не по количеству прослушиваний.</p>
-        </div>
-
-        <div class="card">
-          <h3>Материалы о жанрах</h3>
-          <p>Разбираем направления, в которых разбираться ещё не успели.
-             Отделяем проверенное от предположений.</p>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="wrap">
-      <h2>Печатный журнал</h2>
-      <div class="zine">
-        <div class="zine-note">
-          <p>
-            Zine — это не приложение к сайту, это отдельная история.
-            Бумага, типографская краска, переплёт и то самое ощущение,
-            когда журнал только что из коробки.
-          </p>
-          <p style="margin-top:18px">
-            Анонсы выпусков и способов получить экземпляр — в сообществе.
-          </p>
-        </div>
-        <div class="zine-quote">
-          «Неописуемый типографский запах»
-          <small>о нашем журнале</small>
-        </div>
-      </div>
-    </div>
-  </section>
-</main>
+  </div>
+</div>
