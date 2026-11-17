@@ -21,8 +21,8 @@ description: Все обзоры релизов на Atmospheric
       <h3><a href="{{ site.baseurl }}{{ album.url }}">{{ album.artist }} — {{ album.title }} ({{ album.year }})</a></h3>
       <p class="release-excerpt">{{ album.excerpt | strip_html | truncatewords: 40 }}</p>
       <div class="release-tags">
-        {% for g in album.genres %}
-        <a href="{{ site.baseurl }}/tag-{{ g | slugify }}.html">{{ g }}</a>
+        {% for g in album.genre_links %}
+        <a href="{{ site.baseurl }}{{ g.url }}">{{ g.name }}</a>
         {% endfor %}
       </div>
     </div>
