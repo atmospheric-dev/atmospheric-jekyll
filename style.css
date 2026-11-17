@@ -1119,9 +1119,9 @@ a.card:hover{
 }
 .related-grid{
   display:grid;
-  grid-template-columns:repeat(3, 260px);
+  grid-template-columns:repeat(3, 1fr);
   gap:16px;
-  justify-content:start;
+}
 }
 .related-card{
   display:block;
@@ -1289,6 +1289,65 @@ a.card:hover{
   -webkit-box-orient:vertical;
   overflow:hidden;
 }
+/* ===== КОНТЕЙНЕР СТАТЬИ (по центру, узкая колонка) ===== */
+.article{
+  max-width:760px;
+  margin:0 auto;
+  padding:56px 0;
+}
+
+.article .breadcrumbs{
+  margin:0 0 22px 0;
+}
+
+.article-head{
+  margin:0 0 32px 0;
+}
+
+.article-title{
+  font-size:1.8rem;
+  font-weight:400;
+  line-height:1.2;
+  margin:0 0 12px 0;
+}
+
+.article-body{
+  max-width:100%;
+}
+
+.article-body p{
+  line-height:1.75;
+  margin:0 0 1.3em 0;
+}
+
+.article-body h2{
+  font-size:1.25rem;
+  font-weight:400;
+  margin:44px 0 20px 0;
+}
+
+.article-body h3{
+  font-size:1.05rem;
+  font-weight:400;
+  margin:32px 0 18px 0;
+}
+
+/* чтобы обтекание не лезло под следующий заголовок */
+.article-body h2,
+.article-body h3{
+  clear:both;
+}
+
+@media (max-width:820px){
+  .article{
+    max-width:100%;
+    padding:40px 0;
+  }
+  .article-title{
+    font-size:1.5rem;
+  }
+}
+
 /* ===== ОБТЕКАНИЕ ФОТО В СТАТЬЕ ===== */
 .article-body .note-figure.float-left,
 .article-body .note-figure.float-right{
