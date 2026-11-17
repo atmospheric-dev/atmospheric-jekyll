@@ -766,7 +766,7 @@ footer a:hover{color:var(--accent);opacity:1;}
 }
 .carousel-item img {
   width: 100%;
-  aspect-ratio: 3 / 2;
+  height: 460px;
   object-fit: cover;
   display: block;
 }
@@ -782,6 +782,7 @@ footer a:hover{color:var(--accent);opacity:1;}
 
 @media (max-width: 560px) {
   .carousel-item { flex: 0 0 88%; }
+  .carousel-item img { height: 300px; }
 }
 .note-emphasis {
   text-align: center;
