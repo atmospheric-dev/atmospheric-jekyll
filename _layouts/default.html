@@ -10,6 +10,25 @@
 {{ content }}
 
 {% include footer.html %}
+<script>
+(function(){
+  var drop = document.querySelector('.nav-drop');
+  if(!drop) return;
+  var btn = drop.querySelector('.nav-drop-toggle');
 
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    drop.classList.toggle('is-open');
+  });
+
+  document.addEventListener('click', function(){
+    drop.classList.remove('is-open');
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') drop.classList.remove('is-open');
+  });
+})();
+</script>
 </body>
 </html>
