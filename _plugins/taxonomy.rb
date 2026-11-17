@@ -6,31 +6,28 @@ module Atmospheric
     def generate(site)
       albums = site.collections["albums"]&.docs || []
 
-      # ---------- ЖАНРЫ ----------
+      # ---------- СБОР ДАННЫХ ----------
       genres = {}
+      artists = {}
+      countries = {}
+
       albums.each do |a|
         Array(a.data["genres"]).each do |g|
           slug = make_slug(g)
           genres[slug] ||= { "name" => g, "items" => [] }
           genres[slug]["items"] << a
         end
-      end
 
-      # ---------- ГРУППЫ ----------
-      artists = {}
-      albums.each do |a|
         slug = make_slug(a.data["artist"])
         artists[slug] ||= { "name" => a.data["artist"], "items" => [] }
         artists[slug]["items"] << a
-      end
 
-      # ---------- СТРАНЫ ----------
-      countries = {}
-      albums.each do |a|
-        next if a.data["country"].to_s.empty?
-        slug = make_slug(a.data["country"])
-        countries[slug] ||= { "name" => a.data["country"], "items" => [] }
-        countries[slug]["items"] << a
+        c = a.data["country"].to_s
+        unless c.empty?
+          slug = make_slug(c)
+          countries[slug] ||= { "name" => c, "items" => [] }
+          countries[slug]["items"] << a
+        end
       end
 
       # ---------- ССЫЛКИ В КАЖДЫЙ АЛЬБОМ ----------
@@ -45,53 +42,35 @@ module Atmospheric
         a.data["country_url"] = c.empty? ? nil : "/countries/#{make_slug(c)}.html"
       end
 
-      # ---------- СТРАНИЦЫ ЖАНРОВ ----------
+      # ---------- СТРАНИЦЫ ----------
       genres.each do |slug, data|
-        page = PageWithoutAFile.new(site, site.source, "tags", "#{slug}.html")
-        page.data.merge!(
-          "layout"  => "taxonomy",
-          "title"   => data["name"],
-          "heading" => data["name"],
-          "type"    => "жанр",
-          "items"   => data["items"],
-          "slug"    => slug
-        )
-        page.content = ""
-        site.pages << page
+        add_page(site, "tags", slug, "жанр", data)
       end
 
-      # ---------- СТРАНИЦЫ ГРУПП ----------
       artists.each do |slug, data|
-        page = PageWithoutAFile.new(site, site.source, "bands", "#{slug}.html")
-        page.data.merge!(
-          "layout"  => "taxonomy",
-          "title"   => data["name"],
-          "heading" => data["name"],
-          "type"    => "группа",
-          "items"   => data["items"],
-          "slug"    => slug
-        )
-        page.content = ""
-        site.pages << page
+        add_page(site, "bands", slug, "группа", data)
       end
 
-      # ---------- СТРАНИЦЫ СТРАН ----------
       countries.each do |slug, data|
-        page = PageWithoutAFile.new(site, site.source, "countries", "#{slug}.html")
-        page.data.merge!(
-          "layout"  => "taxonomy",
-          "title"   => data["name"],
-          "heading" => data["name"],
-          "type"    => "страна",
-          "items"   => data["items"],
-          "slug"    => slug
-        )
-        page.content = ""
-        site.pages << page
+        add_page(site, "countries", slug, "страна", data)
       end
     end
 
     private
+
+    def add_page(site, dir, slug, type, data)
+      page = Jekyll::PageWithoutAFile.new(site, site.source, dir, "#{slug}.html")
+      page.data.merge!(
+        "layout"  => "taxonomy",
+        "title"   => data["name"],
+        "heading" => data["name"],
+        "type"    => type,
+        "items"   => data["items"],
+        "slug"    => slug
+      )
+      page.content = ""
+      site.pages << page
+    end
 
     def make_slug(text)
       map = {
