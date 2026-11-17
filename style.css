@@ -783,3 +783,11 @@ footer a:hover{color:var(--accent);opacity:1;}
 @media (max-width: 560px) {
   .carousel-item { flex: 0 0 88%; }
 }
+.note-emphasis {
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin: 32px 0;
+  color: var(--accent);
+}
