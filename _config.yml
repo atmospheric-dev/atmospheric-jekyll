@@ -13,7 +13,7 @@ collections:
   notes:
     output: true
     permalink: /notes/:name/
-     interviews:
+  interviews:
     output: true
     permalink: /interviews/:name/
 exclude:
