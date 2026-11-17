@@ -64,7 +64,7 @@ module Atmospheric
       artists.each do |slug, data|
         page = PageWithoutAFile.new(site, site.source, "bands", "#{slug}.html")
         page.data.merge!(
-          "layout"  => "band",
+          "layout"  => "taxonomy",
           "title"   => data["name"],
           "heading" => data["name"],
           "type"    => "группа",
@@ -79,7 +79,7 @@ module Atmospheric
       countries.each do |slug, data|
         page = PageWithoutAFile.new(site, site.source, "countries", "#{slug}.html")
         page.data.merge!(
-          "layout"  => "country",
+          "layout"  => "taxonomy",
           "title"   => data["name"],
           "heading" => data["name"],
           "type"    => "страна",
