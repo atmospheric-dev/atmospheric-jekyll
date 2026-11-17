@@ -1,0 +1,15 @@
+title: Atmospheric
+description: Сообщество и блог о тяжёлой и тёмной музыке
+url: "https://atmospheric-dev.github.io"
+baseurl: "/atmospheric-jekyll"
+
+markdown: kramdown
+permalink: /:collection/:title.html
+
+collections:
+  albums:
+    output: true
+    permalink: /albums/:name.html
+
+exclude:
+  - README.md
