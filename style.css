@@ -1348,29 +1348,61 @@ a.card:hover{
   }
 }
 
-/* ===== ОБТЕКАНИЕ ФОТО В СТАТЬЕ ===== */
-.article-body .note-figure.float-left,
-.article-body .note-figure.float-right{
-  max-width:340px;
-  margin:8px 0 20px 0;
+/* ===== ФОТО И ВИДЕО В СТАТЬЕ: ПО ЦЕНТРУ ===== */
+.article-body .note-figure{
+  max-width:640px;
+  margin:32px auto;
 }
-.article-body .note-figure.float-left{
-  float:left;
-  margin-right:28px;
+.article-body .note-figure img{
+  width:100%;
+  height:auto;
+  display:block;
+  border:1px solid var(--line);
 }
-.article-body .note-figure.float-right{
-  float:right;
-  margin-left:28px;
+.article-body .note-figure figcaption{
+  font-family:'Courier New',monospace;
+  font-size:.68rem;
+  letter-spacing:.06em;
+  color:var(--text-dim);
+  padding-top:10px;
+  text-align:center;
 }
-.article-body .note-figure.float-left figcaption,
-.article-body .note-figure.float-right figcaption{
-  text-align:left;
+
+.article-body .video-embed{
+  max-width:640px;
+  margin:32px auto;
 }
-@media (max-width:720px){
-  .article-body .note-figure.float-left,
-  .article-body .note-figure.float-right{
-    float:none;
-    max-width:100%;
-    margin:28px 0;
-  }
+
+/* ===== КНОПКА ПЛЕЙЛИСТА ===== */
+.article-body .playlist-link{
+  text-align:center;
+  margin:40px auto 24px auto;
+  max-width:640px;
+}
+.article-body .playlist-link a{
+  display:inline-block;
+  padding:12px 28px;
+  border:1px solid var(--accent);
+  color:var(--accent);
+  text-decoration:none;
+  font-family:'Courier New',monospace;
+  font-size:.8rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  transition:background .25s, color .25s;
+}
+.article-body .playlist-link a:hover{
+  background:var(--accent);
+  color:#0b0b0b;
+}
+
+/* ===== «ПРОДОЛЖЕНИЕ СЛЕДУЕТ» ===== */
+.article-body .note-emphasis{
+  text-align:center;
+  font-weight:700;
+  font-size:1.05rem;
+  line-height:1.6;
+  margin:28px auto;
+  max-width:640px;
+  color:var(--accent);
 }
