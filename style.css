@@ -1366,3 +1366,7 @@ footer a:hover{color:var(--accent);opacity:1;}
   .map-large{height:340px;}
   .place-map{height:240px;}
 }
+/* тёмная карта поверх светлых тайлов OSM */
+.leaflet-tile-pane{
+  filter: invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.6);
+}
