@@ -1,0 +1,29 @@
+---
+layout: default
+title: Заметки с концертов
+description: Что остаётся после живого звука
+---
+<div class="page-head">
+  <div class="wrap">
+    <h1>Заметки с концертов</h1>
+    <p>Что остаётся после живого звука: зал, свет, воздух и пара нетипичных деталей.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="notes-grid">
+
+    {% assign notes = site.notes | sort: "date" | reverse %}
+    {% for note in notes %}
+    <a class="note-card" href="{{ site.baseurl }}{{ note.url }}">
+      {% if note.photo %}
+      <img class="note-card-img" src="{{ site.baseurl }}/{{ note.photo }}" alt="{{ note.title }}" loading="lazy">
+      {% endif %}
+      <p class="note-card-date">{{ note.date | date: "%-d %B %Y" }}{% if note.city %} · {{ note.city }}{% endif %}</p>
+      <h3 class="note-card-title">{{ note.title }}</h3>
+      <p class="note-card-excerpt">{{ note.excerpt | strip_html | truncatewords: 22 }}</p>
+    </a>
+    {% endfor %}
+
+  </div>
+</div>
