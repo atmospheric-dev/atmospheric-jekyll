@@ -1,11 +1,10 @@
 ---
 layout: interview
 title: "Интервью с Alexander Adin Rieth (Kardashev)"
-date: 2026-11-17
-city: Финикс
+date: 2024-05-14
 author: Никита
 photos_by: ""
-photo: covers/interviews/kardashev/01.jpg
+photo: covers/interviews/kardashev/02.jpg
 guests: Александр Рит, Нико Миролла, Марк Гарретт, Шон Лэнг
 description: "С 2012 года группа Kardashev исполняет прогрессивный death-metal, который отличается своей уникальностью. Их стиль сочетает в себе элементы дэт-метала и шугейза, создавая совершенно новый жанр."
 ---
