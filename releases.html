@@ -24,6 +24,9 @@ description: Все обзоры релизов на Atmospheric
         {% for g in album.genre_links %}
         <a href="{{ site.baseurl }}{{ g.url }}">{{ g.name }}</a>
         {% endfor %}
+        {% if album.label_url %}
+        <a href="{{ site.baseurl }}{{ album.label_url }}">{{ album.label }}</a>
+        {% endif %}
       </div>
     </div>
     {% endfor %}
