@@ -1,0 +1,746 @@
+/* ========================================================
+   ATMOSPHERIC — style.css
+   ======================================================== */
+
+/* ====== ПЕРЕМЕННЫЕ ====== */
+:root{
+  --bg:#0d0c0b;
+  --bg-soft:#141211;
+  --bg-card:#181615;
+  --line:#2a2624;
+  --text:#d9d4cc;
+  --text-dim:#8a8178;
+  --accent:#b08e5a;
+}
+
+/* ====== БАЗА ====== */
+*,*::before,*::after{box-sizing:border-box;}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:17px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+
+img{max-width:100%;height:auto;display:block;}
+
+a{
+  color:var(--accent);
+  text-decoration:none;
+  transition:opacity .2s;
+}
+a:hover{opacity:.75;}
+
+p{margin:0 0 18px 0;}
+p:last-child{margin-bottom:0;}
+
+/* ====== КОНТЕЙНЕР ====== */
+.wrap{
+  max-width:1180px;
+  margin:0 auto;
+  padding:0 28px;
+}
+
+/* ====== ВЕРХНЯЯ ПАНЕЛЬ НАВИГАЦИИ ====== */
+.topbar{
+  border-bottom:1px solid var(--line);
+  padding:18px 0;
+}
+
+.topbar .wrap{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+}
+
+.topbar-brand{
+  font-family:'Courier New',monospace;
+  font-size:.78rem;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+}
+.topbar-brand:hover{color:var(--accent);opacity:1;}
+
+.topbar-links{
+  display:flex;
+  gap:28px;
+}
+
+.topbar-links a{
+  font-family:'Courier New',monospace;
+  font-size:.72rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+}
+.topbar-links a:hover{color:var(--accent);opacity:1;}
+
+/* ====== ШАПКА ====== */
+header{
+  padding:56px 0 48px;
+  border-bottom:1px solid var(--line);
+}
+
+/* логотип + соцсети */
+header .head-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:24px;
+  margin-bottom:24px;
+}
+
+header .head-top .logo{
+  width:96px;
+  height:auto;
+  max-width:96px;
+  margin:0;
+  flex:0 0 auto;
+}
+
+header .head-socials{
+  display:flex;
+  gap:10px;
+  flex:0 0 auto;
+}
+
+header .head-socials a{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:40px;
+  height:40px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  color:var(--text-dim);
+  transition:color .2s, border-color .2s;
+}
+header .head-socials a:hover{
+  color:var(--accent);
+  border-color:var(--accent);
+  opacity:1;
+}
+
+header .head-socials svg{
+  width:18px;
+  height:18px;
+  max-width:18px;
+  max-height:18px;
+  fill:currentColor;
+}
+
+.kicker{
+  font-family:'Courier New',monospace;
+  font-size:.7rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  margin:0 0 14px 0;
+}
+
+h1{
+  font-size:3.4rem;
+  font-weight:normal;
+  letter-spacing:.02em;
+  margin:0 0 18px 0;
+  line-height:1.05;
+}
+
+.lead{
+  max-width:720px;
+  font-size:1.05rem;
+  color:var(--text-dim);
+  margin:0;
+}
+
+/* ====== ЗАГОЛОВКИ СЕКЦИЙ ====== */
+main > section{
+  padding:64px 0;
+  border-bottom:1px solid var(--line);
+}
+main > section:last-child{border-bottom:0;}
+
+h2{
+  font-size:1.6rem;
+  font-weight:normal;
+  letter-spacing:.02em;
+  margin:0 0 32px 0;
+}
+
+h3{
+  font-size:1.1rem;
+  font-weight:normal;
+  margin:0 0 12px 0;
+}
+
+/* ====== ВЕРХНИЙ БЛОК: ОБЗОРЫ + КОНЦЕРТЫ ====== */
+.top-layout{
+  display:grid;
+  grid-template-columns:1fr 320px;
+  gap:40px;
+  align-items:start;
+}
+
+/* ====== СЕТКА ЛУЧШИХ ОБЗОРОВ ====== */
+.picks{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:24px;
+}
+
+.pick{
+  display:flex;
+  flex-direction:column;
+}
+
+.pick-title{
+  font-size:.95rem;
+  font-weight:normal;
+  line-height:1.35;
+  margin:0 0 12px 0;
+  min-height:2.6em;
+}
+.pick-title a{
+  color:var(--text);
+}
+
+.pick-cover{
+  width:100%;
+  aspect-ratio:1/1;
+  object-fit:cover;
+  border:1px solid var(--line);
+  transition:border-color .25s;
+}
+.pick a:hover .pick-cover{
+  border-color:var(--accent);
+}
+
+/* ====== БЛОК КОНЦЕРТОВ ====== */
+.concert-block .section-heading{
+  font-family:'Courier New',monospace;
+  font-size:.72rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  margin:0 0 16px 0;
+  font-weight:normal;
+}
+
+.concerts-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.concert-card{
+  position:relative;
+  display:block;
+  overflow:hidden;
+  min-height:92px;
+  padding:16px 18px;
+  border:1px solid var(--line);
+  transition:border-color .25s;
+}
+.concert-card:hover{opacity:1;}
+
+.concert-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image:var(--poster);
+  background-size:cover;
+  background-position:center;
+  opacity:0;
+  transform:scale(1.06);
+  transition:opacity .35s ease, transform .6s ease;
+  z-index:0;
+}
+
+.concert-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,
+    rgba(13,12,11,.95) 0%,
+    rgba(13,12,11,.82) 60%,
+    rgba(13,12,11,.55) 100%);
+  opacity:0;
+  transition:opacity .35s ease;
+  z-index:1;
+}
+
+.concert-card:hover{border-color:var(--accent);}
+.concert-card:hover::before{opacity:.9;transform:scale(1);}
+.concert-card:hover::after{opacity:1;}
+
+.concert-inner{
+  position:relative;
+  z-index:2;
+}
+
+.concert-title{
+  margin:0 0 6px 0;
+  font-size:.9rem;
+  line-height:1.35;
+  color:var(--text);
+  transition:color .25s;
+}
+
+.concert-date{
+  margin:0;
+  font-family:'Courier New',monospace;
+  font-size:.68rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+}
+
+.concert-card:hover .concert-title{color:var(--accent);}
+
+/* ====== ЖАНРОВЫЕ ХЕШТЕГИ ====== */
+.genres{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.genre{
+  display:inline-block;
+  padding:6px 14px;
+  border:1px solid var(--line);
+  font-family:'Courier New',monospace;
+  font-size:.7rem;
+  letter-spacing:.06em;
+  color:var(--text-dim);
+  transition:color .2s, border-color .2s;
+}
+a.genre:hover{
+  color:var(--accent);
+  border-color:var(--accent);
+  opacity:1;
+}
+
+/* ====== РУБРИКИ (СЕТКА КАРТОЧЕК) ====== */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:20px;
+}
+
+.card{
+  padding:26px 24px;
+  border:1px solid var(--line);
+  background:var(--bg-soft);
+  transition:border-color .25s;
+}
+.card:hover{
+  border-color:var(--accent);
+}
+
+.card h3 a{
+  color:var(--text);
+}
+.card h3 a:hover{
+  color:var(--accent);
+  opacity:1;
+}
+
+.card p{
+  color:var(--text-dim);
+  font-size:.94rem;
+  margin:0;
+}
+
+/* ====== ЖУРНАЛ ====== */
+.zine{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:40px;
+  align-items:start;
+}
+
+.zine-note p{
+  color:var(--text-dim);
+}
+
+.zine-quote{
+  border-left:2px solid var(--accent);
+  padding:6px 0 6px 24px;
+  font-size:1.3rem;
+  font-style:italic;
+  line-height:1.45;
+}
+.zine-quote small{
+  display:block;
+  margin-top:14px;
+  font-family:'Courier New',monospace;
+  font-style:normal;
+  font-size:.68rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+}
+
+/* ====== ССЫЛКИ / КНОПКИ ====== */
+.links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:14px;
+}
+
+.btn{
+  display:inline-block;
+  padding:12px 26px;
+  border:1px solid var(--accent);
+  font-family:'Courier New',monospace;
+  font-size:.72rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--accent);
+  transition:background .2s, color .2s;
+}
+.btn:hover{
+  background:var(--accent);
+  color:var(--bg);
+  opacity:1;
+}
+
+/* ====== ПОДВАЛ ====== */
+footer{
+  padding:52px 0 64px;
+  border-top:1px solid var(--line);
+  font-family:'Courier New',monospace;
+  font-size:.74rem;
+  letter-spacing:.06em;
+  color:var(--text-dim);
+}
+footer p{margin:0 0 10px 0;}
+footer p:last-child{margin-bottom:0;}
+footer a{color:var(--text-dim);}
+footer a:hover{color:var(--accent);opacity:1;}
+
+/* ====== СТРАНИЦА «ОБЗОРЫ»: releases.html ====== */
+.page-head{
+  padding:56px 0 0;
+}
+
+.page-head h1{
+  font-size:2.8rem;
+  margin:0 0 14px 0;
+}
+
+.page-head p{
+  max-width:680px;
+  color:var(--text-dim);
+  margin:0;
+}
+
+.releases{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:36px 28px;
+  padding:36px 0 72px;
+}
+
+.release{
+  display:flex;
+  flex-direction:column;
+}
+
+.release-cover{
+  width:100%;
+  max-width:100%;
+  aspect-ratio:1/1;
+  object-fit:cover;
+  border:1px solid var(--line);
+  transition:border-color .25s;
+}
+.release a:hover .release-cover{
+  border-color:var(--accent);
+}
+
+.release h3{
+  font-size:1.05rem;
+  font-weight:normal;
+  line-height:1.35;
+  margin:16px 0 10px 0;
+}
+.release h3 a{
+  color:var(--text);
+}
+.release h3 a:hover{
+  color:var(--accent);
+  opacity:1;
+}
+
+.release-excerpt{
+  margin:0 0 14px 0;
+  font-size:.92rem;
+  line-height:1.55;
+  color:var(--text-dim);
+  display:-webkit-box;
+  -webkit-line-clamp:4;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.release-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:auto;
+}
+.release-tags a{
+  font-family:'Courier New',monospace;
+  font-size:.65rem;
+  letter-spacing:.05em;
+  color:var(--text-dim);
+  border-bottom:1px solid transparent;
+  transition:color .2s, border-color .2s;
+}
+.release-tags a:hover{
+  color:var(--accent);
+  border-color:var(--accent);
+  opacity:1;
+}
+
+/* фильтр хештегов под заголовком страницы */
+.page-head + .wrap .tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:0;
+}
+.page-head + .wrap .tags a{
+  display:inline-block;
+  padding:6px 14px;
+  border:1px solid var(--line);
+  font-family:'Courier New',monospace;
+  font-size:.7rem;
+  letter-spacing:.06em;
+  color:var(--text-dim);
+  transition:color .2s, border-color .2s;
+}
+.page-head + .wrap .tags a:hover{
+  color:var(--accent);
+  border-color:var(--accent);
+  opacity:1;
+}
+.page-head + .wrap .tags a.is-active{
+  color:var(--accent);
+  border-color:var(--accent);
+}
+
+/* ====== СТРАНИЦА АЛЬБОМА ====== */
+.album{
+  padding:64px 0;
+}
+
+.album-title{
+  font-size:2.4rem;
+  font-weight:normal;
+  line-height:1.15;
+  margin:0 0 14px 0;
+}
+.album-title span{color:var(--accent);}
+
+.album-date{
+  font-family:'Courier New',monospace;
+  font-size:.72rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  margin:0 0 48px 0;
+}
+
+.album-layout{
+  display:grid;
+  grid-template-columns:minmax(0,420px) 1fr;
+  gap:48px;
+  align-items:start;
+  margin-bottom:56px;
+}
+
+.album-cover{
+  width:100%;
+  border:1px solid var(--line);
+}
+
+.album-info{
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+.album-info li{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  padding:12px 0;
+  border-bottom:1px solid var(--line);
+}
+.album-info dt{
+  font-family:'Courier New',monospace;
+  font-size:.7rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+}
+.album-info dd{
+  margin:0;
+  text-align:right;
+}
+
+/* ====== ССЫЛКИ НА СООБЩЕСТВА (ИКОНКИ) ====== */
+.band-links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:28px 0 0 0;
+}
+.band-links a{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:42px;
+  height:42px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  color:var(--text-dim);
+  transition:color .2s, border-color .2s;
+}
+.band-links a:hover{
+  color:var(--accent);
+  border-color:var(--accent);
+  opacity:1;
+}
+.band-links svg{
+  width:19px;
+  height:19px;
+  max-width:19px;
+  max-height:19px;
+  fill:currentColor;
+}
+
+/* ====== ТЕКСТ РЕЦЕНЗИИ ====== */
+.album-body{
+  max-width:740px;
+}
+.album-body p{
+  margin:0 0 22px 0;
+}
+
+/* ====== ПЛЕЕР ====== */
+.album-player{
+  margin:44px 0 0 0;
+  padding-top:32px;
+  border-top:1px solid var(--line);
+}
+
+.album-player-label{
+  font-family:'Courier New',monospace;
+  font-size:.7rem;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  margin:0 0 16px 0;
+}
+
+.album-player iframe{
+  display:block;
+  width:100%;
+  border:0;
+}
+
+/* ====== ТЕГИ ====== */
+.tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:44px 0 0 0;
+  padding-top:28px;
+  border-top:1px solid var(--line);
+}
+.tags a{
+  font-family:'Courier New',monospace;
+  font-size:.7rem;
+  letter-spacing:.06em;
+  color:var(--text-dim);
+  border-bottom:1px solid transparent;
+  transition:color .2s, border-color .2s;
+}
+.tags a:hover{
+  color:var(--accent);
+  border-color:var(--accent);
+  opacity:1;
+}
+
+/* ====== НАЗАД ====== */
+.album-back{
+  margin:40px 0 0 0;
+}
+.back{
+  font-family:'Courier New',monospace;
+  font-size:.72rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+/* ====== АДАПТИВ ====== */
+@media (max-width:1000px){
+  .top-layout{
+    grid-template-columns:1fr;
+    gap:44px;
+  }
+  .album-layout{
+    grid-template-columns:1fr;
+    gap:36px;
+  }
+  .zine{
+    grid-template-columns:1fr;
+    gap:32px;
+  }
+  .releases{
+    grid-template-columns:repeat(2,1fr);
+    gap:28px 20px;
+  }
+}
+
+@media (max-width:720px){
+  body{font-size:16px;}
+  .wrap{padding:0 20px;}
+  header{padding:44px 0 36px;}
+  h1{font-size:2.3rem;}
+  h2{font-size:1.35rem;margin-bottom:24px;}
+  main > section{padding:44px 0;}
+  .album-title{font-size:1.8rem;}
+  .page-head h1{font-size:2rem;}
+  .picks{
+    grid-template-columns:repeat(2,1fr);
+    gap:16px;
+  }
+  .topbar .wrap{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:12px;
+  }
+  header .head-top{
+    flex-direction:column;
+    gap:16px;
+  }
+}
+
+@media (max-width:560px){
+  .picks{grid-template-columns:1fr;}
+  .releases{grid-template-columns:1fr;}
+  h1{font-size:1.9rem;}
+}
