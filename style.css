@@ -1297,3 +1297,23 @@ footer a:hover{color:var(--accent);opacity:1;}
 @media (max-width:520px){
   .related-grid{grid-template-columns:1fr;}
 }
+/* ===== НИЖНИЙ БЛОК СТАТЬИ: ОДНА ОСЬ ===== */
+.article-body .playlist-link,
+.article-body .note-emphasis{
+  display:block;
+  width:100%;
+  max-width:100%;
+  text-align:center;
+  margin-left:0;
+  margin-right:0;
+  clear:both;
+  float:none;
+}
+.article-body .playlist-link{
+  margin-top:40px;
+  margin-bottom:24px;
+}
+.article-body .note-emphasis{
+  margin-top:28px;
+  margin-bottom:28px;
+}
