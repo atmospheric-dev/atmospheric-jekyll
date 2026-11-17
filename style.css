@@ -16,9 +16,7 @@
 /* ====== БАЗА ====== */
 *,*::before,*::after{box-sizing:border-box;}
 
-html{
-  scroll-behavior:smooth;
-}
+html{scroll-behavior:smooth;}
 
 body{
   margin:0;
@@ -49,7 +47,7 @@ p:last-child{margin-bottom:0;}
   padding:0 28px;
 }
 
-/* ====== ВЕРХНЯЯ ПАНЕЛЬ НАВИГАЦИИ ====== */
+/* ====== ВЕРХНЯЯ ПАНЕЛЬ ====== */
 .topbar{
   border-bottom:1px solid var(--line);
   padding:18px 0;
@@ -91,7 +89,6 @@ header{
   border-bottom:1px solid var(--line);
 }
 
-/* логотип + соцсети */
 header .head-top{
   display:flex;
   align-items:flex-start;
@@ -183,7 +180,7 @@ h3{
   margin:0 0 12px 0;
 }
 
-/* ====== ВЕРХНИЙ БЛОК: ОБЗОРЫ + КОНЦЕРТЫ ====== */
+/* ====== ВЕРХНИЙ БЛОК ====== */
 .top-layout{
   display:grid;
   grid-template-columns:1fr 320px;
@@ -210,9 +207,7 @@ h3{
   margin:0 0 12px 0;
   min-height:2.6em;
 }
-.pick-title a{
-  color:var(--text);
-}
+.pick-title a{color:var(--text);}
 
 .pick-cover{
   width:100%;
@@ -221,9 +216,7 @@ h3{
   border:1px solid var(--line);
   transition:border-color .25s;
 }
-.pick a:hover .pick-cover{
-  border-color:var(--accent);
-}
+.pick a:hover .pick-cover{border-color:var(--accent);}
 
 /* ====== БЛОК КОНЦЕРТОВ ====== */
 .concert-block .section-heading{
@@ -283,10 +276,7 @@ h3{
 .concert-card:hover::before{opacity:.9;transform:scale(1);}
 .concert-card:hover::after{opacity:1;}
 
-.concert-inner{
-  position:relative;
-  z-index:2;
-}
+.concert-inner{position:relative;z-index:2;}
 
 .concert-title{
   margin:0 0 6px 0;
@@ -330,7 +320,7 @@ a.genre:hover{
   opacity:1;
 }
 
-/* ====== РУБРИКИ (СЕТКА КАРТОЧЕК) ====== */
+/* ====== РУБРИКИ ====== */
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
@@ -343,23 +333,25 @@ a.genre:hover{
   background:var(--bg-soft);
   transition:border-color .25s;
 }
-.card:hover{
-  border-color:var(--accent);
-}
+.card:hover{border-color:var(--accent);}
 
-.card h3 a{
-  color:var(--text);
-}
-.card h3 a:hover{
-  color:var(--accent);
-  opacity:1;
-}
+.card h3 a{color:var(--text);}
+.card h3 a:hover{color:var(--accent);opacity:1;}
 
 .card p{
   color:var(--text-dim);
   font-size:.94rem;
   margin:0;
 }
+
+/* ====== КАРТОЧКИ-ССЫЛКИ ====== */
+a.card{
+  display:block;
+  text-decoration:none;
+  color:inherit;
+  transition:border-color .25s;
+}
+a.card:hover{border-color:var(--accent);opacity:1;}
 
 /* ====== ЖУРНАЛ ====== */
 .zine{
@@ -369,9 +361,7 @@ a.genre:hover{
   align-items:start;
 }
 
-.zine-note p{
-  color:var(--text-dim);
-}
+.zine-note p{color:var(--text-dim);}
 
 .zine-quote{
   border-left:2px solid var(--accent);
@@ -391,7 +381,7 @@ a.genre:hover{
   color:var(--text-dim);
 }
 
-/* ====== ССЫЛКИ / КНОПКИ ====== */
+/* ====== КНОПКИ ====== */
 .links{
   display:flex;
   flex-wrap:wrap;
@@ -429,10 +419,8 @@ footer p:last-child{margin-bottom:0;}
 footer a{color:var(--text-dim);}
 footer a:hover{color:var(--accent);opacity:1;}
 
-/* ====== СТРАНИЦА «ОБЗОРЫ»: releases.html ====== */
-.page-head{
-  padding:56px 0 0;
-}
+/* ====== СТРАНИЦА «ОБЗОРЫ» ====== */
+.page-head{padding:56px 0 0;}
 
 .page-head h1{
   font-size:2.8rem;
@@ -465,9 +453,7 @@ footer a:hover{color:var(--accent);opacity:1;}
   border:1px solid var(--line);
   transition:border-color .25s;
 }
-.release a:hover .release-cover{
-  border-color:var(--accent);
-}
+.release a:hover .release-cover{border-color:var(--accent);}
 
 .release h3{
   font-size:1.05rem;
@@ -475,13 +461,8 @@ footer a:hover{color:var(--accent);opacity:1;}
   line-height:1.35;
   margin:16px 0 10px 0;
 }
-.release h3 a{
-  color:var(--text);
-}
-.release h3 a:hover{
-  color:var(--accent);
-  opacity:1;
-}
+.release h3 a{color:var(--text);}
+.release h3 a:hover{color:var(--accent);opacity:1;}
 
 .release-excerpt{
   margin:0 0 14px 0;
@@ -514,7 +495,6 @@ footer a:hover{color:var(--accent);opacity:1;}
   opacity:1;
 }
 
-/* фильтр хештегов под заголовком страницы */
 .page-head + .wrap .tags{
   display:flex;
   flex-wrap:wrap;
@@ -542,9 +522,7 @@ footer a:hover{color:var(--accent);opacity:1;}
 }
 
 /* ====== СТРАНИЦА АЛЬБОМА ====== */
-.album{
-  padding:64px 0;
-}
+.album{padding:64px 0;}
 
 .album-title{
   font-size:2.4rem;
@@ -600,7 +578,7 @@ footer a:hover{color:var(--accent);opacity:1;}
   text-align:right;
 }
 
-/* ====== ССЫЛКИ НА СООБЩЕСТВА (ИКОНКИ) ====== */
+/* ====== ССЫЛКИ НА СООБЩЕСТВА ====== */
 .band-links{
   display:flex;
   flex-wrap:wrap;
@@ -632,12 +610,8 @@ footer a:hover{color:var(--accent);opacity:1;}
 }
 
 /* ====== ТЕКСТ РЕЦЕНЗИИ ====== */
-.album-body{
-  max-width:740px;
-}
-.album-body p{
-  margin:0 0 22px 0;
-}
+.album-body{max-width:740px;}
+.album-body p{margin:0 0 22px 0;}
 
 /* ====== ПЛЕЕР ====== */
 .album-player{
@@ -685,9 +659,7 @@ footer a:hover{color:var(--accent);opacity:1;}
 }
 
 /* ====== НАЗАД ====== */
-.album-back{
-  margin:40px 0 0 0;
-}
+.album-back{margin:40px 0 0 0;}
 .back{
   font-family:'Courier New',monospace;
   font-size:.72rem;
@@ -695,104 +667,42 @@ footer a:hover{color:var(--accent);opacity:1;}
   text-transform:uppercase;
 }
 
-/* ====== АДАПТИВ ====== */
-@media (max-width:1000px){
-  .top-layout{
-    grid-template-columns:1fr;
-    gap:44px;
-  }
-  .album-layout{
-    grid-template-columns:1fr;
-    gap:36px;
-  }
-  .zine{
-    grid-template-columns:1fr;
-    gap:32px;
-  }
-  .releases{
-    grid-template-columns:repeat(2,1fr);
-    gap:28px 20px;
-  }
+/* ====== КАРУСЕЛЬ ====== */
+.carousel{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+  margin:32px 0;
+  padding-bottom:10px;
+}
+.carousel::-webkit-scrollbar{height:6px;}
+.carousel::-webkit-scrollbar-track{background:rgba(255,255,255,.05);}
+.carousel::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px;}
+
+.carousel-item{
+  flex:0 0 78%;
+  scroll-snap-align:start;
+  display:block;
+}
+.carousel-item img{
+  width:100%;
+  height:460px;
+  object-fit:cover;
+  display:block;
 }
 
-@media (max-width:720px){
-  body{font-size:16px;}
-  .wrap{padding:0 20px;}
-  header{padding:44px 0 36px;}
-  h1{font-size:2.3rem;}
-  h2{font-size:1.35rem;margin-bottom:24px;}
-  main > section{padding:44px 0;}
-  .album-title{font-size:1.8rem;}
-  .page-head h1{font-size:2rem;}
-  .picks{
-    grid-template-columns:repeat(2,1fr);
-    gap:16px;
-  }
-  .topbar .wrap{
-    flex-direction:column;
-    align-items:flex-start;
-    gap:12px;
-  }
-  header .head-top{
-    flex-direction:column;
-    gap:16px;
-  }
+.note-meta-author{
+  font-family:'Courier New',monospace;
+  font-size:.68rem;
+  letter-spacing:.06em;
+  color:var(--text-dim);
+  margin:0 0 8px;
+  font-style:italic;
 }
 
-@media (max-width:560px){
-  .picks{grid-template-columns:1fr;}
-  .releases{grid-template-columns:1fr;}
-  h1{font-size:1.9rem;}
-}
-
-/* ===== КАРУСЕЛЬ ===== */
-.carousel {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  margin: 32px 0;
-  padding-bottom: 10px;
-}
-.carousel::-webkit-scrollbar { height: 6px; }
-.carousel::-webkit-scrollbar-track { background: rgba(255,255,255,.05); }
-.carousel::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
-
-.carousel-item {
-  flex: 0 0 78%;
-  scroll-snap-align: start;
-  display: block;
-}
-.carousel-item img {
-  width: 100%;
-  height: 460px;
-  object-fit: cover;
-  display: block;
-}
-
-.note-meta-author {
-  font-family: 'Courier New', monospace;
-  font-size: .68rem;
-  letter-spacing: .06em;
-  color: var(--text-dim);
-  margin: 0 0 8px;
-  font-style: italic;
-}
-
-@media (max-width: 560px) {
-  .carousel-item { flex: 0 0 88%; }
-  .carousel-item img { height: 300px; }
-}
-.note-emphasis {
-  text-align: center;
-  font-weight: 700;
-  font-size: 1.05rem;
-  line-height: 1.6;
-  margin: 32px 0;
-  color: var(--accent);
-}
-/* ===== СПИСОК ЗАМЕТОК ===== */
+/* ====== СПИСОК ЗАМЕТОК ====== */
 .notes-grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
@@ -847,7 +757,7 @@ footer a:hover{color:var(--accent);opacity:1;}
   overflow:hidden;
 }
 
-/* ===== СТРАНИЦА ЗАМЕТКИ ===== */
+/* ====== СТРАНИЦА ЗАМЕТКИ ====== */
 .note{padding:56px 0;}
 
 .breadcrumbs{
@@ -910,17 +820,8 @@ footer a:hover{color:var(--accent);opacity:1;}
   margin:28px 0;
 }
 
-@media (max-width:900px){
-  .note-hero{grid-template-columns:1fr;gap:24px;}
-}
-@media (max-width:560px){
-  .note-title{font-size:1.45rem;}
-  .notes-grid{grid-template-columns:1fr;}
-}
-/* ===== ВЫПАДАЮЩЕЕ МЕНЮ РУБРИК ===== */
-.nav-drop{
-  position:relative;
-}
+/* ====== ВЫПАДАЮЩЕЕ МЕНЮ РУБРИК ====== */
+.nav-drop{position:relative;}
 
 .nav-drop-toggle{
   background:none;
@@ -935,9 +836,7 @@ footer a:hover{color:var(--accent);opacity:1;}
   transition:color .2s;
 }
 .nav-drop-toggle:hover,
-.nav-drop.is-open .nav-drop-toggle{
-  color:var(--accent);
-}
+.nav-drop.is-open .nav-drop-toggle{color:var(--accent);}
 
 .nav-drop-menu{
   position:absolute;
@@ -952,9 +851,7 @@ footer a:hover{color:var(--accent);opacity:1;}
   box-shadow:0 12px 32px rgba(0,0,0,.5);
 }
 
-.nav-drop.is-open .nav-drop-menu{
-  display:block;
-}
+.nav-drop.is-open .nav-drop-menu{display:block;}
 
 .nav-drop-menu a{
   display:block;
@@ -973,17 +870,7 @@ footer a:hover{color:var(--accent);opacity:1;}
   opacity:1;
 }
 
-@media (max-width:720px){
-  .nav-drop-menu{
-    position:static;
-    min-width:0;
-    box-shadow:none;
-    border:0;
-    border-left:1px solid var(--line);
-    margin:8px 0 0 0;
-  }
-}
-/* ===== ИНТЕРВЬЮ ===== */
+/* ====== ИНТЕРВЬЮ ====== */
 .interview-head{
   margin:0 0 40px 0;
   max-width:740px;
@@ -1052,9 +939,8 @@ footer a:hover{color:var(--accent);opacity:1;}
   margin:20px auto;
 }
 
-.note-figure{
-  margin:36px 0;
-}
+/* ====== ФИГУРЫ (общие) ====== */
+.note-figure{margin:36px 0;}
 .note-figure img{
   width:100%;
   border:1px solid var(--line);
@@ -1090,23 +976,7 @@ footer a:hover{color:var(--accent);opacity:1;}
   display:block;
 }
 
-@media (max-width:900px){
-  .album-embed{grid-template-columns:1fr;gap:24px;}
-}
-
-/* ===== КАРТОЧКИ-ССЫЛКИ ===== */
-a.card{
-  display:block;
-  text-decoration:none;
-  color:inherit;
-  transition:border-color .25s;
-}
-a.card:hover{
-  border-color:var(--accent);
-  opacity:1;
-}
-
-/* ===== ЧИТАЙТЕ ТАКЖЕ ===== */
+/* ====== ЧИТАЙТЕ ТАКЖЕ ====== */
 .related{
   margin:48px 0 0 0;
   padding-top:32px;
@@ -1121,7 +991,6 @@ a.card:hover{
   display:grid;
   grid-template-columns:repeat(3, 1fr);
   gap:16px;
-}
 }
 .related-card{
   display:block;
@@ -1157,73 +1026,8 @@ a.card:hover{
   color:var(--text-dim);
   margin:0;
 }
-@media (max-width:820px){
-  .related-grid{grid-template-columns:repeat(2, 1fr);}
-}
-@media (max-width:520px){
-  .related-grid{grid-template-columns:1fr;}
-}
-.article-lead{
-  font-style:italic;
-  color:var(--text);
-  line-height:1.75;
-}
-.video-embed{
-  position:relative;
-  width:100%;
-  aspect-ratio:16/9;
-  background:#000;
-}
-.video-embed iframe{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  border:0;
-}
-.playlist-link{
-  text-align:center;
-  margin:32px 0 24px 0;
-}
-.playlist-link a{
-  display:inline-block;
-  padding:12px 28px;
-  border:1px solid var(--accent);
-  color:var(--accent);
-  text-decoration:none;
-  font-family:'Courier New',monospace;
-  font-size:.8rem;
-  letter-spacing:.12em;
-  text-transform:uppercase;
-  transition:background .25s, color .25s;
-}
-.playlist-link a:hover{
-  background:var(--accent);
-  color:#0b0b0b;
-}
-/* ===== ФОТО В СТАТЬЯХ ===== */
-.article-body .note-figure{
-  margin:32px 0;
-  max-width:640px;
-}
-.article-body .note-figure img{
-  width:100%;
-  height:auto;
-  display:block;
-  border:1px solid var(--line);
-}
-.article-body .note-figure figcaption{
-  font-family:'Courier New',monospace;
-  font-size:.68rem;
-  letter-spacing:.06em;
-  color:var(--text-dim);
-  padding-top:8px;
-}
-.article-body .video-embed{
-  max-width:640px;
-}
 
-/* ===== СТАТЬИ ===== */
+/* ====== СТАТЬИ: СПИСОК ====== */
 .page-title{
   font-size:1.6rem;
   letter-spacing:.02em;
@@ -1289,20 +1093,21 @@ a.card:hover{
   -webkit-box-orient:vertical;
   overflow:hidden;
 }
-/* ===== КОНТЕЙНЕР СТАТЬИ (по центру, узкая колонка) ===== */
+
+/* ====== СТАТЬЯ: КОНТЕЙНЕР ПО ЦЕНТРУ ====== */
 .article{
+  display:block;
+  width:100%;
   max-width:760px;
   margin:0 auto;
   padding:56px 0;
 }
-
-.article .breadcrumbs{
-  margin:0 0 22px 0;
+.article > *{
+  margin-left:auto;
+  margin-right:auto;
 }
-
-.article-head{
-  margin:0 0 32px 0;
-}
+.article .breadcrumbs{margin:0 auto 22px auto;}
+.article-head{margin:0 auto 32px auto;}
 
 .article-title{
   font-size:1.8rem;
@@ -1311,45 +1116,52 @@ a.card:hover{
   margin:0 0 12px 0;
 }
 
-.article-body{
-  max-width:100%;
+.article-subtitle{
+  font-size:1rem;
+  line-height:1.55;
+  color:var(--text-dim);
+  font-style:italic;
+  margin:0 0 14px 0;
 }
 
+.article-meta{
+  font-family:'Courier New',monospace;
+  font-size:.68rem;
+  letter-spacing:.06em;
+  color:var(--text-dim);
+  margin:0;
+}
+
+.article-lead{
+  font-style:italic;
+  color:var(--text);
+  line-height:1.75;
+}
+
+/* ====== СТАТЬЯ: ТЕКСТ ====== */
+.article-body{
+  width:100%;
+  max-width:100%;
+  margin:0 auto;
+}
 .article-body p{
   line-height:1.75;
   margin:0 0 1.3em 0;
 }
-
 .article-body h2{
   font-size:1.25rem;
   font-weight:400;
   margin:44px 0 20px 0;
 }
-
 .article-body h3{
   font-size:1.05rem;
   font-weight:400;
   margin:32px 0 18px 0;
 }
 
-/* чтобы обтекание не лезло под следующий заголовок */
-.article-body h2,
-.article-body h3{
-  clear:both;
-}
-
-@media (max-width:820px){
-  .article{
-    max-width:100%;
-    padding:40px 0;
-  }
-  .article-title{
-    font-size:1.5rem;
-  }
-}
-
-/* ===== ФОТО И ВИДЕО В СТАТЬЕ: ПО ЦЕНТРУ ===== */
+/* ====== СТАТЬЯ: ФОТО ПО ЦЕНТРУ ====== */
 .article-body .note-figure{
+  float:none;
   max-width:640px;
   margin:32px auto;
 }
@@ -1368,18 +1180,31 @@ a.card:hover{
   text-align:center;
 }
 
+/* ====== СТАТЬЯ: ВИДЕО ПО ЦЕНТРУ ====== */
+.video-embed{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/9;
+  background:#000;
+}
+.video-embed iframe{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border:0;
+}
 .article-body .video-embed{
   max-width:640px;
   margin:32px auto;
 }
 
-/* ===== КНОПКА ПЛЕЙЛИСТА ===== */
-.article-body .playlist-link{
+/* ====== СТАТЬЯ: КНОПКА ПЛЕЙЛИСТА ====== */
+.playlist-link{
   text-align:center;
-  margin:40px auto 24px auto;
-  max-width:640px;
+  margin:32px 0 24px 0;
 }
-.article-body .playlist-link a{
+.playlist-link a{
   display:inline-block;
   padding:12px 28px;
   border:1px solid var(--accent);
@@ -1391,18 +1216,84 @@ a.card:hover{
   text-transform:uppercase;
   transition:background .25s, color .25s;
 }
-.article-body .playlist-link a:hover{
+.playlist-link a:hover{
   background:var(--accent);
   color:#0b0b0b;
 }
+.article-body .playlist-link{
+  text-align:center;
+  max-width:640px;
+  margin:40px auto 24px auto;
+}
 
-/* ===== «ПРОДОЛЖЕНИЕ СЛЕДУЕТ» ===== */
-.article-body .note-emphasis{
+/* ====== СТАТЬЯ: «ПРОДОЛЖЕНИЕ СЛЕДУЕТ» ====== */
+.note-emphasis{
   text-align:center;
   font-weight:700;
   font-size:1.05rem;
   line-height:1.6;
-  margin:28px auto;
-  max-width:640px;
+  margin:32px 0;
   color:var(--accent);
+}
+.article-body .note-emphasis{
+  text-align:center;
+  max-width:640px;
+  margin:28px auto;
+}
+
+/* ====== АДАПТИВ ====== */
+@media (max-width:1000px){
+  .top-layout{grid-template-columns:1fr;gap:44px;}
+  .album-layout{grid-template-columns:1fr;gap:36px;}
+  .zine{grid-template-columns:1fr;gap:32px;}
+  .releases{grid-template-columns:repeat(2,1fr);gap:28px 20px;}
+  .album-embed{grid-template-columns:1fr;gap:24px;}
+  .cards{grid-template-columns:repeat(2,1fr);}
+}
+
+@media (max-width:900px){
+  .note-hero{grid-template-columns:1fr;gap:24px;}
+}
+
+@media (max-width:820px){
+  .related-grid{grid-template-columns:repeat(2, 1fr);}
+  .article{max-width:100%;padding:40px 0;}
+  .article-title{font-size:1.5rem;}
+}
+
+@media (max-width:720px){
+  body{font-size:16px;}
+  .wrap{padding:0 20px;}
+  header{padding:44px 0 36px;}
+  h1{font-size:2.3rem;}
+  h2{font-size:1.35rem;margin-bottom:24px;}
+  main > section{padding:44px 0;}
+  .album-title{font-size:1.8rem;}
+  .page-head h1{font-size:2rem;}
+  .picks{grid-template-columns:repeat(2,1fr);gap:16px;}
+  .topbar .wrap{flex-direction:column;align-items:flex-start;gap:12px;}
+  header .head-top{flex-direction:column;gap:16px;}
+  .nav-drop-menu{
+    position:static;
+    min-width:0;
+    box-shadow:none;
+    border:0;
+    border-left:1px solid var(--line);
+    margin:8px 0 0 0;
+  }
+}
+
+@media (max-width:560px){
+  .picks{grid-template-columns:1fr;}
+  .releases{grid-template-columns:1fr;}
+  .cards{grid-template-columns:1fr;}
+  h1{font-size:1.9rem;}
+  .carousel-item{flex:0 0 88%;}
+  .carousel-item img{height:300px;}
+  .note-title{font-size:1.45rem;}
+  .notes-grid{grid-template-columns:1fr;}
+}
+
+@media (max-width:520px){
+  .related-grid{grid-template-columns:1fr;}
 }
