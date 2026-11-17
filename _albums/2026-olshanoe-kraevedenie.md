@@ -6,7 +6,7 @@ year: 2026
 country: Россия
 label: Мёртвых собак лай
 genres:
-  - атмосферный блэк-метал
+  - atmospheric black-metal
   - dark folk
 cover: covers/olshanoe.jpg
 bandcamp_id: "13448730"
