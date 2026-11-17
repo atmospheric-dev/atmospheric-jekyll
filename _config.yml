@@ -10,6 +10,8 @@ collections:
   albums:
     output: true
     permalink: /albums/:name.html
-
+  notes:
+    output: true
+    permalink: /notes/:name/
 exclude:
   - README.md
