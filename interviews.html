@@ -1,0 +1,27 @@
+---
+layout: default
+title: Интервью
+description: Разговоры с музыкантами
+---
+<div class="page-head">
+  <div class="wrap">
+    <h1>Интервью</h1>
+    <p>Разговоры с музыкантами — о записях, сцене и том, что остаётся за кадром.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="notes-grid">
+    {% assign items = site.interviews | sort: "date" | reverse %}
+    {% for item in items %}
+    <a class="note-card" href="{{ site.baseurl }}{{ item.url }}">
+      {% if item.photo %}
+      <img class="note-card-img" src="{{ site.baseurl }}/{{ item.photo }}" alt="{{ item.title }}" loading="lazy">
+      {% endif %}
+      <p class="note-card-date">{{ item.date | date: "%-d.%m.%Y" }}</p>
+      <h3 class="note-card-title">{{ item.title }}</h3>
+      <p class="note-card-excerpt">{{ item.description | default: item.excerpt | strip_html | truncatewords: 22 }}</p>
+    </a>
+    {% endfor %}
+  </div>
+</div>
