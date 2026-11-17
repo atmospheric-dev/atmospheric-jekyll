@@ -1,0 +1,7 @@
+<div class="carousel">
+  {% for img in include.images %}
+  <a class="carousel-item" href="{{ site.baseurl }}/{{ img }}" target="_blank" rel="noopener">
+    <img src="{{ site.baseurl }}/{{ img }}" alt="" loading="lazy">
+  </a>
+  {% endfor %}
+</div>
