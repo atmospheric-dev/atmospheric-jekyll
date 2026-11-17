@@ -1,0 +1,74 @@
+---
+layout: default
+title: Атмосферные места
+---
+
+<div class="wrap">
+
+  <div class="page-head" style="padding-top:56px;">
+    <h1>Атмосферные места</h1>
+    <p class="page-lead">Точки на карте, где музыка, погода и тишина совпали.</p>
+  </div>
+
+  <div id="map" class="map-large"></div>
+
+  <div class="cards">
+    {% assign places = site.places | sort: "date" | reverse %}
+    {% for place in places %}
+    <a class="card" href="{{ site.baseurl }}{{ place.url }}">
+      {% if place.cover %}
+        <img class="card-cover" src="{{ site.baseurl }}/{{ place.cover }}" alt="{{ place.title }}">
+      {% endif %}
+      <h3>{{ place.title }}</h3>
+      <p class="card-meta">{{ place.date | date: "%d.%m.%Y" }}{% if place.region %} · {{ place.region }}{% endif %}</p>
+      {% if place.excerpt %}<p>{{ place.excerpt }}</p>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+
+  {% if places.size == 0 %}
+    <p class="empty">Пока ни одного места. Первое появится скоро.</p>
+  {% endif %}
+
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function(){
+  var el = document.getElementById('map');
+  if(!el || !window.L) return;
+
+  var map = L.map(el, {scrollWheelZoom:false}).setView([60.0, 90.0], 3);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap, &copy; CARTO',
+    maxZoom: 18
+  }).addTo(map);
+
+  var places = [
+    {% for place in site.places %}
+    {
+      lat: {{ place.lat | default: 0 }},
+      lng: {{ place.lng | default: 0 }},
+      title: {{ place.title | jsonify }},
+      url: {{ place.url | prepend: site.baseurl | jsonify }},
+      cover: {% if place.cover %}{{ place.cover | prepend: "/" | prepend: site.baseurl | jsonify }}{% else %}null{% endif %}
+    }{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  ];
+
+  var bounds = [];
+  places.forEach(function(p){
+    if(!p.lat || !p.lng) return;
+    var marker = L.marker([p.lat, p.lng]).addTo(map);
+    var html = '<a class="map-pop" href="'+p.url+'">'+
+      (p.cover ? '<img src="'+p.cover+'" alt="">' : '')+
+      '<span>'+p.title+'</span></a>';
+    marker.bindPopup(html, {minWidth: 180});
+    bounds.push([p.lat, p.lng]);
+  });
+
+  if(bounds.length > 1) map.fitBounds(bounds, {padding:[40,40]});
+  else if(bounds.length === 1) map.setView(bounds[0], 9);
+})();
+</script>
