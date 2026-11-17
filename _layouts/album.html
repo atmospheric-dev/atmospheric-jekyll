@@ -30,8 +30,8 @@ layout: default
           </a>
           {% endif %}
           {% if page.bandlink %}
-          <a href="{{ page.bandlink }}" target="_blank" rel="noopener" title="band.link" aria-label="band.link">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 15a5 5 0 110-10 5 5 0 010 10z"/></svg>
+          <a href="{{ page.bandlink }}" target="_blank" rel="noopener" title="Слушать на площадках" aria-label="Все площадки">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 13.4a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1.3 1.3a1 1 0 001.4 1.4l1.3-1.3a2 2 0 012.8 2.8l-3 3a2 2 0 01-2.8 0 1 1 0 00-1.4 1.5zm2.8-2.8a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1.3-1.3a1 1 0 00-1.4-1.4l-1.3 1.3a2 2 0 01-2.8-2.8l3-3a2 2 0 012.8 0 1 1 0 101.4-1.5z"/></svg>
           </a>
           {% endif %}
         </div>
@@ -54,11 +54,13 @@ layout: default
     {% endif %}
 
     <div class="tags">
-      {% for g in page.genres %}
-      <a href="{{ site.baseurl }}/tag-{{ g | slugify }}.html">{{ g }}</a>
+      {% for g in page.genre_links %}
+      <a href="{{ site.baseurl }}{{ g.url }}">{{ g.name }}</a>
       {% endfor %}
-      <a href="{{ site.baseurl }}/band-{{ page.artist | slugify }}.html">{{ page.artist }}</a>
-      <a href="{{ site.baseurl }}/country-{{ page.country | slugify }}.html">{{ page.country }}</a>
+      <a href="{{ site.baseurl }}{{ page.artist_url }}">{{ page.artist }}</a>
+      {% if page.country_url %}
+      <a href="{{ site.baseurl }}{{ page.country_url }}">{{ page.country }}</a>
+      {% endif %}
     </div>
 
     <p class="album-back"><a class="back" href="{{ site.baseurl }}/releases.html">← Все обзоры</a></p>
