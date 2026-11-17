@@ -46,6 +46,7 @@ layout: default
   var lat = parseFloat(el.dataset.lat), lng = parseFloat(el.dataset.lng);
   if(isNaN(lat) || isNaN(lng)) return;
   var map = L.map(el, {scrollWheelZoom:false}).setView([lat, lng], 11);
+  map.attributionControl.setPrefix(false);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: 'Карта: OpenStreetMap',
     maxZoom: 19
