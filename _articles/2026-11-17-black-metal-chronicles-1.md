@@ -184,4 +184,4 @@ Mystifier — еще один редкий алмаз из Бразилии ко
 
 <p class="playlist-link"><a href="https://vk.ru/music/playlist/-223810057_634_23da4eab9935ff04e5" target="_blank" rel="noopener">Слушать плейлист</a></p>
 
-<p class="qa-pull">Продолжение следует…</p>
+<p class="note-emphasis">Продолжение следует…</p>
