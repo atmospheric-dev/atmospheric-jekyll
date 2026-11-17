@@ -21,13 +21,6 @@ layout: default
     </p>
   </header>
 
-  {% if page.photo %}
-  <figure class="note-figure">
-    <img src="{{ site.baseurl }}/{{ page.photo }}" alt="{{ page.title }}">
-    {% if page.photo_caption %}<figcaption>{{ page.photo_caption }}</figcaption>{% endif %}
-  </figure>
-  {% endif %}
-
   <div class="article-body">
     {{ content }}
   </div>
