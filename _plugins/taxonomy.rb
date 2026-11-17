@@ -15,19 +15,6 @@ module Atmospheric
           genres[slug]["items"] << a
         end
       end
-      genres.each do |slug, data|
-        page = PageWithoutAFile.new(site, site.source, "tags", "#{slug}.html")
-        page.data.merge!(
-          "layout" => "taxonomy",
-          "title" => data["name"],
-          "heading" => data["name"],
-          "type" => "жанр",
-          "items" => data["items"],
-          "slug" => slug
-        )
-        page.content = ""
-        site.pages << page
-      end
 
       # ---------- ГРУППЫ ----------
       artists = {}
@@ -35,19 +22,6 @@ module Atmospheric
         slug = make_slug(a.data["artist"])
         artists[slug] ||= { "name" => a.data["artist"], "items" => [] }
         artists[slug]["items"] << a
-      end
-      artists.each do |slug, data|
-        page = PageWithoutAFile.new(site, site.source, "bands", "#{slug}.html")
-        page.data.merge!(
-          "layout" => "taxonomy",
-          "title" => data["name"],
-          "heading" => data["name"],
-          "type" => "группа",
-          "items" => data["items"],
-          "slug" => slug
-        )
-        page.content = ""
-        site.pages << page
       end
 
       # ---------- СТРАНЫ ----------
@@ -58,15 +32,59 @@ module Atmospheric
         countries[slug] ||= { "name" => a.data["country"], "items" => [] }
         countries[slug]["items"] << a
       end
+
+      # ---------- ССЫЛКИ В КАЖДЫЙ АЛЬБОМ ----------
+      albums.each do |a|
+        a.data["genre_links"] = Array(a.data["genres"]).map do |g|
+          { "name" => g, "url" => "/tags/#{make_slug(g)}.html" }
+        end
+
+        a.data["artist_url"] = "/bands/#{make_slug(a.data['artist'])}.html"
+
+        c = a.data["country"].to_s
+        a.data["country_url"] = c.empty? ? nil : "/countries/#{make_slug(c)}.html"
+      end
+
+      # ---------- СТРАНИЦЫ ЖАНРОВ ----------
+      genres.each do |slug, data|
+        page = PageWithoutAFile.new(site, site.source, "tags", "#{slug}.html")
+        page.data.merge!(
+          "layout"  => "taxonomy",
+          "title"   => data["name"],
+          "heading" => data["name"],
+          "type"    => "жанр",
+          "items"   => data["items"],
+          "slug"    => slug
+        )
+        page.content = ""
+        site.pages << page
+      end
+
+      # ---------- СТРАНИЦЫ ГРУПП ----------
+      artists.each do |slug, data|
+        page = PageWithoutAFile.new(site, site.source, "bands", "#{slug}.html")
+        page.data.merge!(
+          "layout"  => "band",
+          "title"   => data["name"],
+          "heading" => data["name"],
+          "type"    => "группа",
+          "items"   => data["items"],
+          "slug"    => slug
+        )
+        page.content = ""
+        site.pages << page
+      end
+
+      # ---------- СТРАНИЦЫ СТРАН ----------
       countries.each do |slug, data|
         page = PageWithoutAFile.new(site, site.source, "countries", "#{slug}.html")
         page.data.merge!(
-          "layout" => "taxonomy",
-          "title" => data["name"],
+          "layout"  => "country",
+          "title"   => data["name"],
           "heading" => data["name"],
-          "type" => "страна",
-          "items" => data["items"],
-          "slug" => slug
+          "type"    => "страна",
+          "items"   => data["items"],
+          "slug"    => slug
         )
         page.content = ""
         site.pages << page
@@ -75,7 +93,6 @@ module Atmospheric
 
     private
 
-    # Транслитерация кириллицы в латиницу + очистка под URL
     def make_slug(text)
       map = {
         "а"=>"a","б"=>"b","в"=>"v","г"=>"g","д"=>"d","е"=>"e","ё"=>"e",
