@@ -1,0 +1,67 @@
+{% comment %}
+  Блок «Читайте также».
+  Сначала материалы того же исполнителя, затем с общими жанрами.
+{% endcomment %}
+
+{% assign all_items = site.albums | concat: site.interviews | concat: site.notes %}
+{% assign current = page %}
+{% assign limit = 3 %}
+{% assign picked_urls = "|" %}
+
+{% if current.artist %}
+  {% for item in all_items %}
+    {% if item.url != current.url and item.artist == current.artist %}
+      {% assign picked_urls = picked_urls | append: item.url | append: "|" %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% if current.genres %}
+  {% for item in all_items %}
+    {% if item.url != current.url %}
+      {% unless picked_urls contains item.url %}
+        {% if item.genres %}
+          {% for g in item.genres %}
+            {% if current.genres contains g %}
+              {% assign picked_urls = picked_urls | append: item.url | append: "|" %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endunless %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% assign picked = "" | split: "" %}
+{% for item in all_items %}
+  {% if picked_urls contains item.url %}
+    {% assign picked = picked | push: item %}
+  {% endif %}
+{% endfor %}
+
+{% if picked.size > 0 %}
+<section class="related">
+  <h2 class="related-title">Читайте также</h2>
+  <div class="related-grid">
+    {% for item in picked limit: limit %}
+    <a class="related-card" href="{{ site.baseurl }}{{ item.url }}">
+      {% assign thumb = item.cover | default: item.photo %}
+      {% if thumb %}
+      <img src="{{ site.baseurl }}/{{ thumb }}" alt="{{ item.title }}" loading="lazy">
+      {% endif %}
+      <div class="related-body">
+        <p class="related-kind">
+          {% if item.collection == "albums" %}Обзор
+          {% elsif item.collection == "interviews" %}Интервью
+          {% elsif item.collection == "notes" %}Заметка
+          {% endif %}
+        </p>
+        <h3 class="related-heading">{{ item.title }}</h3>
+        {% if item.artist %}<p class="related-artist">{{ item.artist }}</p>{% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
