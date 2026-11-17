@@ -6,10 +6,10 @@ module Atmospheric
     def generate(site)
       albums = site.collections["albums"]&.docs || []
 
-      # ---------- СБОР ДАННЫХ ----------
       genres = {}
       artists = {}
       countries = {}
+      labels = {}
 
       albums.each do |a|
         Array(a.data["genres"]).each do |g|
@@ -28,9 +28,15 @@ module Atmospheric
           countries[slug] ||= { "name" => c, "items" => [] }
           countries[slug]["items"] << a
         end
+
+        l = a.data["label"].to_s
+        unless l.empty?
+          slug = make_slug(l)
+          labels[slug] ||= { "name" => l, "items" => [] }
+          labels[slug]["items"] << a
+        end
       end
 
-      # ---------- ССЫЛКИ В КАЖДЫЙ АЛЬБОМ ----------
       albums.each do |a|
         a.data["genre_links"] = Array(a.data["genres"]).map do |g|
           { "name" => g, "url" => "/tags/#{make_slug(g)}.html" }
@@ -40,20 +46,15 @@ module Atmospheric
 
         c = a.data["country"].to_s
         a.data["country_url"] = c.empty? ? nil : "/countries/#{make_slug(c)}.html"
+
+        l = a.data["label"].to_s
+        a.data["label_url"] = l.empty? ? nil : "/labels/#{make_slug(l)}.html"
       end
 
-      # ---------- СТРАНИЦЫ ----------
-      genres.each do |slug, data|
-        add_page(site, "tags", slug, "жанр", data)
-      end
-
-      artists.each do |slug, data|
-        add_page(site, "bands", slug, "группа", data)
-      end
-
-      countries.each do |slug, data|
-        add_page(site, "countries", slug, "страна", data)
-      end
+      genres.each    { |slug, data| add_page(site, "tags",      slug, "жанр",   data) }
+      artists.each   { |slug, data| add_page(site, "bands",     slug, "группа", data) }
+      countries.each { |slug, data| add_page(site, "countries", slug, "страна", data) }
+      labels.each    { |slug, data| add_page(site, "labels",    slug, "лейбл",  data) }
     end
 
     private
