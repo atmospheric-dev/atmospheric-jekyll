@@ -1,0 +1,33 @@
+---
+layout: default
+title: Статьи
+---
+
+<section class="block">
+  <div class="wrap">
+
+    <h1 class="page-title">Статьи</h1>
+    <p class="page-lead">Длинные тексты о сцене, истории и контексте —
+       там, где рецензии уже мало.</p>
+
+    {% assign items = site.articles | sort: "date" | reverse %}
+
+    {% if items.size > 0 %}
+    <div class="cards">
+      {% for item in items %}
+      <a class="card" href="{{ site.baseurl }}{{ item.url }}">
+        {% if item.photo %}
+        <img class="card-cover" src="{{ site.baseurl }}/{{ item.photo }}" alt="{{ item.title }}" loading="lazy">
+        {% endif %}
+        <h3>{{ item.title }}</h3>
+        <p class="card-meta">{{ item.date | date: "%d.%m.%Y" }}{% if item.author %} · {{ item.author }}{% endif %}</p>
+        {% if item.description %}<p>{{ item.description }}</p>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty">Пока статей нет — но они уже пишутся.</p>
+    {% endif %}
+
+  </div>
+</section>
