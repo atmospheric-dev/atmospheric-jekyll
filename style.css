@@ -1093,3 +1093,15 @@ footer a:hover{color:var(--accent);opacity:1;}
 @media (max-width:900px){
   .album-embed{grid-template-columns:1fr;gap:24px;}
 }
+
+/* ===== КАРТОЧКИ-ССЫЛКИ ===== */
+a.card{
+  display:block;
+  text-decoration:none;
+  color:inherit;
+  transition:border-color .25s;
+}
+a.card:hover{
+  border-color:var(--accent);
+  opacity:1;
+}
