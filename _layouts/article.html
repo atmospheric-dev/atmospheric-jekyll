@@ -1,0 +1,39 @@
+---
+layout: default
+---
+
+<article class="article">
+
+  <p class="breadcrumbs">
+    <a href="{{ site.baseurl }}/articles.html">Статьи</a>
+    <span>→</span>
+    {{ page.title }}
+  </p>
+
+  <header class="article-head">
+    <h1 class="article-title">{{ page.title }}</h1>
+    {% if page.subtitle %}
+    <p class="article-subtitle">{{ page.subtitle }}</p>
+    {% endif %}
+    <p class="article-meta">
+      {% if page.date %}{{ page.date | date: "%d.%m.%Y" }}{% endif %}
+      {% if page.author %} · {{ page.author }}{% endif %}
+    </p>
+  </header>
+
+  {% if page.photo %}
+  <figure class="note-figure">
+    <img src="{{ site.baseurl }}/{{ page.photo }}" alt="{{ page.title }}">
+    {% if page.photo_caption %}<figcaption>{{ page.photo_caption }}</figcaption>{% endif %}
+  </figure>
+  {% endif %}
+
+  <div class="article-body">
+    {{ content }}
+  </div>
+
+  {% include related.html %}
+
+  <p class="album-back"><a class="back" href="{{ site.baseurl }}/articles.html">← Все статьи</a></p>
+
+</article>
