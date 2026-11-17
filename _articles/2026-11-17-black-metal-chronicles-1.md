@@ -20,7 +20,7 @@ description: "Путеводитель по первой волне блэк-м�
 
 Все, что потом назовут блэком, начинает отсчет с трех аккордов Venom. Альбом «Black Metal» в 1982 году не был самым быстрым или самым тяжелым — он был самым наглым. Тексты про главного врага человечества, ад и богохульство выглядят, как некий манифест, а не просто представляют красивые образы, да в конце концов, именно Venom дали жанру имя.
 
-<figure class="note-figure">
+<figure class="note-figure float-left">
   <img src="{{ site.baseurl }}/covers/articles/bmc/01.jpg" alt="Venom">
   <figcaption>Venom</figcaption>
 </figure>
