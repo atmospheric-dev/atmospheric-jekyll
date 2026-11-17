@@ -917,3 +917,69 @@ footer a:hover{color:var(--accent);opacity:1;}
   .note-title{font-size:1.45rem;}
   .notes-grid{grid-template-columns:1fr;}
 }
+/* ===== ВЫПАДАЮЩЕЕ МЕНЮ РУБРИК ===== */
+.nav-drop{
+  position:relative;
+}
+
+.nav-drop-toggle{
+  background:none;
+  border:0;
+  padding:0;
+  cursor:pointer;
+  font-family:'Courier New',monospace;
+  font-size:.72rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  transition:color .2s;
+}
+.nav-drop-toggle:hover,
+.nav-drop.is-open .nav-drop-toggle{
+  color:var(--accent);
+}
+
+.nav-drop-menu{
+  position:absolute;
+  top:calc(100% + 14px);
+  left:0;
+  min-width:260px;
+  background:var(--bg-soft);
+  border:1px solid var(--line);
+  padding:8px 0;
+  display:none;
+  z-index:50;
+  box-shadow:0 12px 32px rgba(0,0,0,.5);
+}
+
+.nav-drop.is-open .nav-drop-menu{
+  display:block;
+}
+
+.nav-drop-menu a{
+  display:block;
+  padding:10px 20px;
+  font-family:'Courier New',monospace;
+  font-size:.7rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  white-space:nowrap;
+  transition:color .2s, background .2s;
+}
+.nav-drop-menu a:hover{
+  color:var(--accent);
+  background:rgba(176,142,90,.08);
+  opacity:1;
+}
+
+@media (max-width:720px){
+  .nav-drop-menu{
+    position:static;
+    min-width:0;
+    box-shadow:none;
+    border:0;
+    border-left:1px solid var(--line);
+    margin:8px 0 0 0;
+  }
+}
