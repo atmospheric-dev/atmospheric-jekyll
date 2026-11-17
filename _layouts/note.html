@@ -1,0 +1,57 @@
+---
+layout: default
+---
+<div class="page-head">
+  <div class="wrap">
+    <p class="breadcrumbs">
+      <a href="{{ site.baseurl }}/">Главная</a>
+      <span>/</span>
+      <a href="{{ site.baseurl }}/notes.html">Заметки с концертов</a>
+      <span>/</span>
+      {{ page.title }}
+    </p>
+  </div>
+</div>
+
+<article class="note">
+  <div class="wrap">
+
+    <div class="note-hero">
+      {% if page.photo %}
+      <img class="note-hero-img" src="{{ site.baseurl }}/{{ page.photo }}" alt="{{ page.title }}">
+      {% endif %}
+
+      <div class="note-hero-text">
+        <h1 class="note-title">{{ page.title }}</h1>
+
+        <p class="note-meta">
+          {{ page.date | date: "%-d %B %Y" }}
+          {% if page.venue %} · {{ page.venue }}{% endif %}
+          {% if page.city %} · {{ page.city }}{% endif %}
+        </p>
+
+        {% if page.description %}
+        <p class="note-lead">{{ page.description }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="note-body">
+      {{ content }}
+
+      {% if page.gallery %}
+      <div class="note-gallery">
+        {% for img in page.gallery %}
+        <a href="{{ site.baseurl }}/{{ img }}" target="_blank" rel="noopener">
+          <img src="{{ site.baseurl }}/{{ img }}" alt="{{ page.title }}" loading="lazy">
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <p class="album-back">
+      <a class="back" href="{{ site.baseurl }}/notes.html">← Все заметки</a>
+    </p>
+  </div>
+</article>
