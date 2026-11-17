@@ -1,0 +1,32 @@
+---
+layout: default
+title: Обзоры
+description: Все обзоры релизов на Atmospheric
+---
+<div class="page-head">
+  <div class="wrap">
+    <h1>Обзоры</h1>
+    <p>Все рецензии, которые вышли у нас на сайте. Новые — сверху.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="releases">
+
+    {% for album in site.albums reversed %}
+    <div class="release">
+      <a href="{{ site.baseurl }}{{ album.url }}">
+        <img class="release-cover" src="{{ site.baseurl }}/{{ album.cover }}" alt="{{ album.artist }} — {{ album.title }}">
+      </a>
+      <h3><a href="{{ site.baseurl }}{{ album.url }}">{{ album.artist }} — {{ album.title }} ({{ album.year }})</a></h3>
+      <p class="release-excerpt">{{ album.excerpt | strip_html | truncatewords: 40 }}</p>
+      <div class="release-tags">
+        {% for g in album.genres %}
+        <a href="{{ site.baseurl }}/tag-{{ g | slugify }}.html">{{ g }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
