@@ -1533,3 +1533,24 @@ footer a:hover{color:var(--accent);opacity:1;}
 @media (max-width:720px){
   .playlist-embed iframe{height:380px;}
 }
+.article-body .playlist-credits{
+  margin:32px 0 40px;
+}
+.playlist-credits a{
+  color:var(--accent);
+  text-decoration:none;
+  border-bottom:1px solid rgba(176,142,90,.35);
+  transition:border-color .2s;
+}
+.playlist-credits a:hover{
+  border-color:var(--accent);
+  opacity:1;
+}
+.article-body .playlist-updated{
+  margin-top:16px;
+  font-family:'Courier New',monospace;
+  font-size:.68rem;
+  letter-spacing:.08em;
+  color:var(--text-dim);
+  text-transform:uppercase;
+}
