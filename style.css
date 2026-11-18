@@ -1725,8 +1725,8 @@ footer a:hover{color:var(--accent);opacity:1;}
 /* ===== ВИТРИНА ТОВАРОВ НА ГЛАВНОЙ ===== */
 .front-layout{
   display:grid;
-  grid-template-columns:220px 1fr;
-  gap:40px;
+  grid-template-columns:150px 1fr;
+  gap:36px;
   align-items:start;
 }
 
@@ -1737,60 +1737,66 @@ footer a:hover{color:var(--accent);opacity:1;}
 
 .shop-block .section-heading{
   font-family:'Courier New',monospace;
-  font-size:.72rem;
+  font-size:.66rem;
   letter-spacing:.14em;
   text-transform:uppercase;
   color:var(--text-dim);
-  margin:0 0 16px 0;
+  margin:0 0 14px 0;
   font-weight:normal;
 }
 
 .shop-list{
   display:flex;
   flex-direction:column;
-  gap:14px;
+  gap:16px;
 }
 
+/* карточка — просто миниатюра с подписью, без рамки */
 .shop-card{
   display:flex;
-  flex-direction:column;
-  border:1px solid var(--line);
-  background:#121010;
+  align-items:flex-start;
+  gap:10px;
   text-decoration:none;
-  overflow:hidden;
-  transition:border-color .25s;
+  color:inherit;
+  transition:opacity .2s;
 }
-.shop-card:hover{border-color:var(--accent);opacity:1;}
+.shop-card:hover{opacity:1;}
 
 .shop-img{
   display:block;
-  aspect-ratio:1/1;
+  flex:0 0 52px;
+  width:52px;
+  height:52px;
   overflow:hidden;
+  border:1px solid var(--line);
   background:#1a1716;
+  transition:border-color .25s;
 }
 .shop-img img{
   width:100%;
   height:100%;
   object-fit:cover;
-  transition:transform .5s;
+  display:block;
 }
-.shop-card:hover .shop-img img{transform:scale(1.04);}
+.shop-card:hover .shop-img{border-color:var(--accent);}
 
 .shop-body{
   display:flex;
   flex-direction:column;
-  gap:4px;
-  padding:12px 14px 14px;
+  gap:2px;
+  padding-top:2px;
 }
 .shop-title{
-  font-size:.9rem;
+  font-size:.78rem;
   line-height:1.35;
-  color:#e6e0d6;
+  color:#c9c2b7;
+  transition:color .2s;
 }
 .shop-card:hover .shop-title{color:var(--accent);}
+
 .shop-note{
   font-family:'Courier New',monospace;
-  font-size:.62rem;
+  font-size:.56rem;
   letter-spacing:.08em;
   text-transform:uppercase;
   color:var(--text-dim);
@@ -1798,12 +1804,12 @@ footer a:hover{color:var(--accent);opacity:1;}
 
 /* адаптив витрины */
 @media (max-width:1000px){
-  .front-layout{grid-template-columns:1fr;gap:36px;}
+  .front-layout{grid-template-columns:1fr;gap:32px;}
   .shop-block{position:static;}
   .shop-list{
     flex-direction:row;
-    overflow-x:auto;
-    padding-bottom:6px;
+    flex-wrap:wrap;
+    gap:10px 22px;
   }
-  .shop-card{flex:0 0 180px;}
+  .shop-card{flex:0 0 auto;}
 }
