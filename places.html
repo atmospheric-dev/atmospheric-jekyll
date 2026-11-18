@@ -14,18 +14,16 @@ title: Атмосферные места
 
   <div class="region-filter" id="regionFilter">
     <button class="region-btn is-active" data-region="all">Все</button>
-    {% assign regions = site.places | map: "region" | uniq | sort %}
+    {% assign regions = site.places | map: "region" | compact | uniq | sort %}
     {% for r in regions %}
-      {% if r and r != "" %}
-        <button class="region-btn" data-region="{{ r }}">{{ r }}</button>
-      {% endif %}
+      <button class="region-btn" data-region="{{ r }}">{{ r }}</button>
     {% endfor %}
   </div>
-  
+
   <div class="cards">
     {% assign places = site.places | sort: "date" | reverse %}
     {% for place in places %}
-    <a class="card" href="{{ site.baseurl }}{{ place.url }}">
+    <a class="card" href="{{ site.baseurl }}{{ place.url }}" data-region="{{ place.region }}">
       {% if place.cover %}
         <img class="card-cover" src="{{ site.baseurl }}/{{ place.cover }}" alt="{{ place.title }}">
       {% endif %}
@@ -50,8 +48,8 @@ title: Атмосферные места
   if(!el || !window.L) return;
 
   var map = L.map(el, {scrollWheelZoom:false}).setView([60.0, 90.0], 3);
-    map.attributionControl.setPrefix(false);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  map.attributionControl.setPrefix(false);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: 'Карта: OpenStreetMap',
     maxZoom: 19
   }).addTo(map);
@@ -61,6 +59,7 @@ title: Атмосферные места
     {
       lat: {{ place.lat | default: 0 }},
       lng: {{ place.lng | default: 0 }},
+      region: {{ place.region | default: "" | jsonify }},
       title: {{ place.title | jsonify }},
       url: {{ place.url | prepend: site.baseurl | jsonify }},
       cover: {% if place.cover %}{{ place.cover | prepend: "/" | prepend: site.baseurl | jsonify }}{% else %}null{% endif %}
@@ -68,6 +67,7 @@ title: Атмосферные места
     {% endfor %}
   ];
 
+  var markers = [];
   var bounds = [];
   places.forEach(function(p){
     if(!p.lat || !p.lng) return;
@@ -76,10 +76,42 @@ title: Атмосферные места
       (p.cover ? '<img src="'+p.cover+'" alt="">' : '')+
       '<span>'+p.title+'</span></a>';
     marker.bindPopup(html, {minWidth: 180});
+    markers.push(marker);
     bounds.push([p.lat, p.lng]);
   });
 
   if(bounds.length > 1) map.fitBounds(bounds, {padding:[40,40]});
   else if(bounds.length === 1) map.setView(bounds[0], 9);
+
+  /* ---- фильтр по областям ---- */
+  document.querySelectorAll('.region-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var region = btn.dataset.region;
+
+      document.querySelectorAll('.region-btn').forEach(function(b){ b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+
+      var visible = [];
+      places.forEach(function(p, i){
+        var ok = (region === 'all') || (p.region === region);
+        var m = markers[i];
+        if(!m) return;
+        if(ok){
+          if(!map.hasLayer(m)) map.addLayer(m);
+          visible.push([p.lat, p.lng]);
+        } else {
+          if(map.hasLayer(m)) map.removeLayer(m);
+        }
+      });
+
+      if(visible.length > 1) map.fitBounds(visible, {padding:[40,40]});
+      else if(visible.length === 1) map.setView(visible[0], 9);
+
+      document.querySelectorAll('.cards .card').forEach(function(card){
+        var ok = (region === 'all') || (card.dataset.region === region);
+        card.classList.toggle('is-hidden', !ok);
+      });
+    });
+  });
 })();
 </script>
