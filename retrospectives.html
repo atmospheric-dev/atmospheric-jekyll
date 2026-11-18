@@ -2,15 +2,23 @@
 layout: default
 title: Ретроспектива
 ---
+
 <div class="wrap">
   <h1 class="page-title">Ретроспектива</h1>
   <p class="page-lead">Вся дискография одного проекта — в одной статье.</p>
 
-  <div class="grid">
+  <div class="retro-grid">
     {% for r in site.retrospectives %}
-      <a class="card" href="{{ site.baseurl }}{{ r.url }}">
-        <h3>{{ r.title }}</h3>
-        <p>{{ r.artist }}</p>
+      <a class="retro-card" href="{{ site.baseurl }}{{ r.url }}">
+        <div class="retro-card-strip">
+          {% if r.cover %}
+            <img src="{{ site.baseurl }}/{{ r.cover }}" alt="{{ r.artist }}">
+          {% endif %}
+        </div>
+        <div class="retro-card-inner">
+          <p class="retro-card-title">{{ r.title }}</p>
+          <p class="retro-card-artist">{{ r.artist }}</p>
+        </div>
       </a>
     {% endfor %}
   </div>
