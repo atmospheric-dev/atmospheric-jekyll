@@ -3,6 +3,7 @@ layout: album
 title: Sigil
 artist: Gåte
 year: 2026
+date: 2026-11-01
 country: Норвегия
 label: Season of Mist
 genres:
