@@ -1,79 +1,49 @@
 ---
 layout: default
-title: Вороны
 ---
-
 <div class="wrap">
 
   <div class="crows-head">
-    <p class="article-meta">Рубрика</p>
-    <h1 class="article-title">Вороны</h1>
-    <p class="page-lead">Две вороны, которые живут у меня дома: Икар и Шэпс. Дневник наблюдений, досье на каждого — и то, что стоит знать, если однажды вы найдёте птицу в беде.</p>
+    <p class="kicker">рубрика</p>
+    <h1 class="page-title">Вороны</h1>
+    <p class="page-lead">
+      Две вороны живут дома — Икар и Шэпс. Здесь их досье: кто они,
+      откуда, что с ними было и что происходит сейчас.
+    </p>
   </div>
 
   <div class="crows-tiles">
 
-    {% assign birds = site.birds | sort: "order" %}
-    {% for bird in birds %}
-    <a class="crow-tile" href="{{ site.baseurl }}{{ bird.url }}">
-      {% if bird.cover %}
+    <a class="crow-tile" href="{{ site.baseurl }}/birds/ikar.html">
       <span class="crow-tile-img">
-        <img src="{{ site.baseurl }}/{{ bird.cover }}" alt="{{ bird.title }}" loading="lazy">
+        <img src="{{ site.baseurl }}/covers/birds/ikar/01.jpg" alt="Икар" loading="lazy">
       </span>
-      {% else %}
-      <span class="crow-tile-img crow-tile-empty"></span>
-      {% endif %}
       <span class="crow-tile-body">
-        <span class="crow-tile-label">Досье</span>
-        <span class="crow-tile-title">{{ bird.title }}</span>
-        {% if bird.tagline %}<span class="crow-tile-text">{{ bird.tagline }}</span>{% endif %}
-      </span>
-    </a>
-    {% endfor %}
-
-    <a class="crow-tile" href="{{ site.baseurl }}/crows/care/">
-      <span class="crow-tile-img crow-tile-empty"></span>
-      <span class="crow-tile-body">
-        <span class="crow-tile-label">Справочник</span>
-        <span class="crow-tile-title">Правила заботы</span>
-        <span class="crow-tile-text">Что делать, если нашли слётка, чем кормить, как ухаживать.</span>
+        <span class="crow-tile-label">досье</span>
+        <span class="crow-tile-title">Икар</span>
+        <span class="crow-tile-text">Найден с травмой крыла. Долгий путь восстановления.</span>
       </span>
     </a>
 
-  </div>
+    <a class="crow-tile" href="{{ site.baseurl }}/birds/shnaps.html">
+      <span class="crow-tile-img">
+        <img src="{{ site.baseurl }}/covers/birds/shnaps/01.jpg" alt="Шэпс" loading="lazy">
+      </span>
+      <span class="crow-tile-body">
+        <span class="crow-tile-label">досье</span>
+        <span class="crow-tile-title">Шэпс</span>
+        <span class="crow-tile-text">Вторая ворона в доме. Характер, привычки, дела.</span>
+      </span>
+    </a>
 
-</div>
-
-<div class="wrap">
-
-  <div class="crows-chronicle">
-    <p class="crow-label">Хроника</p>
-
-    <div class="crows-grid">
-      {% assign posts = site.crows | sort: "date" | reverse %}
-      {% for p in posts %}
-      <a class="card crow-card" href="{{ site.baseurl }}{{ p.url }}">
-        {% if p.cover %}
-        <img class="card-cover" src="{{ site.baseurl }}/{{ p.cover }}" alt="{{ p.title }}" loading="lazy">
-        {% endif %}
-        <h3>{{ p.title }}</h3>
-        <p class="card-meta">{{ p.date | date: "%d.%m.%Y" }}</p>
-        {% if p.excerpt %}<p>{{ p.excerpt }}</p>{% endif %}
-        {% if p.birds %}
-        <p class="crow-card-tags">
-          {% for b in p.birds %}
-            {% assign bird = site.birds | where: "short", b | first %}
-            <span class="crow-card-tag">{{ bird.title | default: b }}</span>
-          {% endfor %}
-        </p>
-        {% endif %}
-      </a>
-      {% endfor %}
-    </div>
-
-    {% if posts.size == 0 %}
-    <p class="empty">Пока ни одной записи.</p>
-    {% endif %}
+    <a class="crow-tile crow-tile-empty" href="{{ site.baseurl }}/crows/care/">
+      <span class="crow-tile-img crow-tile-empty"></span>
+      <span class="crow-tile-body">
+        <span class="crow-tile-label">памятка</span>
+        <span class="crow-tile-title">Забота</span>
+        <span class="crow-tile-text">Что делать, если нашли ворону: кормление, тепло, врач.</span>
+      </span>
+    </a>
 
   </div>
 
