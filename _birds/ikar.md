@@ -3,6 +3,7 @@ layout: bird
 title: "Икар"
 tagline: "Однокрылая ворона, которая живёт у меня с января"
 short: ikar
+permalink: /birds/ikar.html
 order: 1
 cover: covers/crows/ikar/01.jpg
 facts:
