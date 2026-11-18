@@ -30,7 +30,12 @@ toc:
 <div class="album-player">
   <p class="album-player-label">Плейлист</p>
   <div id="vk_playlist_-208062070_879"></div>
-  <script>
-    VK.Widgets.Playlist("vk_playlist_-208062070_879", -208062070, 879, "", {});
-  </script>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    if (window.VK && VK.Widgets && VK.Widgets.Playlist) {
+      VK.Widgets.Playlist("vk_playlist_-208062070_879", -208062070, 879, "", {});
+    }
+  });
+</script>
