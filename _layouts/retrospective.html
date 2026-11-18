@@ -1,0 +1,51 @@
+---
+layout: default
+---
+<div class="wrap">
+  <article class="retro">
+    <p class="breadcrumbs">
+      <a href="{{ site.baseurl }}/">Главная</a><span>·</span>
+      <a href="{{ site.baseurl }}/retrospectives.html">Ретроспектива</a>
+    </p>
+
+    <h1 class="retro-title">{{ page.title }}</h1>
+
+    <div class="retro-top">
+      <div class="retro-cover">
+        <img src="{{ site.baseurl }}/{{ page.cover }}" alt="{{ page.artist }}">
+      </div>
+
+      <div class="retro-facts">
+        <p class="retro-artist">{{ page.artist }}</p>
+        <dl class="retro-info">
+          {% if page.formed %}
+          <div class="retro-row"><dt>Основан</dt><dd>{{ page.formed }}</dd></div>
+          {% endif %}
+          {% if page.country %}
+          <div class="retro-row"><dt>Страна</dt><dd>{{ page.country }}</dd></div>
+          {% endif %}
+          {% if page.genres %}
+          <div class="retro-row"><dt>Жанры</dt><dd>{{ page.genres | join: ", " }}</dd></div>
+          {% endif %}
+        </dl>
+
+        {% if page.toc %}
+        <nav class="retro-toc">
+          <p class="retro-toc-title">Оглавление</p>
+          {% for item in page.toc %}
+          <a href="#{{ item.id }}">{{ item.label }}</a>
+          {% endfor %}
+        </nav>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="retro-body">
+      {{ content }}
+    </div>
+
+    <p class="album-back">
+      <a class="back" href="{{ site.baseurl }}/retrospectives.html">Все ретроспективы →</a>
+    </p>
+  </article>
+</div>
