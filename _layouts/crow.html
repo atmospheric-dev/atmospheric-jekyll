@@ -33,10 +33,7 @@ layout: default
 
         {% if c contains ".mp4" or c contains ".webm" %}
         <div class="crow-clip">
-          <video controls preload="metadata" playsinline>
-            <source src="{{ c }}" type="video/mp4">
-            Ваш браузер не поддерживает видео.
-          </video>
+          <video controls preload="auto" playsinline src="{{ c }}"></video>
         </div>
 
         {% elsif c contains "video_ext.php" %}
