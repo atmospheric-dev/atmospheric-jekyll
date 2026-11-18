@@ -1433,8 +1433,13 @@ footer a:hover{color:var(--accent);opacity:1;}
   display:grid;
   grid-template-columns:340px 1fr;
   gap:28px;
-  align-items:start;
+  align-items:stretch;
   margin:36px 0 28px;
+}
+.playlist-left{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
 }
 .playlist-cover{
   margin:0;
