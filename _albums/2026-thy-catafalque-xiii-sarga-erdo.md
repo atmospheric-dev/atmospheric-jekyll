@@ -12,7 +12,7 @@ genres:
   - avant-garde
   - black metal
 cover: covers/catafalque.jpg
-bandcamp_id: "4867902578"
+bandcamp_id: "4067902578"
 bandcamp_url: "https://thycatafalqueuk.bandcamp.com/album/xiii-s-rga-erd"
 featured: true
 ---
