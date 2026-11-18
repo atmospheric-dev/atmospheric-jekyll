@@ -1962,3 +1962,33 @@ footer a:hover{color:var(--accent);opacity:1;}
   .retro-grid{grid-template-columns:1fr;gap:16px;}
   .retro-card-strip{height:140px;}
 }
+/* ===== ОБТЕКАНИЕ ОБЛОЖКИ РЕТРОСПЕКТИВЫ ===== */
+.retro-float{
+  float:left;
+  width:42%;
+  max-width:380px;
+  margin:6px 32px 16px 0;
+  border:1px solid var(--line);
+  overflow:hidden;
+}
+.retro-float img{display:block;width:100%;height:auto;}
+
+/* страховка: поток не заезжает под обложку */
+.retro-body::after{content:"";display:block;clear:both;}
+
+/* эти блоки всегда во всю ширину, под обложкой */
+.retro-body .album-player,
+.retro-body .retro-release,
+.retro-body .retro-duo,
+.retro-body .retro-duo-players,
+.retro-body .retro-outro,
+.retro-body .note-figure{clear:both;}
+
+@media (max-width:720px){
+  .retro-float{
+    float:none;
+    width:100%;
+    max-width:100%;
+    margin:0 0 18px;
+  }
+}
