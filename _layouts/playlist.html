@@ -11,21 +11,23 @@ layout: default
 
   <div class="playlist-body">
 
-    {% if page.cover %}
-    <figure class="note-figure">
-      <img src="{{ site.baseurl }}/{{ page.cover }}" alt="{{ page.title }}">
-    </figure>
-    {% endif %}
+    <div class="playlist-top">
+      {% if page.cover %}
+      <figure class="playlist-cover">
+        <img src="{{ site.baseurl }}/{{ page.cover }}" alt="{{ page.title }}">
+      </figure>
+      {% endif %}
+
+      {% if page.yandex_playlist %}
+      <div class="playlist-embed">
+        <iframe frameborder="0"
+          src="https://music.yandex.ru/iframe/playlists/{{ page.yandex_playlist }}"></iframe>
+      </div>
+      {% endif %}
+    </div>
 
     {% if page.description %}
     <p class="article-lead">{{ page.description }}</p>
-    {% endif %}
-
-    {% if page.yandex_playlist %}
-    <div class="playlist-embed">
-      <iframe frameborder="0"
-        src="https://music.yandex.ru/iframe/playlists/{{ page.yandex_playlist }}"></iframe>
-    </div>
     {% endif %}
 
     <div class="playlist-links">
