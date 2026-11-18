@@ -34,5 +34,8 @@ collections:
   crowcare:
     output: true
     permalink: /crows/care/:name/
+  retrospectives:
+    output: true
+    permalink: /retro/:name/
 exclude:
   - README.md
