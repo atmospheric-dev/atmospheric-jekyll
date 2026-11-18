@@ -12,7 +12,7 @@ genres:
 cover: covers/agalloch/03.jpg
 date: 2026-11-18
 toc:
-    - { id: "from-which",   label: "From Which Of This Oak (1997)" }
+  - { id: "from-which",   label: "From Which Of This Oak (1997)" }
   - { id: "pale",         label: "Pale Folklore (1999)" }
   - { id: "stone",        label: "Of Stone, Wind, and Pillor (2001)" }
   - { id: "mantle",       label: "The Mantle (2002)" }
