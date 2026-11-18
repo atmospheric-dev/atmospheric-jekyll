@@ -9,7 +9,7 @@ genres:
   - neofolk
   - post-metal
   - doom metal
-cover: covers/groups/agalloch.jpg
+cover: covers/agalloch/01.jpg
 date: 2026-11-18
 toc:
   - { id: "photo01",      label: "Фото 01" }
@@ -29,7 +29,7 @@ toc:
 <p class="retro-lead">Хотелось бы вернуться к одному любимому проекту, с которого у меня, как и у многих здесь обитающих, началась любовь к тяжёлой, но атмосферной музыке. Самому интересно воплотить мысли о творчестве Agalloch в небольшую статью и постараться разобраться, на каких культурных и философских влияниях оно было сформировано.</p>
 
 <figure class="note-figure" id="photo01">
-  <img src="{{ '/photos/2026-agalloch/01.jpg' | relative_url }}" alt="Фото 01">
+  <img src="{{ '/covers/agalloch/01.jpg' | relative_url }}" alt="Фото 01">
   <figcaption>Фото 01</figcaption>
 </figure>
 
@@ -269,7 +269,7 @@ C началом обзора всей дискографии Agalloch в Atmosp
 </div>
 
 <figure class="note-figure" id="photo02">
-  <img src="{{ '/photos/2026-agalloch/02.jpg' | relative_url }}" alt="Фото 02">
+  <img src="{{ '/covers/agalloch/02.jpg' | relative_url }}" alt="Фото 02">
   <figcaption>Фото 02</figcaption>
 </figure>
 
