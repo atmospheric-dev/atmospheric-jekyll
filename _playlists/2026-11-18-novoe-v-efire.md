@@ -14,6 +14,7 @@ vk_url: "https://vk.ru/music/playlist/-223810057_524_adb79aa1c94e5fb857"
 <p>Обязательно делитесь этим плейлистом и поддерживайте отечественного исполнителя!</p>
 
 <div class="playlist-credits">
-  <p>На обложке — Eoront (<a href="https://vk.ru/club4148270" target="_blank" rel="noopener">vk.ru/club4148270</a>)</p>
-  <p>Для оформления обложки плейлиста использована фотография Elen Tree (<a href="https://vk.ru/club74841786" target="_blank" rel="noopener">vk.ru/club74841786</a>)</p>
+  <p>На обложке — <a href="https://vk.ru/club4148270" target="_blank" rel="noopener">Eoront</a></p>
+  <p>Для оформления обложки плейлиста использована фотография <a href="https://vk.ru/club74841786" target="_blank" rel="noopener">Elen Tree</a></p>
+  <p class="playlist-updated">Последнее обновление: 12.11.2026</p>
 </div>
