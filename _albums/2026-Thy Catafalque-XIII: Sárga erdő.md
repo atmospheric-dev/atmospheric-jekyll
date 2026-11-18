@@ -1,18 +1,18 @@
 ---
 layout: album
-title: XIII: Sárga erdő
-artist: Thy Catafalque
+title: "XIII: Särga erdö"
+artist: "Thy Catafalque"
 year: 2026
-country: Венгрия
-label: Season of Mist
+country: "Венгрия"
+label: "Season of Mist"
 genres:
   - progressive metal
   - experimental
-  - avantgarde
+  - avant-garde
   - black metal
 cover: covers/catafalque.jpg
-bandcamp_id: "4067902578"
-bandcamp_url: https://thycatafalqueuk.bandcamp.com/album/xiii-s-rga-erdo
+bandcamp_id: "4867902578"
+bandcamp_url: "https://thycatafalqueuk.bandcamp.com/album/xiii-s-rga-erd"
 featured: true
 ---
 
