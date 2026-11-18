@@ -1428,3 +1428,82 @@ footer a:hover{color:var(--accent);opacity:1;}
 .card.is-hidden{
   display:none;
 }
+/* ===== ПЛЕЙЛИСТЫ ===== */
+.playlist-embed{
+  margin:36px 0 28px;
+}
+.playlist-embed iframe{
+  display:block;
+  width:100%;
+  min-height:450px;
+  border:1px solid var(--line);
+}
+
+.playlist-links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin:26px 0 44px;
+}
+.playlist-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  border:1px solid var(--line);
+  padding:11px 18px;
+  font-family:'Courier New',monospace;
+  font-size:.74rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#cdbfa8;
+  text-decoration:none;
+  transition:border-color .2s, color .2s;
+}
+.playlist-btn:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+  opacity:1;
+}
+.playlist-ico{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  font-size:.62rem;
+  font-weight:700;
+  letter-spacing:0;
+  color:#0d0d0d;
+}
+.playlist-ico-ya{background:#ffcc00;}
+.playlist-ico-vk{background:#4c75a3;color:#fff;font-size:.52rem;}
+
+.playlist-credits{
+  margin:32px 0 56px;
+  padding-top:22px;
+  border-top:1px solid var(--line);
+  font-size:.86rem;
+  line-height:1.6;
+  color:var(--text-dim);
+}
+.playlist-credits p{margin:0 0 6px;}
+.playlist-credits a{color:var(--accent);text-decoration:none;}
+.playlist-credits a:hover{text-decoration:underline;opacity:1;}
+
+/* заголовок страницы плейлиста по центру колонки, как у статей */
+.playlist-head{
+  max-width:760px;
+  margin:0 auto;
+  padding:56px 0 0;
+}
+.playlist-body{
+  max-width:760px;
+  margin:0 auto;
+  padding:0 0 64px;
+}
+
+@media (max-width:720px){
+  .playlist-embed iframe{min-height:380px;}
+  .playlist-btn{font-size:.68rem;padding:10px 14px;}
+}
