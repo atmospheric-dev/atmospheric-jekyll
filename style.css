@@ -1844,3 +1844,10 @@ footer a:hover{color:var(--accent);opacity:1;}
   .retro-top{grid-template-columns:1fr;gap:24px;}
   .retro-cover{max-width:260px;}
 }
+/* затемнение виджета ВК */
+.album-player iframe{
+  filter: brightness(.78) contrast(1.05) saturate(.85);
+  border:1px solid var(--line);
+  display:block;
+  width:100%;
+}
