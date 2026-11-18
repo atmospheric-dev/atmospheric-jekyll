@@ -1,0 +1,17 @@
+---
+layout: default
+title: Ретроспектива
+---
+<div class="wrap">
+  <h1 class="page-title">Ретроспектива</h1>
+  <p class="page-lead">Вся дискография одного проекта — в одной статье.</p>
+
+  <div class="grid">
+    {% for r in site.retrospectives %}
+      <a class="card" href="{{ site.baseurl }}{{ r.url }}">
+        <h3>{{ r.title }}</h3>
+        <p>{{ r.artist }}</p>
+      </a>
+    {% endfor %}
+  </div>
+</div>
