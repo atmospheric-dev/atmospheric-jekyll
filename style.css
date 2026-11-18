@@ -1041,10 +1041,11 @@ footer a:hover{color:var(--accent);opacity:1;}
   margin:0 0 36px 0;
 }
 
+/* ====== СЕТКА КАРТОЧЕК РУБРИК — ПЯТЬ В РЯД ====== */
 .cards{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:22px;
+  grid-template-columns:repeat(5,1fr);
+  gap:16px;
   margin:36px 0 56px;
 }
 @media (max-width:1200px){
@@ -1056,6 +1057,7 @@ footer a:hover{color:var(--accent);opacity:1;}
 @media (max-width:600px){
   .cards{grid-template-columns:1fr;}
 }
+
 .cards .card{
   display:flex;
   flex-direction:column;
@@ -1257,7 +1259,6 @@ footer a:hover{color:var(--accent);opacity:1;}
   .zine{grid-template-columns:1fr;gap:32px;}
   .releases{grid-template-columns:repeat(2,1fr);gap:28px 20px;}
   .album-embed{grid-template-columns:1fr;gap:24px;}
-  .cards{grid-template-columns:repeat(2,1fr);}
 }
 
 @media (max-width:900px){
@@ -1295,7 +1296,6 @@ footer a:hover{color:var(--accent);opacity:1;}
 @media (max-width:560px){
   .picks{grid-template-columns:1fr;}
   .releases{grid-template-columns:1fr;}
-  .cards{grid-template-columns:1fr;}
   h1{font-size:1.9rem;}
   .carousel-item{flex:0 0 88%;}
   .carousel-item img{height:300px;}
@@ -1715,13 +1715,13 @@ footer a:hover{color:var(--accent);opacity:1;}
 
 /* адаптив */
 @media (max-width:1000px){
-  .crows-tiles{grid-template-columns:repeat(2,1fr);}
   .bird-top{grid-template-columns:1fr;}
   .bird-cover{max-width:280px;}
 }
 @media (max-width:760px){
   .crows-tiles{grid-template-columns:1fr;}
 }
+
 /* ===== ВИТРИНА ТОВАРОВ НА ГЛАВНОЙ ===== */
 .front-layout{
   display:grid;
