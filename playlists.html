@@ -1,0 +1,33 @@
+---
+layout: default
+title: Плейлисты
+---
+
+{% include header.html %}
+
+<div class="wrap">
+
+  <div class="page-head" style="padding-top:56px;">
+    <h1>Плейлисты</h1>
+    <p class="page-lead">Собрания звуков, которые хорошо звучат вместе.</p>
+  </div>
+
+  <div class="cards">
+    {% assign playlists = site.playlists | sort: "date" | reverse %}
+    {% for pl in playlists %}
+    <a class="card" href="{{ site.baseurl }}{{ pl.url }}">
+      {% if pl.cover %}
+        <img class="card-cover" src="{{ site.baseurl }}/{{ pl.cover }}" alt="{{ pl.title }}">
+      {% endif %}
+      <h3>{{ pl.title }}</h3>
+      <p class="card-meta">{{ pl.date | date: "%d.%m.%Y" }}</p>
+      {% if pl.excerpt %}<p>{{ pl.excerpt }}</p>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+
+  {% if playlists.size == 0 %}
+    <p class="empty">Пока ни одного плейлиста.</p>
+  {% endif %}
+
+</div>
