@@ -1,0 +1,29 @@
+---
+layout: default
+---
+<div class="wrap">
+
+  <div class="care-head">
+    <p class="article-meta">Правила заботы</p>
+    <h1 class="article-title">{{ page.title }}</h1>
+    {% if page.tagline %}<p class="article-subtitle">{{ page.tagline }}</p>{% endif %}
+  </div>
+
+  <div class="care-body">
+
+    {% if page.toc and page.toc.size > 0 %}
+    <nav class="care-toc">
+      {% for t in page.toc %}
+      <a href="#{{ t.id }}">{{ t.title }}</a>
+      {% endfor %}
+    </nav>
+    {% endif %}
+
+    {{ content }}
+
+    <div class="album-back">
+      <a class="back" href="{{ site.baseurl }}/crows.html">← Все вороны</a>
+    </div>
+
+  </div>
+</div>
