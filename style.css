@@ -1429,13 +1429,27 @@ footer a:hover{color:var(--accent);opacity:1;}
   display:none;
 }
 /* ===== ПЛЕЙЛИСТЫ ===== */
-.playlist-embed{
+.playlist-top{
+  display:grid;
+  grid-template-columns:340px 1fr;
+  gap:28px;
+  align-items:start;
   margin:36px 0 28px;
+}
+.playlist-cover{
+  margin:0;
+}
+.playlist-cover img{
+  width:100%;
+  border:1px solid var(--line);
+}
+.playlist-embed{
+  margin:0;
 }
 .playlist-embed iframe{
   display:block;
   width:100%;
-  min-height:450px;
+  height:450px;
   border:1px solid var(--line);
 }
 
@@ -1506,4 +1520,11 @@ footer a:hover{color:var(--accent);opacity:1;}
 @media (max-width:720px){
   .playlist-embed iframe{min-height:380px;}
   .playlist-btn{font-size:.68rem;padding:10px 14px;}
+}
+@media (max-width:900px){
+  .playlist-top{grid-template-columns:1fr;gap:22px;}
+  .playlist-embed iframe{height:420px;}
+}
+@media (max-width:720px){
+  .playlist-embed iframe{height:380px;}
 }
