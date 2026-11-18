@@ -12,6 +12,16 @@ title: Атмосферные места
 
   <div id="map" class="map-large"></div>
 
+  <div class="region-filter" id="regionFilter">
+    <button class="region-btn is-active" data-region="all">Все</button>
+    {% assign regions = site.places | map: "region" | uniq | sort %}
+    {% for r in regions %}
+      {% if r and r != "" %}
+        <button class="region-btn" data-region="{{ r }}">{{ r }}</button>
+      {% endif %}
+    {% endfor %}
+  </div>
+  
   <div class="cards">
     {% assign places = site.places | sort: "date" | reverse %}
     {% for place in places %}
