@@ -27,21 +27,23 @@ layout: default
 
     {{ content }}
 
+    {% if page.clips and page.clips.size > 0 %}
+    <div class="crow-clips">
+      {% for c in page.clips %}
+      <div class="crow-clip">
+        <iframe src="{{ c }}" frameborder="0" allowfullscreen
+          allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
     {% if page.media and page.media.size > 0 %}
     <div class="crow-gallery">
       {% for img in page.media %}
       <figure>
         <img src="{{ site.baseurl }}/{{ img }}" alt="{{ page.title }}" loading="lazy">
       </figure>
-      {% endfor %}
-    </div>
-    {% endif %}
-
-    {% if page.videos and page.videos.size > 0 %}
-    <div class="crow-videos">
-      <p class="crow-label">Видео</p>
-      {% for v in page.videos %}
-      <a class="crow-video" href="{{ v }}" target="_blank" rel="noopener">▶ Смотреть видео {{ forloop.index }}</a>
       {% endfor %}
     </div>
     {% endif %}
