@@ -1,0 +1,32 @@
+---
+layout: default
+title: Правила заботы
+---
+
+<div class="wrap">
+
+  <div class="care-head">
+    <p class="article-meta">Справочник</p>
+    <h1 class="article-title">Правила заботы</h1>
+    <p class="page-lead">Что делать, если вы нашли ворону в беде: от слётка на земле до особенностей ухода за птицей с удалённым крылом.</p>
+  </div>
+
+  <div class="care-list">
+    {% assign items = site.crowcare | sort: "order" %}
+    {% for c in items %}
+    <a class="care-item" href="{{ site.baseurl }}{{ c.url }}">
+      <span class="care-item-title">{{ c.title }}</span>
+      {% if c.tagline %}<span class="care-item-text">{{ c.tagline }}</span>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+
+  {% if items.size == 0 %}
+  <p class="empty">Пока ни одной статьи.</p>
+  {% endif %}
+
+  <div class="album-back">
+    <a class="back" href="{{ site.baseurl }}/crows.html">← Все вороны</a>
+  </div>
+
+</div>
