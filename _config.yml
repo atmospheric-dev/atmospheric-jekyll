@@ -25,5 +25,14 @@ collections:
   playlists:
     output: true
     permalink: /playlists/:name/
+  crows:
+    output: true
+    permalink: /crows/:name/
+  birds:
+    output: true
+    permalink: /crows/bird/:name/
+  crowcare:
+    output: true
+    permalink: /crows/care/:name/
 exclude:
   - README.md
