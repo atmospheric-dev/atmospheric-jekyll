@@ -1554,3 +1554,318 @@ footer a:hover{color:var(--accent);opacity:1;}
   color:var(--text-dim);
   text-transform:uppercase;
 }
+/* ===== ВОРОНЫ ===== */
+.crows-head{
+  padding-top:56px;
+  max-width:720px;
+}
+.crows-head .page-lead{margin-top:14px;}
+
+/* плитки разделов */
+.crows-tiles{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+  margin:44px 0 20px;
+}
+.crow-tile{
+  display:flex;
+  flex-direction:column;
+  border:1px solid var(--line);
+  background:#121010;
+  text-decoration:none;
+  overflow:hidden;
+  transition:border-color .25s;
+}
+.crow-tile:hover{border-color:var(--accent);opacity:1;}
+.crow-tile-img{
+  display:block;
+  aspect-ratio:16/10;
+  overflow:hidden;
+  background:#1a1716;
+}
+.crow-tile-img img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:transform .5s;
+}
+.crow-tile:hover .crow-tile-img img{transform:scale(1.04);}
+.crow-tile-empty{
+  background:
+    repeating-linear-gradient(45deg,#191615 0 10px,#141111 10px 20px);
+}
+.crow-tile-body{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding:18px 20px 22px;
+}
+.crow-tile-label{
+  font-family:'Courier New',monospace;
+  font-size:.62rem;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--accent);
+}
+.crow-tile-title{
+  font-size:1.15rem;
+  color:#e6e0d6;
+}
+.crow-tile-text{
+  font-size:.86rem;
+  line-height:1.55;
+  color:var(--text-dim);
+}
+
+/* хроника */
+.crows-chronicle{
+  margin:36px 0 80px;
+  padding-top:30px;
+  border-top:1px solid var(--line);
+}
+.crow-label{
+  font-family:'Courier New',monospace;
+  font-size:.66rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin:0 0 18px;
+}
+.crows-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:18px;
+}
+.crow-card{display:flex;flex-direction:column;}
+.crow-card-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin:10px 0 0;
+}
+.crow-card-tag{
+  font-family:'Courier New',monospace;
+  font-size:.58rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--accent);
+  border:1px solid rgba(176,142,90,.4);
+  padding:3px 7px;
+}
+
+/* страница записи */
+.crow-head{
+  max-width:760px;
+  margin:0 auto;
+  padding:56px 0 0;
+}
+.crow-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:18px;
+}
+.crow-tag{
+  font-family:'Courier New',monospace;
+  font-size:.62rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--accent);
+  border:1px solid rgba(176,142,90,.45);
+  padding:5px 10px;
+  text-decoration:none;
+  transition:background .2s;
+}
+a.crow-tag:hover{background:rgba(176,142,90,.1);opacity:1;}
+.crow-tag-dim{
+  color:var(--text-dim);
+  border-color:var(--line);
+}
+.crow-body{
+  max-width:760px;
+  margin:0 auto;
+  padding:34px 0 64px;
+}
+
+/* галерея */
+.crow-gallery{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  margin:34px 0 10px;
+}
+.crow-gallery figure{
+  margin:0;
+  overflow:hidden;
+  border:1px solid var(--line);
+  background:#141111;
+}
+.crow-gallery img{
+  display:block;
+  width:100%;
+  height:auto;
+}
+.crow-gallery figure:first-child:nth-last-child(odd){
+  grid-column:1 / -1;
+}
+
+/* видео ВК */
+.crow-clips{
+  display:grid;
+  gap:18px;
+  margin:34px 0;
+}
+.crow-clip{
+  position:relative;
+  width:100%;
+  padding-top:56.25%;
+  border:1px solid var(--line);
+  background:#000;
+  overflow:hidden;
+}
+.crow-clip iframe{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border:0;
+}
+
+/* досье */
+.bird-head{
+  max-width:760px;
+  margin:0 auto;
+  padding:56px 0 0;
+}
+.bird-body{
+  max-width:760px;
+  margin:0 auto;
+  padding:34px 0 64px;
+}
+.bird-top{
+  display:grid;
+  grid-template-columns:300px 1fr;
+  gap:26px;
+  align-items:start;
+  margin-bottom:34px;
+}
+.bird-cover{margin:0;}
+.bird-cover img{
+  width:100%;
+  border:1px solid var(--line);
+}
+.bird-facts{
+  border-top:1px solid var(--line);
+}
+.bird-fact{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  padding:11px 0;
+  border-bottom:1px solid var(--line);
+  font-size:.88rem;
+}
+.bird-fact-k{
+  font-family:'Courier New',monospace;
+  font-size:.66rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+}
+.bird-fact-v{color:#e6e0d6;text-align:right;}
+
+.bird-related{
+  margin:44px 0 10px;
+  padding-top:26px;
+  border-top:1px solid var(--line);
+}
+.bird-related-item{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:14px;
+  padding:11px 0;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  text-decoration:none;
+  transition:opacity .2s;
+}
+.bird-related-item:hover{opacity:1;}
+.bird-related-date{
+  font-family:'Courier New',monospace;
+  font-size:.66rem;
+  letter-spacing:.1em;
+  color:var(--accent);
+  min-width:82px;
+}
+.bird-related-title{color:#d6cfc3;font-size:.92rem;}
+
+/* правила заботы */
+.care-head{
+  max-width:760px;
+  margin:0 auto;
+  padding:56px 0 0;
+}
+.care-body{
+  max-width:760px;
+  margin:0 auto;
+  padding:34px 0 64px;
+}
+.care-toc{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  margin:0 0 34px;
+  padding:18px 22px;
+  border:1px solid var(--line);
+  border-left:2px solid var(--accent);
+}
+.care-toc a{
+  font-size:.9rem;
+  color:#cdbfa8;
+  text-decoration:none;
+  padding:5px 0;
+}
+.care-toc a:hover{color:var(--accent);opacity:1;}
+.care-list{
+  max-width:760px;
+  margin:38px auto 20px;
+}
+.care-item{
+  display:block;
+  padding:18px 0;
+  border-bottom:1px solid var(--line);
+  text-decoration:none;
+  transition:opacity .2s;
+}
+.care-item:hover{opacity:1;}
+.care-item-title{
+  display:block;
+  font-size:1.02rem;
+  color:#e6e0d6;
+  margin-bottom:5px;
+}
+.care-item:hover .care-item-title{color:var(--accent);}
+.care-item-text{
+  display:block;
+  font-size:.86rem;
+  line-height:1.55;
+  color:var(--text-dim);
+}
+
+/* адаптив */
+@media (max-width:1000px){
+  .crows-tiles{grid-template-columns:repeat(2,1fr);}
+  .crows-grid{grid-template-columns:repeat(3,1fr);}
+  .bird-top{grid-template-columns:1fr;}
+  .bird-cover{max-width:280px;}
+}
+@media (max-width:760px){
+  .crows-tiles{grid-template-columns:1fr;}
+  .crows-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media (max-width:560px){
+  .crows-grid{grid-template-columns:1fr;}
+  .crow-gallery{grid-template-columns:1fr;}
+  .crow-gallery figure:first-child:nth-last-child(odd){grid-column:auto;}
+}
