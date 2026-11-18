@@ -35,7 +35,13 @@ toc:
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     if (window.VK && VK.Widgets && VK.Widgets.Playlist) {
-      VK.Widgets.Playlist("vk_playlist_-208062070_879", -208062070, 879, "", {});
+      VK.Widgets.Playlist(
+        "vk_playlist_-208062070_879",
+        -208062070,
+        879,
+        "",
+        { theme: "dark" }
+      );
     }
   });
 </script>
