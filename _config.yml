@@ -22,5 +22,8 @@ collections:
   places:
     output: true
     permalink: /places/:name/
+  playlists:
+    output: true
+    permalink: /playlists/:name/
 exclude:
   - README.md
