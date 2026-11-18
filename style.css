@@ -1043,9 +1043,19 @@ footer a:hover{color:var(--accent);opacity:1;}
 
 .cards{
   display:grid;
-  grid-template-columns:repeat(3, minmax(0, 1fr));
-  gap:24px;
-  align-items:start;
+  grid-template-columns:repeat(4,1fr);
+  gap:22px;
+  margin:36px 0 56px;
+}
+@media (max-width:1200px){
+  .cards{grid-template-columns:repeat(3,1fr);}
+}
+@media (max-width:900px){
+  .cards{grid-template-columns:repeat(2,1fr);}
+}
+@media (max-width:600px){
+  .cards{grid-template-columns:1fr;}
+}
 }
 .cards .card{
   display:flex;
@@ -1386,4 +1396,35 @@ footer a:hover{color:var(--accent);opacity:1;}
 }
 .leaflet-control-attribution a{
   color:#b08e5a !important;
+}
+/* фильтр по областям */
+.region-filter{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:28px 0 0;
+}
+.region-btn{
+  background:transparent;
+  border:1px solid var(--line);
+  color:var(--text-soft, #9a8f80);
+  font-family:'Courier New',monospace;
+  font-size:.72rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  padding:9px 16px;
+  cursor:pointer;
+  transition:border-color .2s, color .2s;
+}
+.region-btn:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+.region-btn.is-active{
+  border-color:var(--accent);
+  color:var(--accent);
+  background:rgba(176,142,90,.08);
+}
+.card.is-hidden{
+  display:none;
 }
