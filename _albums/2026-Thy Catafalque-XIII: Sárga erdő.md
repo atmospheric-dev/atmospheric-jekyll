@@ -3,6 +3,7 @@ layout: album
 title: "XIII: Särga erdö"
 artist: "Thy Catafalque"
 year: 2026
+date: 2026-11-18
 country: "Венгрия"
 label: "Season of Mist"
 genres:
