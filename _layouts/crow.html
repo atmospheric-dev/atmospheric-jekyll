@@ -30,7 +30,8 @@ layout: default
     {% if page.clips and page.clips.size > 0 %}
     <div class="crow-clips">
       {% for c in page.clips %}
-              {% if c contains ".mp4" or c contains ".webm" %}
+
+        {% if c contains ".mp4" or c contains ".webm" %}
         <div class="crow-clip">
           <video controls preload="metadata" playsinline>
             <source src="{{ c }}" type="video/mp4">
@@ -50,6 +51,9 @@ layout: default
           <span class="crow-clip-text">Смотреть видео {{ forloop.index }}</span>
         </a>
         {% endif %}
+
+      {% endfor %}
+    </div>
     {% endif %}
 
     {% if page.media and page.media.size > 0 %}
