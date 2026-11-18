@@ -9,11 +9,10 @@ genres:
   - neofolk
   - post-metal
   - doom metal
-cover: covers/agalloch/01.jpg
+cover: covers/agalloch/03.jpg
 date: 2026-11-18
 toc:
-  - { id: "photo01",      label: "Фото 01" }
-  - { id: "from-which",   label: "From Which Of This Oak (1997)" }
+    - { id: "from-which",   label: "From Which Of This Oak (1997)" }
   - { id: "pale",         label: "Pale Folklore (1999)" }
   - { id: "stone",        label: "Of Stone, Wind, and Pillor (2001)" }
   - { id: "mantle",       label: "The Mantle (2002)" }
@@ -23,15 +22,13 @@ toc:
   - { id: "white",        label: "The White (2008)" }
   - { id: "marrow",       label: "Marrow Of The Spirit (2010)" }
   - { id: "serpent",      label: "The Serpent & The Sphere (2014)" }
-  - { id: "photo02",      label: "Фото 02" }
----
+ ---
 
 <p class="retro-lead">Хотелось бы вернуться к одному любимому проекту, с которого у меня, как и у многих здесь обитающих, началась любовь к тяжёлой, но атмосферной музыке. Самому интересно воплотить мысли о творчестве Agalloch в небольшую статью и постараться разобраться, на каких культурных и философских влияниях оно было сформировано.</p>
 
 <figure class="note-figure" id="photo01">
   <img src="{{ '/covers/agalloch/01.jpg' | relative_url }}" alt="Фото 01">
-  <figcaption>Фото 01</figcaption>
-</figure>
+ </figure>
 
 <div class="retro-release" id="from-which"></div>
 ## From Which Of This Oak (1997)
@@ -270,7 +267,6 @@ C началом обзора всей дискографии Agalloch в Atmosp
 
 <figure class="note-figure" id="photo02">
   <img src="{{ '/covers/agalloch/02.jpg' | relative_url }}" alt="Фото 02">
-  <figcaption>Фото 02</figcaption>
 </figure>
 
 <div class="retro-all-players">
