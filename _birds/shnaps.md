@@ -3,6 +3,7 @@ layout: bird
 title: "Шэпс"
 tagline: "Слёток этого года, который остался насовсем"
 short: shnaps
+permalink: /birds/shnaps.html
 order: 2
 cover: covers/crows/shnaps/01.jpg
 facts:
