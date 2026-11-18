@@ -1,0 +1,61 @@
+---
+layout: default
+---
+<div class="wrap">
+
+  <div class="bird-head">
+    <p class="article-meta">Досье</p>
+    <h1 class="article-title">{{ page.title }}</h1>
+    {% if page.tagline %}<p class="article-subtitle">{{ page.tagline }}</p>{% endif %}
+  </div>
+
+  <div class="bird-body">
+
+    <div class="bird-top">
+      {% if page.cover %}
+      <figure class="bird-cover">
+        <img src="{{ site.baseurl }}/{{ page.cover }}" alt="{{ page.title }}">
+      </figure>
+      {% endif %}
+
+      <div class="bird-facts">
+        {% for f in page.facts %}
+        <div class="bird-fact">
+          <span class="bird-fact-k">{{ f[0] }}</span>
+          <span class="bird-fact-v">{{ f[1] }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {{ content }}
+
+    {% if page.photos and page.photos.size > 0 %}
+    <div class="crow-gallery">
+      {% for img in page.photos %}
+      <figure>
+        <img src="{{ site.baseurl }}/{{ img }}" alt="{{ page.title }}" loading="lazy">
+      </figure>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% assign rel = site.crows | where_exp: "p", "p.birds contains page.short" | sort: "date" | reverse %}
+    {% if rel.size > 0 %}
+    <div class="bird-related">
+      <p class="crow-label">Записи об этой птице</p>
+      {% for p in rel %}
+      <a class="bird-related-item" href="{{ site.baseurl }}{{ p.url }}">
+        <span class="bird-related-date">{{ p.date | date: "%d.%m.%Y" }}</span>
+        <span class="bird-related-title">{{ p.title }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="album-back">
+      <a class="back" href="{{ site.baseurl }}/crows.html">← Все вороны</a>
+    </div>
+
+  </div>
+</div>
