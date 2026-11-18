@@ -26,64 +26,108 @@ layout: default
 </header>
 
 <main>
-  <section>
+    <section>
     <div class="wrap">
-      <h2>Выбор редакции</h2>
+      <div class="front-layout">
 
-      <div class="top-layout">
-        <div>
-          <div class="picks">
-            {% assign featured = site.albums | where: "featured", true %}
-            {% for album in featured limit: 3 %}
-            <div class="pick">
-              <h3 class="pick-title"><a href="{{ site.baseurl }}{{ album.url }}">{{ album.artist }} — {{ album.title }} ({{ album.year }})</a></h3>
-              <a href="{{ site.baseurl }}{{ album.url }}">
-                <img class="pick-cover" src="{{ site.baseurl }}/{{ album.cover }}" alt="{{ album.artist }} — {{ album.title }}">
-              </a>
-            </div>
-            {% endfor %}
-          </div>
+        <aside class="shop-block">
+          <p class="section-heading">Мерч и диски</p>
 
-          <p style="margin-top:28px;font-family:'Courier New',monospace;font-size:.7rem;letter-spacing:.08em;color:var(--text-dim)">
-            Лучшие обзоры за последнее время.
-          </p>
+          <div class="shop-list">
 
-          <p style="margin-top:20px">
-            <a class="back" href="{{ site.baseurl }}/releases.html">Все обзоры →</a>
-          </p>
-        </div>
-
-        <aside class="concert-block">
-          <p class="section-heading">Ближайшие концерты</p>
-
-          <div class="concerts-list">
-
-            <a class="concert-card" href="https://vk.ru/theosophy_samara2026"
-               style="--poster:url('{{ site.baseurl }}/covers/posters/poster-1.jpg')">
-              <div class="concert-inner">
-                <p class="concert-title">Birth of the Monolith, Самара</p>
-                <p class="concert-date">11 ноября 2026</p>
-              </div>
+            <a class="shop-card" href="ССЫЛКА_1" target="_blank" rel="noopener">
+              <span class="shop-img">
+                <img src="{{ site.baseurl }}/covers/shop/01.jpg" alt="Футболка Atmospheric" loading="lazy">
+              </span>
+              <span class="shop-body">
+                <span class="shop-title">Футболка Atmospheric</span>
+                <span class="shop-note">чёрная, принт на спине</span>
+              </span>
             </a>
 
-            <a class="concert-card" href="https://vk.ru/club240885644"
-               style="--poster:url('{{ site.baseurl }}/covers/posters/poster-2.jpg')">
-              <div class="concert-inner">
-                <p class="concert-title">Birth of the Monolith, Екатеринбург</p>
-                <p class="concert-date">13 ноября 2026</p>
-              </div>
+            <a class="shop-card" href="ССЫЛКА_2" target="_blank" rel="noopener">
+              <span class="shop-img">
+                <img src="{{ site.baseurl }}/covers/shop/02.jpg" alt="Кассета Atmospheric" loading="lazy">
+              </span>
+              <span class="shop-body">
+                <span class="shop-title">Кассета Atmosphere</span>
+                <span class="shop-note">тираж 50 копий</span>
+              </span>
             </a>
 
-            <a class="concert-card" href="https://vk.ru/club240885807"
-               style="--poster:url('{{ site.baseurl }}/covers/posters/poster-3.jpg')">
-              <div class="concert-inner">
-                <p class="concert-title">Birth of the Monolith, Омск</p>
-                <p class="concert-date">14 ноября 2026</p>
-              </div>
+            <a class="shop-card" href="ССЫЛКА_3" target="_blank" rel="noopener">
+              <span class="shop-img">
+                <img src="{{ site.baseurl }}/covers/shop/03.jpg" alt="Журнал Atmospheric" loading="lazy">
+              </span>
+              <span class="shop-body">
+                <span class="shop-title">Журнал, №1</span>
+                <span class="shop-note">печатный зин</span>
+              </span>
             </a>
 
           </div>
         </aside>
+
+        <div class="front-main">
+          <h2>Выбор редакции</h2>
+
+          <div class="top-layout">
+            <div>
+              <div class="picks">
+                {% assign featured = site.albums | where: "featured", true %}
+                {% for album in featured limit: 3 %}
+                <div class="pick">
+                  <h3 class="pick-title"><a href="{{ site.baseurl }}{{ album.url }}">{{ album.artist }} — {{ album.title }} ({{ album.year }})</a></h3>
+                  <a href="{{ site.baseurl }}{{ album.url }}">
+                    <img class="pick-cover" src="{{ site.baseurl }}/{{ album.cover }}" alt="{{ album.artist }} — {{ album.title }}">
+                  </a>
+                </div>
+                {% endfor %}
+              </div>
+
+              <p style="margin-top:28px;font-family:'Courier New',monospace;font-size:.7rem;letter-spacing:.08em;color:var(--text-dim)">
+                Лучшие обзоры за последнее время.
+              </p>
+
+              <p style="margin-top:20px">
+                <a class="back" href="{{ site.baseurl }}/releases.html">Все обзоры →</a>
+              </p>
+            </div>
+
+            <aside class="concert-block">
+              <p class="section-heading">Ближайшие концерты</p>
+
+              <div class="concerts-list">
+
+                <a class="concert-card" href="https://vk.ru/theosophy_samara2026"
+                   style="--poster:url('{{ site.baseurl }}/covers/posters/poster-1.jpg')">
+                  <div class="concert-inner">
+                    <p class="concert-title">Birth of the Monolith, Самара</p>
+                    <p class="concert-date">11 ноября 2026</p>
+                  </div>
+                </a>
+
+                <a class="concert-card" href="https://vk.ru/club240885644"
+                   style="--poster:url('{{ site.baseurl }}/covers/posters/poster-2.jpg')">
+                  <div class="concert-inner">
+                    <p class="concert-title">Birth of the Monolith, Екатеринбург</p>
+                    <p class="concert-date">13 ноября 2026</p>
+                  </div>
+                </a>
+
+                <a class="concert-card" href="https://vk.ru/club240885807"
+                   style="--poster:url('{{ site.baseurl }}/covers/posters/poster-3.jpg')">
+                  <div class="concert-inner">
+                    <p class="concert-title">Birth of the Monolith, Омск</p>
+                    <p class="concert-date">14 ноября 2026</p>
+                  </div>
+                </a>
+
+              </div>
+            </aside>
+
+          </div>
+        </div>
 
       </div>
     </div>
