@@ -1306,6 +1306,7 @@ footer a:hover{color:var(--accent);opacity:1;}
 @media (max-width:520px){
   .related-grid{grid-template-columns:1fr;}
 }
+
 /* ===== НИЖНИЙ БЛОК СТАТЬИ: ОДНА ОСЬ ===== */
 .article-body .playlist-link,
 .article-body .note-emphasis{
@@ -1326,6 +1327,7 @@ footer a:hover{color:var(--accent);opacity:1;}
   margin-top:28px;
   margin-bottom:28px;
 }
+
 /* ===== АТМОСФЕРНЫЕ МЕСТА ===== */
 .map-large{
   width:100%;
@@ -1379,7 +1381,6 @@ footer a:hover{color:var(--accent);opacity:1;}
 .leaflet-tile-pane{
   filter: invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.6);
 }
-/* убрать логотип Leaflet с флагом из плашки атрибуции */
 .leaflet-control-attribution a[href*="leaflet"]{
   background:none !important;
   padding-left:0 !important;
@@ -1427,6 +1428,7 @@ footer a:hover{color:var(--accent);opacity:1;}
 .card.is-hidden{
   display:none;
 }
+
 /* ===== ПЛЕЙЛИСТЫ ===== */
 .playlist-top{
   display:grid;
@@ -1553,6 +1555,7 @@ footer a:hover{color:var(--accent);opacity:1;}
   color:var(--text-dim);
   text-transform:uppercase;
 }
+
 /* ===== ВОРОНЫ ===== */
 .crows-head{
   padding-top:56px;
@@ -1617,156 +1620,6 @@ footer a:hover{color:var(--accent);opacity:1;}
   color:var(--text-dim);
 }
 
-/* хроника */
-.crows-chronicle{
-  margin:36px 0 80px;
-  padding-top:30px;
-  border-top:1px solid var(--line);
-}
-.crow-label{
-  font-family:'Courier New',monospace;
-  font-size:.66rem;
-  letter-spacing:.18em;
-  text-transform:uppercase;
-  color:var(--accent);
-  margin:0 0 18px;
-}
-.crows-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:18px;
-}
-.crow-card{display:flex;flex-direction:column;}
-.crow-card-tags{
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-  margin:10px 0 0;
-}
-.crow-card-tag{
-  font-family:'Courier New',monospace;
-  font-size:.58rem;
-  letter-spacing:.12em;
-  text-transform:uppercase;
-  color:var(--accent);
-  border:1px solid rgba(176,142,90,.4);
-  padding:3px 7px;
-}
-
-/* страница записи */
-.crow-head{
-  max-width:760px;
-  margin:0 auto;
-  padding:56px 0 0;
-}
-.crow-tags{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-top:18px;
-}
-.crow-tag{
-  font-family:'Courier New',monospace;
-  font-size:.62rem;
-  letter-spacing:.14em;
-  text-transform:uppercase;
-  color:var(--accent);
-  border:1px solid rgba(176,142,90,.45);
-  padding:5px 10px;
-  text-decoration:none;
-  transition:background .2s;
-}
-a.crow-tag:hover{background:rgba(176,142,90,.1);opacity:1;}
-.crow-tag-dim{
-  color:var(--text-dim);
-  border-color:var(--line);
-}
-.crow-body{
-  max-width:760px;
-  margin:0 auto;
-  padding:34px 0 64px;
-}
-
-/* галерея */
-.crow-gallery{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-  margin:34px 0 10px;
-}
-.crow-gallery figure{
-  margin:0;
-  overflow:hidden;
-  border:1px solid var(--line);
-  background:#141111;
-}
-.crow-gallery img{
-  display:block;
-  width:100%;
-  height:auto;
-}
-.crow-gallery figure:first-child:nth-last-child(odd){
-  grid-column:1 / -1;
-}
-
-/* ===== ВИДЕО В ЗАПИСЯХ ХРОНИКИ ===== */
-.crow-clips{
-  display:grid;
-  gap:18px;
-  margin:34px 0;
-}
-
-/* свой плеер из GitHub Releases */
-.crow-clip{
-  position:relative;
-  width:100%;
-  border:1px solid var(--line);
-  background:#000;
-  overflow:hidden;
-}
-.crow-clip video{
-  display:block;
-  width:100%;
-  height:auto;
-  background:#000;
-}
-
-/* плеер ВК (на случай, если встраивание разрешено) */
-.crow-clip iframe{
-  display:block;
-  width:100%;
-  aspect-ratio:16/9;
-  border:0;
-}
-
-/* ссылка-кнопка на внешний сервис */
-.crow-clip-link{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:16px 22px;
-  border:1px solid var(--line);
-  background:#141111;
-  text-decoration:none;
-  transition:border-color .25s, background .25s;
-}
-.crow-clip-link:hover{
-  border-color:var(--accent);
-  background:rgba(176,142,90,.06);
-  opacity:1;
-}
-.crow-clip-play{
-  font-size:.8rem;
-  color:var(--accent);
-}
-.crow-clip-text{
-  font-family:'Courier New',monospace;
-  font-size:.68rem;
-  letter-spacing:.14em;
-  text-transform:uppercase;
-  color:#d6cfc3;
-}
-
 /* досье */
 .bird-head{
   max-width:760px;
@@ -1809,31 +1662,6 @@ a.crow-tag:hover{background:rgba(176,142,90,.1);opacity:1;}
   color:var(--text-dim);
 }
 .bird-fact-v{color:#e6e0d6;text-align:right;}
-
-.bird-related{
-  margin:44px 0 10px;
-  padding-top:26px;
-  border-top:1px solid var(--line);
-}
-.bird-related-item{
-  display:flex;
-  flex-wrap:wrap;
-  align-items:baseline;
-  gap:14px;
-  padding:11px 0;
-  border-bottom:1px solid rgba(255,255,255,.05);
-  text-decoration:none;
-  transition:opacity .2s;
-}
-.bird-related-item:hover{opacity:1;}
-.bird-related-date{
-  font-family:'Courier New',monospace;
-  font-size:.66rem;
-  letter-spacing:.1em;
-  color:var(--accent);
-  min-width:82px;
-}
-.bird-related-title{color:#d6cfc3;font-size:.92rem;}
 
 /* правила заботы */
 .care-head{
@@ -1891,16 +1719,9 @@ a.crow-tag:hover{background:rgba(176,142,90,.1);opacity:1;}
 /* адаптив */
 @media (max-width:1000px){
   .crows-tiles{grid-template-columns:repeat(2,1fr);}
-  .crows-grid{grid-template-columns:repeat(3,1fr);}
   .bird-top{grid-template-columns:1fr;}
   .bird-cover{max-width:280px;}
 }
 @media (max-width:760px){
   .crows-tiles{grid-template-columns:1fr;}
-  .crows-grid{grid-template-columns:repeat(2,1fr);}
-}
-@media (max-width:560px){
-  .crows-grid{grid-template-columns:1fr;}
-  .crow-gallery{grid-template-columns:1fr;}
-  .crow-gallery figure:first-child:nth-last-child(odd){grid-column:auto;}
 }
