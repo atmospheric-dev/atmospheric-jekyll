@@ -3,6 +3,7 @@ layout: album
 title: Краеведение
 artist: Olshanoe
 year: 2026
+date: 2026-11-02
 country: Россия
 label: Мёртвых собак лай
 genres:
