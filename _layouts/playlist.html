@@ -1,42 +1,47 @@
 ---
 layout: default
 ---
-{% include header.html %}
+<div class="wrap">
 
-<div class="wrap article-wrap">
-
-  <p class="article-meta">{{ page.date | date: "%d.%m.%Y" }}</p>
-  <h1 class="article-title">{{ page.title }}</h1>
-  {% if page.subtitle %}<p class="page-lead">{{ page.subtitle }}</p>{% endif %}
-
-  {% if page.cover %}
-  <figure class="note-figure">
-    <img src="{{ site.baseurl }}/{{ page.cover }}" alt="{{ page.title }}">
-  </figure>
-  {% endif %}
-
-  {% if page.description %}
-  <p class="article-lead">{{ page.description }}</p>
-  {% endif %}
-
-  {% if page.yandex_playlist %}
-  <div class="playlist-embed">
-    <iframe frameborder="0" style="border:none;width:100%;height:450px;"
-      src="https://music.yandex.ru/iframe/playlist/{{ page.yandex_playlist }}"></iframe>
-  </div>
-  {% endif %}
-
-  <div class="playlist-links">
-    {% if page.yandex_url %}
-    <a class="playlist-btn" href="{{ page.yandex_url }}" target="_blank" rel="noopener">
-      <span class="playlist-ico playlist-ico-ya">Я</span> Яндекс Музыка
-    </a>
-    {% endif %}
-    {% if page.vk_url %}
-    <a class="playlist-btn" href="{{ page.vk_url }}" target="_blank" rel="noopener">
-      <span class="playlist-ico playlist-ico-vk">VK</span> ВКонтакте
-    </a>
-    {% endif %}
+  <div class="playlist-head">
+    <p class="article-meta">{{ page.date | date: "%d.%m.%Y" }}</p>
+    <h1 class="article-title">{{ page.title }}</h1>
+    {% if page.subtitle %}<p class="article-subtitle">{{ page.subtitle }}</p>{% endif %}
   </div>
 
+  <div class="playlist-body">
+
+    {% if page.cover %}
+    <figure class="note-figure">
+      <img src="{{ site.baseurl }}/{{ page.cover }}" alt="{{ page.title }}">
+    </figure>
+    {% endif %}
+
+    {% if page.description %}
+    <p class="article-lead">{{ page.description }}</p>
+    {% endif %}
+
+    {% if page.yandex_playlist %}
+    <div class="playlist-embed">
+      <iframe frameborder="0"
+        src="https://music.yandex.ru/iframe/playlists/{{ page.yandex_playlist }}"></iframe>
+    </div>
+    {% endif %}
+
+    <div class="playlist-links">
+      {% if page.yandex_url %}
+      <a class="playlist-btn" href="{{ page.yandex_url }}" target="_blank" rel="noopener">
+        <span class="playlist-ico playlist-ico-ya">Я</span> Яндекс Музыка
+      </a>
+      {% endif %}
+      {% if page.vk_url %}
+      <a class="playlist-btn" href="{{ page.vk_url }}" target="_blank" rel="noopener">
+        <span class="playlist-ico playlist-ico-vk">VK</span> ВКонтакте
+      </a>
+      {% endif %}
+    </div>
+
+    {{ content }}
+
+  </div>
 </div>
