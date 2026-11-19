@@ -105,3 +105,42 @@
   });
 })();
 </script>
+
+<!-- Оценки на обложках каталога -->
+<script>
+(function () {
+  var SUPABASE_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+
+  document.addEventListener('DOMContentLoaded', async function () {
+    var cards = document.querySelectorAll('.release[data-album]');
+    if (!cards.length) return;
+
+    try {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/rpc/album_stats_all', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: '{}'
+      });
+      if (!res.ok) throw new Error('album_stats_all: ' + res.status);
+      var rows = await res.json();
+
+      var map = {};
+      rows.forEach(function (r) { map[r.album] = r; });
+
+      cards.forEach(function (card) {
+        var row = map[card.dataset.album];
+        var badge = card.querySelector('.release-badge');
+        if (!row || !badge) return;
+        badge.textContent = Number(row.avg_value).toFixed(1).replace('.', ',');
+        badge.title = row.votes + ' гл.';
+        badge.hidden = false;
+      });
+    } catch (e) { console.warn(e); }
+  });
+})();
+</script>
