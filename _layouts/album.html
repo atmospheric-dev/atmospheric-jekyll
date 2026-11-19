@@ -6,6 +6,8 @@ layout: default
     <h1 class="album-title">{{ page.artist }} — <span>{{ page.title }}</span></h1>
     <p class="album-date">{{ page.year }} · {{ page.genres | join: ", " }} · {{ page.country }}</p>
 
+    {% include rating.html %}
+    
     <div class="album-layout">
       <img class="album-cover" src="{{ site.baseurl }}/{{ page.cover }}" alt="{{ page.artist }} — {{ page.title }}">
 
