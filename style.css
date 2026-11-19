@@ -2021,3 +2021,12 @@ footer a:hover{color:var(--accent);opacity:1;}
 .seal-crows[data-empty="true"] .crow { background-color: #2a2724; }
 
 .seal-avg { font-family: Georgia, serif; color: #b08e5a; font-size: 15px; }
+/* половина вороны: обрезаем справа */
+.crow.is-half {
+  -webkit-mask-size: 200% 100%;
+  mask-size: 200% 100%;
+  -webkit-mask-position: left center;
+  mask-position: left center;
+  width: 21px;
+  margin-right: 25px;
+}
