@@ -55,32 +55,17 @@
     function paint(avg, votes) {
       if (!votes) {
         crows.querySelectorAll('.crow').forEach(function (btn) {
-          btn.classList.remove('is-off', 'is-half');
+          btn.classList.remove('is-on');
         });
-        crows.dataset.empty = 'true';
         avgNum.textContent = 'нет оценок';
         return;
       }
 
-      crows.dataset.empty = 'false';
-
-      var full = Math.floor(avg);
-      var rest = avg - full;
-      var half = rest >= 0.25 && rest < 0.75;
-      var halfShown = false;
+      var filled = Math.floor(avg + 0.5);
 
       crows.querySelectorAll('.crow').forEach(function (btn) {
         var n = parseInt(btn.dataset.value, 10);
-        btn.classList.remove('is-off', 'is-half');
-
-        if (n <= full) return;
-
-        if (half && !halfShown) {
-          btn.classList.add('is-half');
-          halfShown = true;
-          return;
-        }
-        btn.classList.add('is-off');
+        btn.classList.toggle('is-on', n <= filled);
       });
 
       avgNum.textContent = avg.toFixed(1).replace('.', ',') + ' · ' + votes + ' гл.';
