@@ -35,7 +35,7 @@
 
     var album = box.dataset.album;
     var path = window.location.pathname;
-    var leaves = box.querySelector('.seal-leaves');
+    var leaves = box.querySelector('.seal-crows');
     var avgNum = box.querySelector('.seal-avg-num');
     var viewsNum = box.querySelector('.seal-views-num');
 
@@ -77,7 +77,7 @@
     refresh();
 
     // голосование
-    leaves.querySelectorAll('.seal-leaf').forEach(function (btn) {
+    leaves.querySelectorAll('.crow').forEach(function (btn) {
       btn.addEventListener('click', async function () {
         var value = parseInt(btn.dataset.value, 10);
         try {
