@@ -1,0 +1,186 @@
+<script>
+(function () {
+  var SUPABASE_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+
+  function visitorId() {
+    var k = 'atmos_visitor';
+    var v = localStorage.getItem(k);
+    if (!v) {
+      v = 'v_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem(k, v);
+    }
+    return v;
+  }
+
+  function esc(s) {
+    var d = document.createElement('div');
+    d.textContent = s == null ? '' : String(s);
+    return d.innerHTML;
+  }
+
+  document.addEventListener('DOMContentLoaded', async function () {
+    var section = document.querySelector('.comments');
+    if (!section) return;
+
+    var page = section.dataset.page;
+    var list = section.querySelector('.comment-list');
+    var num = section.querySelector('.comments-num');
+    var form = section.querySelector('.comment-form');
+    var nameEl = form.querySelector('[name="name"]');
+    var bodyEl = form.querySelector('[name="body"]');
+    var parentEl = form.querySelector('[name="parent_id"]');
+    var note = form.querySelector('.comment-note');
+    var replyBox = form.querySelector('.comment-reply-to');
+    var replyName = form.querySelector('.comment-reply-name');
+    var cancelBtn = form.querySelector('.comment-cancel-reply');
+
+    var savedName = localStorage.getItem('atmos_name');
+    if (savedName) nameEl.value = savedName;
+
+    /* ---------- загрузка ---------- */
+    async function load() {
+      try {
+        var url = SUPABASE_URL + '/rest/v1/comments?select=id,parent_id,name,body,created_at'
+          + '&page=eq.' + encodeURIComponent(page)
+          + '&order=created_at.asc';
+        var res = await fetch(url, {
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY
+          }
+        });
+        if (!res.ok) throw new Error('load: ' + res.status);
+        var rows = await res.json();
+        render(rows);
+      } catch (e) { console.warn(e); }
+    }
+
+    function fmtDate(iso) {
+      var d = new Date(iso);
+      var months = ['января','февраля','марта','апреля','мая','июня',
+                    'июля','августа','сентября','октября','ноября','декабря'];
+      var hh = String(d.getHours()).padStart(2, '0');
+      var mm = String(d.getMinutes()).padStart(2, '0');
+      return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ', ' + hh + ':' + mm;
+    }
+
+    function render(rows) {
+      num.textContent = rows.length;
+      if (!rows.length) {
+        list.innerHTML = '<p class="comment-empty">Пока никто не высказался. Будьте первым.</p>';
+        return;
+      }
+
+      var byId = {};
+      rows.forEach(function (r) { byId[r.id] = r; r.children = []; });
+
+      var roots = [];
+      rows.forEach(function (r) {
+        if (r.parent_id && byId[r.parent_id]) {
+          byId[r.parent_id].children.push(r);
+        } else {
+          roots.push(r);
+        }
+      });
+
+      function node(c, depth) {
+        var html = '<div class="comment" data-id="' + c.id + '">'
+          + '<div class="comment-head">'
+          +   '<span class="comment-author">' + esc(c.name) + '</span>'
+          +   '<span class="comment-date">' + fmtDate(c.created_at) + '</span>'
+          + '</div>'
+          + '<div class="comment-text">' + esc(c.body).replace(/\n/g, '<br>') + '</div>';
+        if (depth < 1) {
+          html += '<button type="button" class="comment-reply" data-id="' + c.id
+                + '" data-name="' + esc(c.name) + '">Ответить</button>';
+        }
+        if (c.children.length) {
+          html += '<div class="comment-children">';
+          c.children.forEach(function (ch) { html += node(ch, depth + 1); });
+          html += '</div>';
+        }
+        return html + '</div>';
+      }
+
+      list.innerHTML = roots.map(function (r) { return node(r, 0); }).join('');
+    }
+
+    load();
+
+    /* ---------- ответ ---------- */
+    list.addEventListener('click', function (e) {
+      var btn = e.target.closest('.comment-reply');
+      if (!btn) return;
+      parentEl.value = btn.dataset.id;
+      replyName.textContent = btn.dataset.name;
+      replyBox.hidden = false;
+      bodyEl.focus();
+    });
+
+    cancelBtn.addEventListener('click', function () {
+      parentEl.value = '';
+      replyBox.hidden = true;
+    });
+
+    /* ---------- отправка ---------- */
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      note.textContent = '';
+
+      var name = nameEl.value.trim();
+      var body = bodyEl.value.trim();
+      if (!name) { note.textContent = 'Введите имя.'; nameEl.focus(); return; }
+      if (body.length < 3) { note.textContent = 'Слишком короткий комментарий.'; bodyEl.focus(); return; }
+
+      var submit = form.querySelector('.comment-submit');
+      submit.disabled = true;
+      note.textContent = 'Отправляем…';
+
+      try {
+        var res = await fetch(SUPABASE_URL + '/rest/v1/rpc/add_comment', {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            p_page: page,
+            p_name: name,
+            p_body: body,
+            p_visitor: visitorId(),
+            p_parent: parentEl.value ? Number(parentEl.value) : null
+          })
+        });
+        if (!res.ok) throw new Error('add_comment: ' + res.status);
+        var r = await res.json();
+
+        if (!r.ok) {
+          note.textContent = r.error === 'rate'
+            ? 'Слишком часто. Попробуйте через час.'
+            : 'Не получилось отправить.';
+          return;
+        }
+
+        localStorage.setItem('atmos_name', name);
+        bodyEl.value = '';
+        parentEl.value = '';
+        replyBox.hidden = true;
+
+        if (r.approved) {
+          note.textContent = 'Отправлено.';
+          load();
+        } else {
+          note.textContent = 'Отправлено. Комментарий появится после проверки.';
+        }
+      } catch (err) {
+        console.warn(err);
+        note.textContent = 'Ошибка отправки.';
+      } finally {
+        submit.disabled = false;
+      }
+    });
+  });
+})();
+</script>
