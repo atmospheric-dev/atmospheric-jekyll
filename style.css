@@ -2004,7 +2004,7 @@ footer a:hover{color:var(--accent);opacity:1;}
 
 .crow {
   width: 40px; height: 40px; padding: 0; border: 0; cursor: pointer;
-  background-color: #b08e5a;
+  background-color: #3a342c;
   -webkit-mask-image: url('/images/crow.png');
   mask-image: url('/images/crow.png');
   -webkit-mask-size: contain; mask-size: contain;
@@ -2013,20 +2013,9 @@ footer a:hover{color:var(--accent);opacity:1;}
   transition: background-color .2s ease, transform .15s ease;
 }
 .crow:hover { background-color: #d4b483; transform: translateY(-2px); }
-
-/* скрыть ворон, которых не набралось по средней */
-.crow.is-off { display: none; }
-
+.crow.is-on { background-color: #b08e5a; }
+.crow.is-on:hover { background-color: #9c7c4c; }
 /* до первого голоса — вороны бледные */
 .seal-crows[data-empty="true"] .crow { background-color: #55493a; }
 
 .seal-avg { font-family: Georgia, serif; color: #b08e5a; font-size: 15px; }
-/* половина вороны: обрезаем справа */
-.crow.is-half {
-  -webkit-mask-size: 200% 100%;
-  mask-size: 200% 100%;
-  -webkit-mask-position: left center;
-  mask-position: left center;
-  width: 21px;
-  margin-right: 25px;
-}
