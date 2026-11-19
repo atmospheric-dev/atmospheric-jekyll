@@ -2191,3 +2191,66 @@ footer a:hover{color:var(--accent);opacity:1;}
   .comment-form-foot{flex-direction:column;align-items:flex-start;}
   .comment-children{padding-left:14px;}
 }
+.comment-editor{position:relative;}
+
+.comment-emoji-toggle{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  width:28px;
+  height:28px;
+  padding:0;
+  background:transparent;
+  border:1px solid var(--line);
+  border-radius:2px;
+  color:var(--text-dim);
+  font-size:15px;
+  line-height:1;
+  cursor:pointer;
+  transition:border-color .2s, color .2s;
+}
+.comment-emoji-toggle:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+.comment-emoji-panel{
+  position:absolute;
+  right:0;
+  bottom:46px;
+  z-index:30;
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:2px;
+  width:230px;
+  padding:8px;
+  background:var(--bg-soft);
+  border:1px solid var(--line);
+  box-shadow:0 12px 32px rgba(0,0,0,.55);
+}
+.comment-emoji-panel[hidden]{display:none;}
+
+.comment-emoji{
+  width:34px;
+  height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  background:transparent;
+  border:0;
+  border-radius:2px;
+  font-size:19px;
+  line-height:1;
+  cursor:pointer;
+  transition:background .15s;
+}
+.comment-emoji:hover{background:rgba(176,142,90,.12);}
+
+/* поле ввода не должно заезжать под кнопку */
+.comment-textarea{padding-bottom:44px;}
+
+@media (max-width:720px){
+  .comment-emoji-panel{width:206px;}
+  .comment-emoji{width:30px;height:30px;font-size:17px;}
+}
