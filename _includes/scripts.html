@@ -1,0 +1,109 @@
+<!-- Supabase: просмотры и оценки -->
+<script>
+(function () {
+  var SUPABASE_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+
+  // id посетителя — случайная строка в localStorage
+  function visitorId() {
+    var k = 'atmos_visitor';
+    var v = localStorage.getItem(k);
+    if (!v) {
+      v = 'v_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem(k, v);
+    }
+    return v;
+  }
+
+  async function rpc(fn, body) {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error('rpc ' + fn + ': ' + res.status);
+    return res.json();
+  }
+
+  document.addEventListener('DOMContentLoaded', async function () {
+    var box = document.querySelector('.seal-rating');
+    if (!box) return;
+
+    var album = box.dataset.album;
+    var path = window.location.pathname;
+    var leaves = box.querySelector('.seal-leaves');
+    var avgNum = box.querySelector('.seal-avg-num');
+    var viewsNum = box.querySelector('.seal-views-num');
+
+    // просмотр — один на сессию
+    try {
+      var seen = sessionStorage.getItem('atmos_view_' + path);
+      if (!seen) {
+        var c = await rpc('bump_view', { p_path: path });
+        viewsNum.textContent = c;
+        sessionStorage.setItem('atmos_view_' + path, '1');
+      } else {
+        var s = await rpc('album_stats', { p_album: album });
+        viewsNum.textContent = (s && s[0] && s[0].views) || 0;
+      }
+    } catch (e) { console.warn(e); }
+
+    // статистика оценок
+    function paint(avg, votes) {
+      if (!votes) {
+        leaves.removeAttribute('data-tier');
+        avgNum.textContent = 'нет оценок';
+        return;
+      }
+      var tier = avg <= 2.0 ? 'low' : (avg <= 4.0 ? 'mid' : 'high');
+      leaves.setAttribute('data-tier', tier);
+      avgNum.textContent = avg.toFixed(1).replace('.', ',') + ' · ' + votes + ' гл.';
+    }
+
+    async function refresh() {
+      try {
+        var s = await rpc('album_stats', { p_album: album });
+        var row = s && s[0];
+        if (row) {
+          if (viewsNum.textContent === '—') viewsNum.textContent = row.views || 0;
+          paint(row.avg_value ? parseFloat(row.avg_value) : 0, Number(row.votes) || 0);
+        }
+      } catch (e) { console.warn(e); }
+    }
+    refresh();
+
+    // голосование
+    leaves.querySelectorAll('.seal-leaf').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        var value = parseInt(btn.dataset.value, 10);
+        try {
+          await fetch(SUPABASE_URL + '/rest/v1/ratings?on_conflict=album,visitor', {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': 'Bearer ' + SUPABASE_KEY,
+              'Content-Type': 'application/json',
+              'Prefer': 'resolution=merge-duplicates,return=minimal'
+            },
+            body: JSON.stringify({ album: album, visitor: visitorId(), value: value })
+          });
+          localStorage.setItem('atmos_rating_' + album, value);
+          await refresh();
+        } catch (e) { console.warn(e); }
+      });
+    });
+
+    // подсветить свою оценку
+    var mine = localStorage.getItem('atmos_rating_' + album);
+    if (mine) {
+      leaves.querySelectorAll('.seal-leaf').forEach(function (b) {
+        b.style.opacity = parseInt(b.dataset.value, 10) <= parseInt(mine, 10) ? '1' : '0.45';
+      });
+    }
+  });
+})();
+</script>
