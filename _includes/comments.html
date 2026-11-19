@@ -4,14 +4,20 @@
     Комментарии<span class="comments-count"> · <span class="comments-num">0</span></span>
   </h2>
 
-  <form class="comment-form" novalidate>
+ <form class="comment-form" novalidate>
     <input type="hidden" name="parent_id" value="">
     <div class="comment-form-row">
       <input type="text" name="name" class="comment-input" placeholder="Имя"
              maxlength="40" required autocomplete="nickname">
     </div>
-    <textarea name="body" class="comment-textarea" placeholder="Что думаете?"
-              maxlength="3000" rows="4" required></textarea>
+    <div class="comment-editor">
+      <textarea name="body" class="comment-textarea" placeholder="Что думаете?"
+                maxlength="3000" rows="4" required></textarea>
+      <button type="button" class="comment-emoji-toggle" aria-label="Вставить символ" title="Символы">
+        ☹
+      </button>
+      <div class="comment-emoji-panel" hidden></div>
+    </div>
     <div class="comment-form-foot">
       <span class="comment-note"></span>
       <button type="submit" class="comment-submit">Отправить</button>
