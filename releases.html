@@ -3,6 +3,7 @@ layout: default
 title: Обзоры
 description: Все обзоры релизов на Atmospheric
 ---
+
 <div class="page-head">
   <div class="wrap">
     <h1>Обзоры</h1>
@@ -14,8 +15,9 @@ description: Все обзоры релизов на Atmospheric
   <div class="releases">
 
     {% for album in site.albums reversed %}
-    <div class="release">
+    <div class="release" data-album="{{ album.name | replace: '.md', '' }}">
       <a href="{{ site.baseurl }}{{ album.url }}">
+        <span class="release-badge" hidden></span>
         <img class="release-cover" src="{{ site.baseurl }}/{{ album.cover }}" alt="{{ album.artist }} — {{ album.title }}">
       </a>
       <h3><a href="{{ site.baseurl }}{{ album.url }}">{{ album.artist }} — {{ album.title }} ({{ album.year }})</a></h3>
