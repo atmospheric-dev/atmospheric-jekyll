@@ -35,6 +35,51 @@
     var replyName = form.querySelector('.comment-reply-name');
     var cancelBtn = form.querySelector('.comment-cancel-reply');
 
+        /* ---------- панель эмодзи ---------- */
+    var EMOJI = [
+      '🖤','💀','🦇','🐦‍⬛','🕯️','🔥','⚰️','🌫️',
+      '🎸','🎧','💿','📼','🎵','🎼','🥀','🗡️',
+      '🩸','⛧','☾','🌑','⚡','🕸️','🧛','👁️'
+    ];
+
+    var editor = form.querySelector('.comment-editor');
+    var emojiToggle = form.querySelector('.comment-emoji-toggle');
+    var emojiPanel = form.querySelector('.comment-emoji-panel');
+
+    emojiPanel.innerHTML = EMOJI.map(function (s) {
+      return '<button type="button" class="comment-emoji" data-emoji="' + s + '">' + s + '</button>';
+    }).join('');
+
+    emojiToggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      emojiPanel.hidden = !emojiPanel.hidden;
+    });
+
+    emojiPanel.addEventListener('click', function (e) {
+      var btn = e.target.closest('.comment-emoji');
+      if (!btn) return;
+      var sym = btn.dataset.emoji;
+      var start = bodyEl.selectionStart;
+      var end = bodyEl.selectionEnd;
+      var val = bodyEl.value;
+      bodyEl.value = val.slice(0, start) + sym + val.slice(end);
+      var pos = start + sym.length;
+      bodyEl.setSelectionRange(pos, pos);
+      bodyEl.focus();
+    });
+
+    document.addEventListener('click', function (e) {
+      if (emojiPanel.hidden) return;
+      if (!editor.contains(e.target)) emojiPanel.hidden = true;
+    });
+
+    bodyEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !emojiPanel.hidden) {
+        emojiPanel.hidden = true;
+        bodyEl.focus();
+      }
+    });
+
     var savedName = localStorage.getItem('atmos_name');
     if (savedName) nameEl.value = savedName;
 
