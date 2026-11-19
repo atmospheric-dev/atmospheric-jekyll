@@ -98,7 +98,6 @@
             },
             body: JSON.stringify({ album: album, visitor: visitorId(), value: value })
           });
-          localStorage.setItem('atmos_rating_' + album, value);
           await refresh();
         } catch (e) { console.warn(e); }
       });
