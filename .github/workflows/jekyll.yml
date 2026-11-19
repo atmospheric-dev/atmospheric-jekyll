@@ -36,7 +36,7 @@ jobs:
 
       - name: Build
         run: |
-          bundle exec jekyll build --trace
+          jekyll build --trace
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
