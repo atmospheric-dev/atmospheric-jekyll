@@ -443,6 +443,7 @@ footer a:hover{color:var(--accent);opacity:1;}
 .release{
   display:flex;
   flex-direction:column;
+  position:relative;
 }
 
 .release-cover{
@@ -2015,7 +2016,38 @@ footer a:hover{color:var(--accent);opacity:1;}
 .crow:hover { background-color: #d4b483; transform: translateY(-2px); }
 .crow.is-on { background-color: #b08e5a; }
 .crow.is-on:hover { background-color: #9c7c4c; }
-/* до первого голоса — вороны бледные */
-.seal-crows[data-empty="true"] .crow { background-color: #55493a; }
 
 .seal-avg { font-family: Georgia, serif; color: #b08e5a; font-size: 15px; }
+
+/* ===== ОЦЕНКА НА ОБЛОЖКАХ КАТАЛОГА ===== */
+.release-badge{
+  position:absolute;
+  top:8px;
+  right:8px;
+  z-index:2;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:3px 8px;
+  background:rgba(13,12,11,.82);
+  border:1px solid rgba(176,142,90,.55);
+  border-radius:3px;
+  font-family:'Courier New',monospace;
+  font-size:.72rem;
+  letter-spacing:.04em;
+  color:var(--accent);
+  line-height:1.1;
+  backdrop-filter:blur(3px);
+  transition:border-color .25s;
+}
+.release-badge::after{
+  content:"\2605";
+  font-size:.62rem;
+  opacity:.85;
+}
+.release-badge[hidden]{display:none;}
+.release:hover .release-badge{border-color:var(--accent);}
+
+@media (max-width:560px){
+  .release-badge{top:6px;right:6px;font-size:.68rem;padding:3px 6px;}
+}
