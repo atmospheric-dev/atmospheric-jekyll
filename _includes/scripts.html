@@ -4,7 +4,6 @@
   var SUPABASE_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
 
-  // id посетителя — случайная строка в localStorage
   function visitorId() {
     var k = 'atmos_visitor';
     var v = localStorage.getItem(k);
@@ -35,11 +34,11 @@
 
     var album = box.dataset.album;
     var path = window.location.pathname;
-    var leaves = box.querySelector('.seal-crows');
+    var crows = box.querySelector('.seal-crows');
     var avgNum = box.querySelector('.seal-avg-num');
     var viewsNum = box.querySelector('.seal-views-num');
 
-    // просмотр — один на сессию
+    /* ---------- просмотры ---------- */
     try {
       var seen = sessionStorage.getItem('atmos_view_' + path);
       if (!seen) {
@@ -47,20 +46,43 @@
         viewsNum.textContent = c;
         sessionStorage.setItem('atmos_view_' + path, '1');
       } else {
-        var s = await rpc('album_stats', { p_album: album });
-        viewsNum.textContent = (s && s[0] && s[0].views) || 0;
+        var s0 = await rpc('album_stats', { p_album: album });
+        viewsNum.textContent = (s0 && s0[0] && s0[0].views) || 0;
       }
     } catch (e) { console.warn(e); }
 
-    // статистика оценок
+    /* ---------- отрисовка ворон ---------- */
     function paint(avg, votes) {
       if (!votes) {
-        leaves.removeAttribute('data-tier');
+        crows.querySelectorAll('.crow').forEach(function (btn) {
+          btn.classList.remove('is-off', 'is-half');
+        });
+        crows.dataset.empty = 'true';
         avgNum.textContent = 'нет оценок';
         return;
       }
-      var tier = avg <= 2.0 ? 'low' : (avg <= 4.0 ? 'mid' : 'high');
-      leaves.setAttribute('data-tier', tier);
+
+      crows.dataset.empty = 'false';
+
+      var full = Math.floor(avg);
+      var rest = avg - full;
+      var half = rest >= 0.25 && rest < 0.75;
+      var halfShown = false;
+
+      crows.querySelectorAll('.crow').forEach(function (btn) {
+        var n = parseInt(btn.dataset.value, 10);
+        btn.classList.remove('is-off', 'is-half');
+
+        if (n <= full) return;
+
+        if (half && !halfShown) {
+          btn.classList.add('is-half');
+          halfShown = true;
+          return;
+        }
+        btn.classList.add('is-off');
+      });
+
       avgNum.textContent = avg.toFixed(1).replace('.', ',') + ' · ' + votes + ' гл.';
     }
 
@@ -76,8 +98,8 @@
     }
     refresh();
 
-    // голосование
-    leaves.querySelectorAll('.crow').forEach(function (btn) {
+    /* ---------- голосование ---------- */
+    crows.querySelectorAll('.crow').forEach(function (btn) {
       btn.addEventListener('click', async function () {
         var value = parseInt(btn.dataset.value, 10);
         try {
@@ -96,14 +118,6 @@
         } catch (e) { console.warn(e); }
       });
     });
-
-    // подсветить свою оценку
-    var mine = localStorage.getItem('atmos_rating_' + album);
-    if (mine) {
-      leaves.querySelectorAll('.seal-leaf').forEach(function (b) {
-        b.style.opacity = parseInt(b.dataset.value, 10) <= parseInt(mine, 10) ? '1' : '0.45';
-      });
-    }
   });
 })();
 </script>
