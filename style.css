@@ -1992,3 +1992,25 @@ footer a:hover{color:var(--accent);opacity:1;}
     margin:0 0 18px;
   }
 }
+.seal-rating { margin: 22px 0 28px; }
+.seal-stats { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; }
+.seal-views { display: inline-flex; align-items: center; gap: 7px;
+  color: #8a8378; font-family: Georgia, serif; font-size: 15px; }
+.seal-leaves { display: inline-flex; gap: 4px; }
+.seal-leaf { background: none; border: 0; padding: 0; cursor: pointer;
+  line-height: 0; transition: transform .15s ease; }
+.seal-leaf:hover { transform: translateY(-2px) scale(1.08); }
+.seal-leaf svg { fill: #2a2724; stroke: #4a443c; stroke-width: .6; transition: fill .25s ease; }
+
+.seal-leaves[data-tier="low"]  .seal-leaf svg { fill: #1a1917; stroke: #6b6259; }
+.seal-leaves[data-tier="mid"]  .seal-leaf svg { fill: #b08e5a; stroke: #d8c39b; }
+.seal-leaves[data-tier="high"] .seal-leaf svg { fill: #a3342a; stroke: #d7766a; }
+
+.seal-leaves[data-tier="mid"] .seal-leaf svg {
+  filter: drop-shadow(0 0 5px rgba(176,142,90,.55));
+}
+.seal-leaves[data-tier="high"] .seal-leaf svg {
+  filter: drop-shadow(0 0 6px rgba(163,52,42,.65));
+}
+
+.seal-avg { font-family: Georgia, serif; color: #b08e5a; font-size: 15px; }
