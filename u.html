@@ -30,6 +30,9 @@ permalink: /u.html
     <h2 class="profile-sub">Любимые альбомы</h2>
     <div class="u-albums" id="u-albums"></div>
 
+    <h2 class="profile-sub">Коллекция</h2>
+    <div class="u-collection" id="u-collection"></div>
+
     <h2 class="profile-sub">Значки</h2>
     <div class="u-badges" id="u-badges"></div>
 
@@ -55,6 +58,16 @@ permalink: /u.html
     collector: { icon: '📼', name: 'Коллекционер' },
     veteran:   { icon: '🕯️', name: 'Старожил' }
   };
+
+  var KIND_NAMES = {
+    music: 'Музыка',
+    book:  'Книга',
+    zine:  'Журнал',
+    film:  'Фильм',
+    other: 'Другое'
+  };
+
+  var KIND_ORDER = ['music','book','zine','film','other'];
 
   var loading = document.getElementById('u-loading');
   var box     = document.getElementById('u-box');
@@ -86,6 +99,7 @@ permalink: /u.html
       if(res.error || !res.data){ fail(); return; }
       var p = res.data;
       render(p);
+      loadCollection(p.id);
       loadBadges(p.id);
     })
     .catch(function(){ fail(); });
@@ -214,6 +228,230 @@ permalink: /u.html
       el.style.fontSize = size + 'px';
       guard++;
     }
+  }
+
+  /* ================= КОЛЛЕКЦИЯ ================= */
+  function loadCollection(id){
+    var wrap = document.getElementById('u-collection');
+    if(!wrap) return;
+
+    wrap.innerHTML = '<p class="profile-fav is-empty">Загружаем…</p>';
+
+    sb.from('collection')
+      .select('id,kind,artist,title,format,year,comment,photos,created_at')
+      .eq('user_id', id)
+      .order('created_at', { ascending: false })
+      .then(function(res){
+        if(res.error){ showCollectionEmpty(wrap, res.error.message); return; }
+        renderCollection(wrap, res.data || []);
+      })
+      .catch(function(){ showCollectionEmpty(wrap); });
+  }
+
+  function showCollectionEmpty(wrap, msg){
+    wrap.innerHTML = '';
+    var p = document.createElement('p');
+    p.className = 'profile-fav is-empty';
+    p.textContent = 'Пока пусто.';
+    wrap.appendChild(p);
+    if(msg && window.console) console.warn('collection:', msg);
+  }
+
+  function renderCollection(wrap, rows){
+    wrap.innerHTML = '';
+
+    if(!rows.length){
+      showCollectionEmpty(wrap);
+      return;
+    }
+
+    /* ---- счётчик по типам ---- */
+    var counts = {};
+    rows.forEach(function(r){
+      var k = KIND_NAMES[r.kind] ? r.kind : 'other';
+      counts[k] = (counts[k] || 0) + 1;
+    });
+
+    var stat = document.createElement('div');
+    stat.className = 'u-col-stat';
+    KIND_ORDER.forEach(function(k){
+      if(!counts[k]) return;
+      var s = document.createElement('span');
+      s.className = 'u-col-stat-item';
+      s.textContent = KIND_NAMES[k] + ' — ' + counts[k];
+      stat.appendChild(s);
+    });
+    wrap.appendChild(stat);
+
+    /* ---- сетка карточек ---- */
+    var grid = document.createElement('div');
+    grid.className = 'u-col-grid';
+
+    rows.forEach(function(r){
+      var card = document.createElement('div');
+      card.className = 'u-col-card';
+
+      var photos = Array.isArray(r.photos) ? r.photos : [];
+
+      var media = document.createElement('div');
+      media.className = 'u-col-media';
+
+      if(photos.length){
+        var img = document.createElement('img');
+        img.className = 'u-col-img';
+        img.src = photos[0];
+        img.alt = '';
+        img.loading = 'lazy';
+        img.onerror = function(){
+          img.classList.add('is-missing');
+          img.removeAttribute('src');
+        };
+        media.appendChild(img);
+
+        if(photos.length > 1){
+          var more = document.createElement('span');
+          more.className = 'u-col-more';
+          more.textContent = '+' + (photos.length - 1);
+          media.appendChild(more);
+        }
+      } else {
+        media.classList.add('u-col-media--empty');
+      }
+
+      /* ---- миниатюры под фото ---- */
+      if(photos.length > 1){
+        var strip = document.createElement('div');
+        strip.className = 'u-col-strip';
+
+        photos.slice(1, 5).forEach(function(u){
+          var t = document.createElement('img');
+          t.className = 'u-col-thumb';
+          t.src = u;
+          t.alt = '';
+          t.loading = 'lazy';
+          strip.appendChild(t);
+        });
+
+        media.addEventListener('click', function(){ openViewer(photos, 0); });
+        media.classList.add('is-clickable');
+        media.appendChild(strip);
+      }
+
+      card.appendChild(media);
+
+      var body = document.createElement('div');
+      body.className = 'u-col-body';
+
+      var k = document.createElement('div');
+      k.className = 'u-col-kind';
+      k.textContent = KIND_NAMES[r.kind] || 'Другое';
+
+      var t = document.createElement('div');
+      t.className = 'u-col-title';
+      t.textContent = r.title || '';
+
+      body.appendChild(k);
+      body.appendChild(t);
+
+      var sub = [r.artist, r.format, r.year].filter(Boolean).join(' · ');
+      if(sub){
+        var s = document.createElement('div');
+        s.className = 'u-col-sub';
+        s.textContent = sub;
+        body.appendChild(s);
+      }
+
+      if(r.comment){
+        var c = document.createElement('div');
+        c.className = 'u-col-text';
+        c.textContent = r.comment;
+        body.appendChild(c);
+      }
+
+      card.appendChild(body);
+      grid.appendChild(card);
+    });
+
+    wrap.appendChild(grid);
+  }
+
+  /* ================= ПРОСМОТР ФОТО ================= */
+  function openViewer(photos, start){
+    var i = start || 0;
+
+    var ov = document.getElementById('u-viewer');
+    if(!ov){
+      ov = document.createElement('div');
+      ov.id = 'u-viewer';
+      ov.className = 'u-viewer';
+      ov.hidden = true;
+
+      var im = document.createElement('img');
+      im.className = 'u-viewer-img';
+      im.alt = '';
+
+      var prev = document.createElement('button');
+      prev.type = 'button';
+      prev.className = 'u-viewer-nav u-viewer-prev';
+      prev.textContent = '‹';
+
+      var next = document.createElement('button');
+      next.type = 'button';
+      next.className = 'u-viewer-nav u-viewer-next';
+      next.textContent = '›';
+
+      var close = document.createElement('button');
+      close.type = 'button';
+      close.className = 'u-viewer-close';
+      close.textContent = '×';
+
+      ov.appendChild(im);
+      ov.appendChild(prev);
+      ov.appendChild(next);
+      ov.appendChild(close);
+      document.body.appendChild(ov);
+
+      close.addEventListener('click', function(){ closeViewer(); });
+      ov.addEventListener('click', function(e){
+        if(e.target === ov) closeViewer();
+      });
+      prev.addEventListener('click', function(e){
+        e.stopPropagation();
+        i = (i - 1 + photos.length) % photos.length;
+        paint();
+      });
+      next.addEventListener('click', function(e){
+        e.stopPropagation();
+        i = (i + 1) % photos.length;
+        paint();
+      });
+      document.addEventListener('keydown', function(e){
+        if(ov.hidden) return;
+        if(e.key === 'Escape') closeViewer();
+        if(e.key === 'ArrowLeft'){ i = (i - 1 + photos.length) % photos.length; paint(); }
+        if(e.key === 'ArrowRight'){ i = (i + 1) % photos.length; paint(); }
+      });
+
+      function paint(){ im.src = photos[i]; }
+      ov._paint = paint;
+    }
+
+    if(ov._photos !== photos){
+      ov._photos = photos;
+    }
+
+    ov.hidden = false;
+    ov.classList.add('is-open');
+    document.body.classList.add('modal-open');
+    ov._paint();
+  }
+
+  function closeViewer(){
+    var ov = document.getElementById('u-viewer');
+    if(!ov) return;
+    ov.hidden = true;
+    ov.classList.remove('is-open');
+    document.body.classList.remove('modal-open');
   }
 
   /* ---- значки ---- */
