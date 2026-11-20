@@ -2270,3 +2270,25 @@ footer a:hover{color:var(--accent);opacity:1;}
 .mark-btn.is-on .mark-count{opacity:1;}
 .mark-btn[disabled]{cursor:default;opacity:.5;}
 .mark-btn[disabled]:hover{color:var(--text-dim);border-color:var(--line);}
+
+/* ===== МОЙ СПИСОК ===== */
+.my-switch{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 30px;}
+.my-list{list-style:none;margin:0;padding:0;}
+.my-item{
+  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:1px solid var(--line);
+}
+.my-link{color:var(--text);text-decoration:none;font-size:1rem;}
+.my-link:hover{color:var(--accent);}
+.my-mark{
+  font-family:'Courier New',monospace;font-size:.65rem;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 8px;border:1px solid var(--line);color:var(--text-dim);
+}
+.my-mark-now{color:var(--accent);border-color:var(--accent);}
+.my-date{
+  margin-left:auto;font-family:'Courier New',monospace;
+  font-size:.7rem;color:var(--text-dim);opacity:.7;
+}
+.my-empty{color:var(--text-dim);font-style:italic;}
+.my-export{margin-top:30px;}
