@@ -2971,3 +2971,27 @@ body.modal-open{
     gap:16px;
   }
 }
+.profile-forgot{
+  margin:.35rem 0 .85rem;
+  font-family:'Courier New', monospace;
+  font-size:.72rem;
+  letter-spacing:.06em;
+}
+
+.profile-forgot a{
+  color:#7c7a72;
+  text-decoration:none;
+  border-bottom:1px dotted rgba(124,122,114,.5);
+}
+
+.profile-forgot a:hover{
+  color:#b08e5a;
+  border-bottom-color:#b08e5a;
+}
+
+.profile-title{
+  font-family:Georgia, serif;
+  font-size:1.6rem;
+  color:#ded8cc;
+  margin:0 0 1.5rem;
+}
