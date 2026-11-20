@@ -71,7 +71,9 @@ p:last-child{margin-bottom:0;}
 
 .topbar-links{
   display:flex;
+  align-items:center;
   gap:28px;
+  margin-left:auto;
 }
 
 .topbar-links a{
@@ -2311,7 +2313,7 @@ footer a:hover{color:var(--accent);opacity:1;}
   font-family:'Courier New',monospace;
   font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;
   color:var(--text-dim);text-decoration:none;
-  margin-left:22px;transition:color .2s;
+  transition:color .2s;
 }
 .topbar-profile:hover{color:var(--accent);}
 /* ===== ПРОФИЛЬ ===== */
