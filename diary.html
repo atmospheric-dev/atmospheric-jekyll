@@ -76,7 +76,7 @@ permalink: /diary.html
       }
 
       var day = dt.getDate();
-      var url = box.dataset.base + '/' + d.album + '/';
+      var url = box.dataset.base + '/' + encodeURIComponent(d.album) + '.html';
 
       html += '<li class="diary-item">' +
         '<span class="diary-day">' + (day < 10 ? '0' + day : day) + '</span>' +
