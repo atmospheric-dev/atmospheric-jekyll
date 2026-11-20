@@ -284,6 +284,63 @@ permalink: /profile.html
     paintCover();
   });
 
+<h2 class="profile-sub">Коллекция</h2>
+
+<div class="col-add">
+  <div class="col-row">
+    <label class="col-label" for="col-kind">Тип</label>
+    <select id="col-kind" class="col-input">
+      <option value="music">Музыка</option>
+      <option value="book">Книга</option>
+      <option value="zine">Журнал</option>
+      <option value="film">Фильм</option>
+      <option value="other">Другое</option>
+    </select>
+  </div>
+
+  <div class="col-row">
+    <label class="col-label" id="col-artist-label" for="col-artist">Группа</label>
+    <input id="col-artist" class="col-input" type="text" maxlength="120" placeholder="Например, Godspeed You! Black Emperor">
+  </div>
+
+  <div class="col-row">
+    <label class="col-label" id="col-title-label" for="col-title">Альбом</label>
+    <input id="col-title" class="col-input" type="text" maxlength="160" placeholder="Название">
+  </div>
+
+  <div class="col-row">
+    <label class="col-label" for="col-format">Формат</label>
+    <input id="col-format" class="col-input" type="text" maxlength="40" placeholder="CD / LP / Кассета">
+  </div>
+
+  <div class="col-row">
+    <label class="col-label" for="col-year">Год</label>
+    <input id="col-year" class="col-input" type="number" min="1800" max="2100" placeholder="1998">
+  </div>
+
+  <div class="col-row">
+    <label class="col-label" for="col-comment">Комментарий</label>
+    <textarea id="col-comment" class="col-input" rows="3" maxlength="500" placeholder="Издание, состояние, история покупки…"></textarea>
+  </div>
+
+  <div class="cover-row">
+    <div class="cover-preview" id="col-preview"></div>
+    <div class="cover-actions">
+      <input type="file" id="col-file" accept="image/*" multiple hidden>
+      <button type="button" class="btn-mini" id="col-pick">Выбрать фото</button>
+      <span class="profile-note" id="col-photos-count">0 фото</span>
+    </div>
+  </div>
+
+  <div class="col-actions">
+    <button type="button" class="btn-mini" id="col-save">Добавить в коллекцию</button>
+    <span class="profile-note" id="col-msg"></span>
+  </div>
+</div>
+
+<h3 class="profile-sub">Мои записи</h3>
+<div class="col-list" id="col-list"></div>
+  
   /* ---- три любимых альбома ---- */
   function buildFav(){
     favWrap.innerHTML = '';
