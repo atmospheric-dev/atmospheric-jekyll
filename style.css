@@ -3651,3 +3651,41 @@ body.modal-open{
   gap:10px;
   flex-wrap:wrap;
 }
+/* ====== ЗНАКИ-МЕДАЛЬОНЫ В ПРОФИЛЕ ====== */
+.u-hero{position:relative;}
+
+.u-medals{
+  position:absolute;
+  top:12px;
+  right:14px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  z-index:3;
+}
+
+.u-medal{
+  width:26px;
+  height:26px;
+  display:block;
+  opacity:.9;
+  transition:opacity .2s, transform .2s;
+  cursor:help;
+}
+.u-medal:hover{
+  opacity:1;
+  transform:translateY(-2px);
+}
+
+/* на узких экранах — отступ, чтобы не легли на аватар */
+@media (max-width:600px){
+  .u-medals{
+    top:8px;
+    right:8px;
+    gap:4px;
+  }
+  .u-medal{
+    width:22px;
+    height:22px;
+  }
+}
