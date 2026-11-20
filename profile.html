@@ -105,6 +105,64 @@ permalink: /profile.html
       </div>
     </form>
 
+    <!-- ===== КОЛЛЕКЦИЯ ===== -->
+    <h2 class="profile-sub">Коллекция</h2>
+
+    <div class="col-add">
+      <div class="col-row">
+        <label class="col-label" for="col-kind">Тип</label>
+        <select id="col-kind" class="col-input">
+          <option value="music">Музыка</option>
+          <option value="book">Книга</option>
+          <option value="zine">Журнал</option>
+          <option value="film">Фильм</option>
+          <option value="other">Другое</option>
+        </select>
+      </div>
+
+      <div class="col-row">
+        <label class="col-label" id="col-artist-label" for="col-artist">Группа</label>
+        <input id="col-artist" class="col-input" type="text" maxlength="120" placeholder="Например, Godspeed You! Black Emperor">
+      </div>
+
+      <div class="col-row">
+        <label class="col-label" id="col-title-label" for="col-title">Альбом</label>
+        <input id="col-title" class="col-input" type="text" maxlength="160" placeholder="Название">
+      </div>
+
+      <div class="col-row">
+        <label class="col-label" for="col-format">Формат</label>
+        <input id="col-format" class="col-input" type="text" maxlength="40" placeholder="CD / LP / Кассета">
+      </div>
+
+      <div class="col-row">
+        <label class="col-label" for="col-year">Год</label>
+        <input id="col-year" class="col-input" type="number" min="1800" max="2100" placeholder="1998">
+      </div>
+
+      <div class="col-row">
+        <label class="col-label" for="col-comment">Комментарий</label>
+        <textarea id="col-comment" class="col-input" rows="3" maxlength="500" placeholder="Издание, состояние, история покупки…"></textarea>
+      </div>
+
+      <div class="cover-row">
+        <div class="cover-preview" id="col-preview"></div>
+        <div class="cover-actions">
+          <input type="file" id="col-file" accept="image/*" multiple hidden>
+          <button type="button" class="fav-pick" id="col-pick">Выбрать фото</button>
+          <span class="profile-note" id="col-photos-count">0 фото</span>
+        </div>
+      </div>
+
+      <div class="col-actions">
+        <button type="button" class="fav-pick" id="col-save">Добавить в коллекцию</button>
+        <span class="profile-note" id="col-msg"></span>
+      </div>
+    </div>
+
+    <h3 class="profile-sub">Мои записи</h3>
+    <div class="col-list" id="col-list"></div>
+
     <h2 class="profile-sub">Мои отметки</h2>
     <div class="profile-links">
       <a class="profile-link" href="{{ site.baseurl }}/my.html">Мой список</a>
@@ -233,19 +291,66 @@ permalink: /profile.html
     document.body.classList.remove('modal-open');
   }
 
-  /* ---- загрузка картинки в Supabase Storage ---- */
+  /* ---- загрузка картинки в Supabase Storage (со сжатием) ---- */
+  var MAX_SIDE = 1600;
+  var QUALITY  = 0.85;
+
+  function compressImage(file){
+    return new Promise(function(resolve){
+      if(!file || !/^image\//.test(file.type)){
+        resolve(file);
+        return;
+      }
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+
+      img.onload = function(){
+        URL.revokeObjectURL(url);
+
+        var w = img.naturalWidth;
+        var h = img.naturalHeight;
+        var scale = Math.min(1, MAX_SIDE / Math.max(w, h));
+
+        if(scale === 1 && file.size < 400 * 1024){
+          resolve(file);
+          return;
+        }
+
+        var cv = document.createElement('canvas');
+        cv.width  = Math.round(w * scale);
+        cv.height = Math.round(h * scale);
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+
+        cv.toBlob(function(blob){
+          resolve(blob || file);
+        }, 'image/jpeg', QUALITY);
+      };
+
+      img.onerror = function(){
+        URL.revokeObjectURL(url);
+        resolve(file);
+      };
+
+      img.src = url;
+    });
+  }
+
   async function uploadCover(file){
-    if(file.size > 3 * 1024 * 1024){
-      alert('Файл больше 3 МБ.');
+    var blob = await compressImage(file);
+
+    if(blob.size > 4 * 1024 * 1024){
+      alert('Файл слишком большой даже после сжатия.');
       return null;
     }
-    var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-    if(['jpg','jpeg','png','webp','gif'].indexOf(ext) === -1) ext = 'jpg';
 
     var path = currentUser.id + '/' + Date.now() + '-' +
-               Math.random().toString(36).slice(2, 8) + '.' + ext;
+               Math.random().toString(36).slice(2, 8) + '.jpg';
 
-    var up = await sb.storage.from('covers').upload(path, file, { upsert: false });
+    var up = await sb.storage.from('covers').upload(path, blob, {
+      contentType: 'image/jpeg',
+      upsert: false
+    });
+
     if(up.error){
       alert('Не загрузилось: ' + up.error.message);
       return null;
@@ -284,63 +389,6 @@ permalink: /profile.html
     paintCover();
   });
 
-<h2 class="profile-sub">Коллекция</h2>
-
-<div class="col-add">
-  <div class="col-row">
-    <label class="col-label" for="col-kind">Тип</label>
-    <select id="col-kind" class="col-input">
-      <option value="music">Музыка</option>
-      <option value="book">Книга</option>
-      <option value="zine">Журнал</option>
-      <option value="film">Фильм</option>
-      <option value="other">Другое</option>
-    </select>
-  </div>
-
-  <div class="col-row">
-    <label class="col-label" id="col-artist-label" for="col-artist">Группа</label>
-    <input id="col-artist" class="col-input" type="text" maxlength="120" placeholder="Например, Godspeed You! Black Emperor">
-  </div>
-
-  <div class="col-row">
-    <label class="col-label" id="col-title-label" for="col-title">Альбом</label>
-    <input id="col-title" class="col-input" type="text" maxlength="160" placeholder="Название">
-  </div>
-
-  <div class="col-row">
-    <label class="col-label" for="col-format">Формат</label>
-    <input id="col-format" class="col-input" type="text" maxlength="40" placeholder="CD / LP / Кассета">
-  </div>
-
-  <div class="col-row">
-    <label class="col-label" for="col-year">Год</label>
-    <input id="col-year" class="col-input" type="number" min="1800" max="2100" placeholder="1998">
-  </div>
-
-  <div class="col-row">
-    <label class="col-label" for="col-comment">Комментарий</label>
-    <textarea id="col-comment" class="col-input" rows="3" maxlength="500" placeholder="Издание, состояние, история покупки…"></textarea>
-  </div>
-
-  <div class="cover-row">
-    <div class="cover-preview" id="col-preview"></div>
-    <div class="cover-actions">
-      <input type="file" id="col-file" accept="image/*" multiple hidden>
-      <button type="button" class="btn-mini" id="col-pick">Выбрать фото</button>
-      <span class="profile-note" id="col-photos-count">0 фото</span>
-    </div>
-  </div>
-
-  <div class="col-actions">
-    <button type="button" class="btn-mini" id="col-save">Добавить в коллекцию</button>
-    <span class="profile-note" id="col-msg"></span>
-  </div>
-</div>
-
-<h3 class="profile-sub">Мои записи</h3>
-<div class="col-list" id="col-list"></div>
-  
   /* ---- три любимых альбома ---- */
   function buildFav(){
     favWrap.innerHTML = '';
@@ -441,7 +489,288 @@ permalink: /profile.html
     }
     return out;
   }
+/* ==========================================================
+   ПРОДОЛЖЕНИЕ profile.html — часть 2 из 2
+   Вставляется сразу после функции readFav(), внутри того же IIFE.
+   ========================================================== */
 
+  /* ================= КОЛЛЕКЦИЯ ================= */
+
+  var KINDS = {
+    music: { artist: 'Группа',    title: 'Альбом',    formatPh: 'CD / LP / Кассета',  label: 'Музыка' },
+    book:  { artist: 'Автор',     title: 'Название',  formatPh: 'Твёрдый / Мягкий',   label: 'Книга' },
+    zine:  { artist: 'Издатель',  title: 'Название',  formatPh: '№ и месяц',          label: 'Журнал' },
+    film:  { artist: 'Режиссёр',  title: 'Название',  formatPh: 'DVD / Blu-ray',      label: 'Фильм' },
+    other: { artist: 'Автор',     title: 'Название',  formatPh: 'Свободно',           label: 'Другое' }
+  };
+
+  var COL_MAX_SIDE  = 1400;
+  var COL_QUALITY   = 0.82;
+  var COL_MAX_FILES = 8;
+
+  var colKind    = document.getElementById('col-kind');
+  var colArtist  = document.getElementById('col-artist');
+  var colTitle   = document.getElementById('col-title');
+  var colFormat  = document.getElementById('col-format');
+  var colYear    = document.getElementById('col-year');
+  var colComment = document.getElementById('col-comment');
+  var colFile    = document.getElementById('col-file');
+  var colPick    = document.getElementById('col-pick');
+  var colPreview = document.getElementById('col-preview');
+  var colCount   = document.getElementById('col-photos-count');
+  var colSave    = document.getElementById('col-save');
+  var colMsg     = document.getElementById('col-msg');
+  var colList    = document.getElementById('col-list');
+
+  var colPicked = [];   // выбранные файлы
+
+  /* ---- подписи полей зависят от типа ---- */
+  function applyKind(){
+    if(!colKind) return;
+    var k = KINDS[colKind.value] || KINDS.other;
+    document.getElementById('col-artist-label').textContent = k.artist;
+    document.getElementById('col-title-label').textContent  = k.title;
+    colArtist.placeholder = k.artist;
+    colFormat.placeholder = k.formatPh;
+  }
+
+  /* ---- сжатие в браузере ---- */
+  function compressForCollection(file){
+    return new Promise(function(resolve, reject){
+      if(!file || !/^image\//.test(file.type)){
+        reject(new Error('Это не изображение'));
+        return;
+      }
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+
+      img.onload = function(){
+        URL.revokeObjectURL(url);
+
+        var w = img.naturalWidth;
+        var h = img.naturalHeight;
+        var scale = Math.min(1, COL_MAX_SIDE / Math.max(w, h));
+
+        var cv = document.createElement('canvas');
+        cv.width  = Math.round(w * scale);
+        cv.height = Math.round(h * scale);
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+
+        cv.toBlob(function(blob){
+          if(!blob){ reject(new Error('Не удалось сжать')); return; }
+          resolve(blob);
+        }, 'image/jpeg', COL_QUALITY);
+      };
+
+      img.onerror = function(){
+        URL.revokeObjectURL(url);
+        reject(new Error('Файл не читается'));
+      };
+
+      img.src = url;
+    });
+  }
+
+  /* ---- выбор фото ---- */
+  if(colPick){
+    colPick.addEventListener('click', function(e){
+      e.preventDefault();
+      colFile.click();
+    });
+  }
+
+  if(colFile){
+    colFile.addEventListener('change', function(){
+      colPicked = Array.prototype.slice.call(this.files || []).slice(0, COL_MAX_FILES);
+      colCount.textContent = colPicked.length + ' фото';
+
+      if(!colPicked.length){
+        colPreview.style.backgroundImage = '';
+        colPreview.classList.remove('has');
+        return;
+      }
+      colPreview.classList.add('has');
+      colPreview.style.backgroundImage = 'url("' + URL.createObjectURL(colPicked[0]) + '")';
+    });
+  }
+
+  function colSetMsg(text, color){
+    colMsg.textContent = text;
+    colMsg.style.color = color || '';
+  }
+
+  function resetCollectionForm(){
+    colArtist.value = '';
+    colTitle.value = '';
+    colFormat.value = '';
+    colYear.value = '';
+    colComment.value = '';
+    colPicked = [];
+    colFile.value = '';
+    colPreview.style.backgroundImage = '';
+    colPreview.classList.remove('has');
+    colCount.textContent = '0 фото';
+  }
+
+  /* ---- сохранение записи ---- */
+  if(colSave){
+    colSave.addEventListener('click', async function(){
+      if(!currentUser){ colSetMsg('Нужно войти в аккаунт.', '#c0705a'); return; }
+      if(!colTitle.value.trim()){ colSetMsg('Укажите название.', '#c0705a'); return; }
+      if(!colPicked.length){ colSetMsg('Добавьте хотя бы одно фото.', '#c0705a'); return; }
+
+      colSave.disabled = true;
+      colSetMsg('Сохраняем…', '#b08e5a');
+
+      try{
+        var stamp = Date.now();
+        var urls = [];
+
+        for(var i = 0; i < colPicked.length; i++){
+          colSetMsg('Фото ' + (i + 1) + ' из ' + colPicked.length + '…', '#b08e5a');
+
+          var blob = await compressForCollection(colPicked[i]);
+          var path = currentUser.id + '/col-' + stamp + '-' + i + '.jpg';
+
+          var up = await sb.storage.from('collection').upload(path, blob, {
+            contentType: 'image/jpeg',
+            upsert: false
+          });
+
+          if(up.error) throw new Error(up.error.message);
+
+          var pub = sb.storage.from('collection').getPublicUrl(path);
+          urls.push(pub.data.publicUrl);
+        }
+
+        var ins = await sb.from('collection').insert({
+          user_id: currentUser.id,
+          kind:    colKind.value,
+          artist:  colArtist.value.trim() || null,
+          title:   colTitle.value.trim(),
+          format:  colFormat.value.trim() || null,
+          year:    colYear.value ? parseInt(colYear.value, 10) : null,
+          comment: colComment.value.trim() || null,
+          photos:  urls
+        });
+
+        if(ins.error) throw new Error(ins.error.message);
+
+        colSetMsg('Добавлено.', '#8fbf7a');
+        resetCollectionForm();
+        loadCollection();
+
+      }catch(err){
+        colSetMsg('Ошибка: ' + (err.message || 'не удалось'), '#c0705a');
+      }finally{
+        colSave.disabled = false;
+      }
+    });
+  }
+
+  /* ---- список своих записей ---- */
+  async function loadCollection(){
+    if(!colList || !currentUser) return;
+    colList.innerHTML = '<p class="profile-note">Загружаем…</p>';
+
+    var res = await sb.from('collection')
+      .select('id,kind,artist,title,format,year,comment,photos,created_at')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+
+    if(res.error){
+      colList.innerHTML = '<p class="profile-note">Не удалось загрузить.</p>';
+      return;
+    }
+
+    renderCollection(res.data || []);
+  }
+
+  function renderCollection(rows){
+    colList.innerHTML = '';
+
+    if(!rows.length){
+      colList.innerHTML = '<p class="profile-note">Пока пусто. Добавьте первую запись.</p>';
+      return;
+    }
+
+    rows.forEach(function(r){
+      var item = document.createElement('div');
+      item.className = 'col-item';
+
+      var thumbs = document.createElement('div');
+      thumbs.className = 'col-thumbs';
+      (r.photos || []).slice(0, 3).forEach(function(u){
+        var im = document.createElement('img');
+        im.src = u;
+        im.alt = '';
+        im.loading = 'lazy';
+        thumbs.appendChild(im);
+      });
+
+      var info = document.createElement('div');
+      info.className = 'col-info';
+
+      var kindEl = document.createElement('div');
+      kindEl.className = 'col-kind';
+      kindEl.textContent = (KINDS[r.kind] || KINDS.other).label;
+
+      var nameEl = document.createElement('div');
+      nameEl.className = 'col-name';
+      nameEl.textContent = r.title || '';
+
+      info.appendChild(kindEl);
+      info.appendChild(nameEl);
+
+      var subParts = [r.artist, r.format, r.year].filter(Boolean);
+      if(subParts.length){
+        var subEl = document.createElement('div');
+        subEl.className = 'col-sub';
+        subEl.textContent = subParts.join(' · ');
+        info.appendChild(subEl);
+      }
+
+      if(r.comment){
+        var cEl = document.createElement('div');
+        cEl.className = 'col-text';
+        cEl.textContent = r.comment;
+        info.appendChild(cEl);
+      }
+
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'col-del';
+      del.textContent = 'удалить';
+      del.addEventListener('click', function(){ removeCollection(r); });
+
+      item.appendChild(thumbs);
+      item.appendChild(info);
+      item.appendChild(del);
+      colList.appendChild(item);
+    });
+  }
+
+  async function removeCollection(r){
+    if(!confirm('Удалить запись?')) return;
+
+    var paths = (r.photos || []).map(function(u){
+      var i = u.indexOf('/collection/');
+      return i >= 0 ? decodeURIComponent(u.slice(i + '/collection/'.length)) : null;
+    }).filter(Boolean);
+
+    if(paths.length){
+      await sb.storage.from('collection').remove(paths);
+    }
+
+    var del = await sb.from('collection').delete().eq('id', r.id);
+    if(del.error){
+      colSetMsg('Не удалось удалить', '#c0705a');
+      return;
+    }
+    loadCollection();
+  }
+
+  /* ---- профиль ---- */
   function showProfile(profile){
     hide(authBox);
     show(profileBox);
@@ -476,6 +805,8 @@ permalink: /profile.html
     buildFav();
     paintCover();
     markSelected();
+    applyKind();
+    loadCollection();
   }
 
   function showAuth(message){
@@ -547,6 +878,9 @@ permalink: /profile.html
     setTimeout(function(){ savedMsg.textContent = ''; }, 2500);
   }
 
+  /* ---- обработчики ---- */
+  if(colKind) colKind.addEventListener('change', applyKind);
+
   document.getElementById('profile-form').addEventListener('submit', function(e){
     e.preventDefault();
     saveProfile();
@@ -610,16 +944,16 @@ permalink: /profile.html
 
   /* ===== ВОССТАНОВЛЕНИЕ ПАРОЛЯ ===== */
   var forgotEl = document.getElementById('p-forgot');
-  if (forgotEl) {
+  if(forgotEl){
     forgotEl.addEventListener('click', async function(ev){
       ev.preventDefault();
 
       var emailInput = document.querySelector('#login-form input[name="email"]');
       var email = emailInput ? emailInput.value.trim() : '';
 
-      if (!email) {
+      if(!email){
         authMsg.textContent = 'Введите e-mail — на него придёт ссылка.';
-        if (emailInput) emailInput.focus();
+        if(emailInput) emailInput.focus();
         return;
       }
 
@@ -635,7 +969,9 @@ permalink: /profile.html
     });
   }
 
+  /* ---- старт ---- */
   buildGrid();
+  applyKind();
 
   (async function init(){
     var s = await sb.auth.getSession();
