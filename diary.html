@@ -48,11 +48,24 @@ permalink: /diary.html
   function render(rows) {
     if (!rows.length) return;
 
-    var html = '';
-    var group = '';
+    // один альбом — одна запись за день (оставляем самую свежую)
+    var seen = {};
+    var list = [];
 
     rows.forEach(function (d) {
       var dt = new Date(d.logged_at);
+      var id = d.album + '|' + dt.toDateString();
+      if (seen[id]) return;
+      seen[id] = true;
+      list.push({ row: d, dt: dt });
+    });
+
+    var html = '';
+    var group = '';
+
+    list.forEach(function (item) {
+      var d = item.row;
+      var dt = item.dt;
       var key = dt.getFullYear() + '-' + dt.getMonth();
       var head = MONTHS[dt.getMonth()] + ' ' + dt.getFullYear();
 
@@ -63,7 +76,7 @@ permalink: /diary.html
       }
 
       var day = dt.getDate();
-      var url = '/albums/' + d.album + '/';
+      var url = box.dataset.base + '/' + d.album + '/';
 
       html += '<li class="diary-item">' +
         '<span class="diary-day">' + (day < 10 ? '0' + day : day) + '</span>' +
