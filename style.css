@@ -3656,36 +3656,38 @@ body.modal-open{
 
 .u-medals{
   position:absolute;
-  top:12px;
-  right:14px;
+  top:14px;
+  right:16px;
   display:flex;
   align-items:center;
-  gap:6px;
+  gap:8px;
   z-index:3;
 }
 
 .u-medal{
-  width:26px;
-  height:26px;
+  width:44px;
+  height:44px;
   display:block;
-  opacity:.9;
+  padding:2px;
+  background:rgba(12,11,10,.72);
+  border-radius:50%;
+  opacity:.92;
   transition:opacity .2s, transform .2s;
   cursor:help;
 }
 .u-medal:hover{
   opacity:1;
-  transform:translateY(-2px);
+  transform:translateY(-2px) scale(1.06);
 }
 
-/* на узких экранах — отступ, чтобы не легли на аватар */
-@media (max-width:600px){
+@media (max-width:720px){
   .u-medals{
-    top:8px;
-    right:8px;
-    gap:4px;
+    top:10px;
+    right:10px;
+    gap:5px;
   }
   .u-medal{
-    width:22px;
-    height:22px;
+    width:34px;
+    height:34px;
   }
 }
