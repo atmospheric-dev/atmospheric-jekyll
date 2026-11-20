@@ -2254,3 +2254,19 @@ footer a:hover{color:var(--accent);opacity:1;}
   .comment-emoji-panel{width:206px;}
   .comment-emoji{width:30px;height:30px;font-size:17px;}
 }
+/* ===== ОТМЕТКИ АЛЬБОМА ===== */
+.album-marks{margin:0 0 40px 0;}
+.marks-row{display:flex;flex-wrap:wrap;gap:10px;}
+.mark-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border:1px solid var(--line);background:transparent;
+  color:var(--text-dim);font-family:'Courier New',monospace;
+  font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;
+  cursor:pointer;transition:color .2s,border-color .2s,background .2s;
+}
+.mark-btn:hover{color:var(--accent);border-color:var(--accent);}
+.mark-btn.is-on{color:var(--accent);border-color:var(--accent);background:rgba(176,142,90,.08);}
+.mark-count{font-variant-numeric:tabular-nums;opacity:.85;}
+.mark-btn.is-on .mark-count{opacity:1;}
+.mark-btn[disabled]{cursor:default;opacity:.5;}
+.mark-btn[disabled]:hover{color:var(--text-dim);border-color:var(--line);}
