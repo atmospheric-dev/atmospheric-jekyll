@@ -43,7 +43,10 @@ permalink: /profile.html
   <div id="profile-box" hidden>
 
     <div class="profile-head">
-      <img class="profile-avatar" id="avatar-preview" src="" alt="">
+      <button type="button" class="profile-avatar-btn" id="avatar-btn" title="Выбрать аватар">
+        <img class="profile-avatar" id="avatar-preview" src="" alt="Аватар">
+        <span class="profile-avatar-hint">Сменить</span>
+      </button>
       <div class="profile-id">
         <div class="profile-username" id="username-line">—</div>
         <div class="profile-status" id="status-line"></div>
@@ -51,9 +54,6 @@ permalink: /profile.html
         <div class="profile-since" id="since-line"></div>
       </div>
     </div>
-
-    <h2 class="profile-sub">Аватар</h2>
-    <div class="goblin-grid" id="goblin-grid"></div>
 
     <h2 class="profile-sub">О себе</h2>
     <form id="profile-form" class="profile-form">
@@ -96,6 +96,21 @@ permalink: /profile.html
 
 </div>
 
+<!-- ===== ОКНО ВЫБОРА АВАТАРА ===== -->
+<div class="goblin-modal" id="goblin-modal" hidden>
+  <div class="goblin-modal-backdrop" data-close></div>
+  <div class="goblin-modal-box" role="dialog" aria-modal="true" aria-label="Выбор аватара">
+    <div class="goblin-modal-head">
+      <span>Выберите персонажа</span>
+      <button type="button" class="goblin-modal-close" data-close aria-label="Закрыть">×</button>
+    </div>
+    <div class="goblin-grid" id="goblin-grid"></div>
+    <div class="goblin-modal-foot">
+      <button type="button" class="goblin-modal-apply" id="avatar-apply">Готово</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
@@ -122,8 +137,8 @@ permalink: /profile.html
   var avatarBase     = '{{ site.baseurl }}/images/goblins/';
   var fallbackAvatar = '{{ site.baseurl }}/logo.png';
 
-  var currentUser     = null;
-  var currentAvatar   = 0;
+  var currentUser   = null;
+  var currentAvatar = 0;
 
   var authBox    = document.getElementById('auth-box');
   var profileBox = document.getElementById('profile-box');
@@ -131,6 +146,8 @@ permalink: /profile.html
   var savedMsg   = document.getElementById('saved-msg');
   var grid       = document.getElementById('goblin-grid');
   var preview    = document.getElementById('avatar-preview');
+  var modal      = document.getElementById('goblin-modal');
+  var avatarBtn  = document.getElementById('avatar-btn');
 
   function avatarSrc(id){
     var g = GOBLINS[id] || GOBLINS[0];
@@ -170,6 +187,17 @@ permalink: /profile.html
     for(var i = 0; i < cells.length; i++){
       cells[i].classList.toggle('is-active', Number(cells[i].dataset.id) === currentAvatar);
     }
+  }
+
+  function openModal(){
+    modal.hidden = false;
+    document.body.classList.add('modal-open');
+    markSelected();
+  }
+
+  function closeModal(){
+    modal.hidden = true;
+    document.body.classList.remove('modal-open');
   }
 
   function showProfile(profile){
@@ -237,9 +265,8 @@ permalink: /profile.html
     }
   }
 
-  document.getElementById('profile-form').addEventListener('submit', async function(e){
-    e.preventDefault();
-    var f = e.target;
+  async function saveProfile(){
+    var f = document.getElementById('profile-form');
     savedMsg.textContent = '';
     savedMsg.classList.remove('is-error');
 
@@ -265,6 +292,26 @@ permalink: /profile.html
     savedMsg.textContent = 'Сохранено';
     showProfile(res.data);
     setTimeout(function(){ savedMsg.textContent = ''; }, 2500);
+  }
+
+  document.getElementById('profile-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    saveProfile();
+  });
+
+  avatarBtn.addEventListener('click', openModal);
+
+  document.getElementById('avatar-apply').addEventListener('click', function(){
+    closeModal();
+    saveProfile();
+  });
+
+  modal.addEventListener('click', function(e){
+    if(e.target.hasAttribute('data-close')) closeModal();
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && !modal.hidden) closeModal();
   });
 
   document.getElementById('login-form').addEventListener('submit', async function(e){
