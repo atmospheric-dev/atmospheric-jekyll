@@ -3147,40 +3147,57 @@ body.modal-open{
 }
 
 .u-album{
+  position:relative;
   display:block;
-  text-decoration:none;
-  color:inherit;
+  overflow:hidden;
+  border-radius:2px;
+  border:1px solid rgba(176,142,90,.2);
+  background:rgba(255,255,255,.03);
+  aspect-ratio:1/1;
 }
 
 .u-album-cover{
   width:100%;
-  aspect-ratio:1/1;
+  height:100%;
   object-fit:cover;
-  border-radius:2px;
-  border:1px solid rgba(176,142,90,.2);
-  background:rgba(255,255,255,.03);
   display:block;
 }
 
 .u-album-cover.is-missing{
-  background:rgba(255,255,255,.03);
-  border-style:dashed;
+  opacity:0;
+}
+
+.u-album-cap{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  padding:26px 10px 9px;
+  background:linear-gradient(180deg, rgba(8,8,8,0), rgba(8,8,8,.78) 45%, rgba(8,8,8,.94));
+  overflow:hidden;
+}
+
+.u-album-artist,
+.u-album-name{
+  width:100%;
+  overflow:hidden;
+  white-space:nowrap;
 }
 
 .u-album-artist{
-  margin-top:8px;
   font-family:'Courier New', monospace;
-  font-size:.68rem;
+  font-size:11px;
   letter-spacing:.08em;
   text-transform:uppercase;
   color:#b08e5a;
+  line-height:1.3;
 }
 
 .u-album-name{
   font-family:Georgia, serif;
-  font-size:.95rem;
-  color:#ded8cc;
-  line-height:1.35;
+  font-size:15px;
+  color:#e8e2d7;
+  line-height:1.3;
 }
 
 /* ---- значки ---- */
