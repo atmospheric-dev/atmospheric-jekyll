@@ -66,8 +66,11 @@ permalink: /profile.html
       <label>Статус
         <input type="text" name="status" maxlength="120" placeholder="Любая фраза до 120 символов">
       </label>
-      <label>Любимый альбом
-        <input type="text" name="favorite_album" maxlength="120" placeholder="Например: Olshanoe — Краеведение">
+      <label>О себе
+        <textarea name="about" rows="5" maxlength="1000" placeholder="Несколько слов о себе"></textarea>
+      </label>
+      <label>Город
+        <input type="text" name="city" maxlength="60" placeholder="Например: Брянск">
       </label>
       <label>Пол
         <select name="gender">
@@ -80,6 +83,9 @@ permalink: /profile.html
         <input type="date" name="birthdate">
       </label>
 
+      <h2 class="profile-sub">Три любимых альбома</h2>
+      <div class="fav-albums" id="fav-albums"></div>
+
       <div class="profile-actions">
         <button type="submit">Сохранить</button>
         <span class="profile-saved" id="saved-msg"></span>
@@ -90,6 +96,7 @@ permalink: /profile.html
     <div class="profile-links">
       <a class="profile-link" href="{{ site.baseurl }}/my.html">Мой список</a>
       <a class="profile-link" href="{{ site.baseurl }}/diary.html">Дневник прослушивания</a>
+      <a class="profile-link" href="#" id="public-link">Мой публичный профиль</a>
     </div>
 
     <div class="profile-footer">
@@ -139,9 +146,11 @@ permalink: /profile.html
 
   var avatarBase     = '{{ site.baseurl }}/images/goblins/';
   var fallbackAvatar = '{{ site.baseurl }}/logo.png';
+  var publicProfile  = '{{ site.baseurl }}/u.html';
 
   var currentUser   = null;
   var currentAvatar = 0;
+  var favAlbums     = [];
 
   var authBox    = document.getElementById('auth-box');
   var profileBox = document.getElementById('profile-box');
@@ -151,6 +160,7 @@ permalink: /profile.html
   var preview    = document.getElementById('avatar-preview');
   var modal      = document.getElementById('goblin-modal');
   var avatarBtn  = document.getElementById('avatar-btn');
+  var favWrap    = document.getElementById('fav-albums');
 
   function avatarSrc(id){
     var g = GOBLINS[id] || GOBLINS[0];
@@ -203,6 +213,129 @@ permalink: /profile.html
     document.body.classList.remove('modal-open');
   }
 
+  /* ---- загрузка обложки в Supabase Storage ---- */
+  async function uploadCover(file){
+    if(file.size > 2 * 1024 * 1024){
+      alert('Файл больше 2 МБ.');
+      return null;
+    }
+    var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    if(['jpg','jpeg','png','webp','gif'].indexOf(ext) === -1) ext = 'jpg';
+
+    var path = currentUser.id + '/' + Date.now() + '-' +
+               Math.random().toString(36).slice(2, 8) + '.' + ext;
+
+    var up = await sb.storage.from('covers').upload(path, file, { upsert: false });
+    if(up.error){
+      alert('Не загрузилось: ' + up.error.message);
+      return null;
+    }
+
+    var pub = sb.storage.from('covers').getPublicUrl(path);
+    return pub.data.publicUrl;
+  }
+
+  /* ---- три любимых альбома ---- */
+  function buildFav(){
+    favWrap.innerHTML = '';
+    for(var i = 0; i < 3; i++){
+      (function(idx){
+        var slot = favAlbums[idx] || {};
+
+        var row = document.createElement('div');
+        row.className = 'fav-slot';
+
+        var line = document.createElement('div');
+        line.className = 'fav-line';
+
+        var thumb = document.createElement('img');
+        thumb.className = 'fav-thumb';
+        thumb.alt = '';
+        if(slot.cover){
+          thumb.src = slot.cover;
+          thumb.dataset.url = slot.cover;
+          thumb.style.visibility = 'visible';
+        }
+        thumb.onerror = function(){ this.style.visibility = 'hidden'; };
+
+        var pick = document.createElement('label');
+        pick.className = 'fav-pick';
+        pick.textContent = slot.cover ? 'Сменить обложку' : 'Загрузить обложку';
+
+        var fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.hidden = true;
+        pick.appendChild(fileInput);
+
+        fileInput.addEventListener('change', function(){
+          var f = this.files && this.files[0];
+          if(!f) return;
+          pick.textContent = 'Загружаем…';
+          uploadCover(f).then(function(url){
+            if(!url){
+              pick.textContent = 'Загрузить обложку';
+              return;
+            }
+            thumb.src = url;
+            thumb.dataset.url = url;
+            thumb.style.visibility = 'visible';
+            pick.textContent = 'Сменить обложку';
+          });
+        });
+
+        var clear = document.createElement('button');
+        clear.type = 'button';
+        clear.className = 'fav-clear';
+        clear.textContent = 'Убрать';
+        clear.addEventListener('click', function(){
+          thumb.removeAttribute('src');
+          delete thumb.dataset.url;
+          thumb.style.visibility = 'hidden';
+          pick.textContent = 'Загрузить обложку';
+        });
+
+        line.appendChild(thumb);
+        line.appendChild(pick);
+        line.appendChild(clear);
+
+        var artist = document.createElement('input');
+        artist.type = 'text';
+        artist.className = 'fav-artist';
+        artist.maxLength = 80;
+        artist.placeholder = 'Группа';
+        artist.value = slot.artist || '';
+
+        var album = document.createElement('input');
+        album.type = 'text';
+        album.className = 'fav-name';
+        album.maxLength = 80;
+        album.placeholder = 'Альбом';
+        album.value = slot.album || '';
+
+        row.appendChild(line);
+        row.appendChild(artist);
+        row.appendChild(album);
+        favWrap.appendChild(row);
+      })(i);
+    }
+  }
+
+  function readFav(){
+    var out = [];
+    var rows = favWrap.querySelectorAll('.fav-slot');
+    for(var i = 0; i < rows.length; i++){
+      var img = rows[i].querySelector('.fav-thumb');
+      var c = (img && img.dataset.url) ? img.dataset.url : '';
+      var a = rows[i].querySelector('.fav-artist').value.trim();
+      var n = rows[i].querySelector('.fav-name').value.trim();
+      if(a || n || c){
+        out.push({ artist: a, album: n, cover: c });
+      }
+    }
+    return out;
+  }
+
   function showProfile(profile){
     hide(authBox);
     show(profileBox);
@@ -221,12 +354,19 @@ permalink: /profile.html
       ? 'На сайте с ' + since.toLocaleDateString('ru-RU')
       : '';
 
+    var pub = document.getElementById('public-link');
+    if(pub) pub.href = publicProfile + '?id=' + currentUser.id;
+
     var f = document.getElementById('profile-form');
-    f.username.value       = (profile && profile.username) || '';
-    f.status.value         = (profile && profile.status) || '';
-    f.favorite_album.value = (profile && profile.favorite_album) || '';
-    f.gender.value         = (profile && profile.gender) || 'none';
-    f.birthdate.value      = (profile && profile.birthdate) || '';
+    f.username.value  = (profile && profile.username) || '';
+    f.status.value    = (profile && profile.status) || '';
+    f.about.value     = (profile && profile.about) || '';
+    f.city.value      = (profile && profile.city) || '';
+    f.gender.value    = (profile && profile.gender) || 'none';
+    f.birthdate.value = (profile && profile.birthdate) || '';
+
+    favAlbums = Array.isArray(profile && profile.fav_albums) ? profile.fav_albums : [];
+    buildFav();
 
     markSelected();
   }
@@ -274,12 +414,14 @@ permalink: /profile.html
     savedMsg.classList.remove('is-error');
 
     var payload = {
-      username:       f.username.value.trim() || null,
-      status:         f.status.value.trim() || null,
-      favorite_album: f.favorite_album.value.trim() || null,
-      gender:         f.gender.value,
-      birthdate:      f.birthdate.value || null,
-      avatar:         currentAvatar
+      username:   f.username.value.trim() || null,
+      status:     f.status.value.trim() || null,
+      about:      f.about.value.trim() || null,
+      city:       f.city.value.trim() || null,
+      gender:     f.gender.value,
+      birthdate:  f.birthdate.value || null,
+      avatar:     currentAvatar,
+      fav_albums: readFav()
     };
 
     var res = await sb.from('profiles').update(payload).eq('id', currentUser.id).select().maybeSingle();
