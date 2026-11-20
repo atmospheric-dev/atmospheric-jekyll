@@ -41,6 +41,15 @@ permalink: /u.html
   <p class="profile-note" id="u-error" hidden>Такого профиля нет.</p>
 </div>
 
+<!-- ===== ПРОСМОТР ФОТО ===== -->
+<div class="u-viewer" id="u-viewer" hidden>
+  <button type="button" class="u-viewer-close" id="u-viewer-close" aria-label="Закрыть">×</button>
+  <button type="button" class="u-viewer-nav u-viewer-prev" id="u-viewer-prev" aria-label="Предыдущее">‹</button>
+  <img class="u-viewer-img" id="u-viewer-img" src="" alt="">
+  <button type="button" class="u-viewer-nav u-viewer-next" id="u-viewer-next" aria-label="Следующее">›</button>
+  <div class="u-viewer-count" id="u-viewer-count"></div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
@@ -87,6 +96,92 @@ permalink: /u.html
   if(!uid && !name){ fail(); return; }
 
   var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  /* ================= ПРОСМОТР ФОТО ================= */
+
+  var viewer = {
+    root:  document.getElementById('u-viewer'),
+    img:   document.getElementById('u-viewer-img'),
+    close: document.getElementById('u-viewer-close'),
+    prev:  document.getElementById('u-viewer-prev'),
+    next:  document.getElementById('u-viewer-next'),
+    count: document.getElementById('u-viewer-count'),
+    list:  [],
+    idx:   0
+  };
+
+  function viewerPaint(){
+    if(!viewer.list.length) return;
+    viewer.img.src = viewer.list[viewer.idx];
+    viewer.count.textContent = viewer.list.length > 1
+      ? (viewer.idx + 1) + ' / ' + viewer.list.length
+      : '';
+
+    var many = viewer.list.length > 1;
+    viewer.prev.hidden = !many;
+    viewer.next.hidden = !many;
+  }
+
+  function viewerStep(delta){
+    if(viewer.list.length < 2) return;
+    viewer.idx = (viewer.idx + delta + viewer.list.length) % viewer.list.length;
+    viewerPaint();
+  }
+
+  function openViewer(photos, start){
+    if(!photos || !photos.length) return;
+
+    viewer.list = photos.slice();
+    viewer.idx  = start || 0;
+
+    viewer.root.hidden = false;
+    document.body.classList.add('modal-open');
+    viewerPaint();
+  }
+
+  function closeViewer(){
+    viewer.root.hidden = true;
+    document.body.classList.remove('modal-open');
+    viewer.img.removeAttribute('src');
+  }
+
+  viewer.close.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    closeViewer();
+  });
+
+  viewer.prev.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    viewerStep(-1);
+  });
+
+  viewer.next.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    viewerStep(1);
+  });
+
+  /* клик по тёмной подложке закрывает, по картинке — нет */
+  viewer.root.addEventListener('click', function(e){
+    if(e.target === viewer.root) closeViewer();
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(viewer.root.hidden) return;
+    if(e.key === 'Escape') closeViewer();
+    if(e.key === 'ArrowLeft'){
+      e.preventDefault();
+      viewerStep(-1);
+    }
+    if(e.key === 'ArrowRight'){
+      e.preventDefault();
+      viewerStep(1);
+    }
+  });
+
+  /* ================= ПРОФИЛЬ ================= */
 
   var q = sb
     .from('profiles')
@@ -231,6 +326,7 @@ permalink: /u.html
   }
 
   /* ================= КОЛЛЕКЦИЯ ================= */
+
   function loadCollection(id){
     var wrap = document.getElementById('u-collection');
     if(!wrap) return;
@@ -291,7 +387,7 @@ permalink: /u.html
       var card = document.createElement('div');
       card.className = 'u-col-card';
 
-      var photos = Array.isArray(r.photos) ? r.photos : [];
+      var photos = Array.isArray(r.photos) ? r.photos.filter(Boolean) : [];
 
       var media = document.createElement('div');
       media.className = 'u-col-media';
@@ -314,27 +410,33 @@ permalink: /u.html
           more.textContent = '+' + (photos.length - 1);
           media.appendChild(more);
         }
+
+        /* клик по фото открывает просмотр — для любого числа фото */
+        media.classList.add('is-clickable');
+        media.addEventListener('click', function(){ openViewer(photos, 0); });
+
+        /* ---- полоска миниатюр ---- */
+        if(photos.length > 1){
+          var strip = document.createElement('div');
+          strip.className = 'u-col-strip';
+
+          photos.slice(0, 6).forEach(function(u, n){
+            var t = document.createElement('img');
+            t.className = 'u-col-thumb';
+            t.src = u;
+            t.alt = '';
+            t.loading = 'lazy';
+            t.addEventListener('click', function(e){
+              e.stopPropagation();
+              openViewer(photos, n);
+            });
+            strip.appendChild(t);
+          });
+
+          media.appendChild(strip);
+        }
       } else {
         media.classList.add('u-col-media--empty');
-      }
-
-      /* ---- миниатюры под фото ---- */
-      if(photos.length > 1){
-        var strip = document.createElement('div');
-        strip.className = 'u-col-strip';
-
-        photos.slice(1, 5).forEach(function(u){
-          var t = document.createElement('img');
-          t.className = 'u-col-thumb';
-          t.src = u;
-          t.alt = '';
-          t.loading = 'lazy';
-          strip.appendChild(t);
-        });
-
-        media.addEventListener('click', function(){ openViewer(photos, 0); });
-        media.classList.add('is-clickable');
-        media.appendChild(strip);
       }
 
       card.appendChild(media);
@@ -375,86 +477,8 @@ permalink: /u.html
     wrap.appendChild(grid);
   }
 
-  /* ================= ПРОСМОТР ФОТО ================= */
-  function openViewer(photos, start){
-    var i = start || 0;
+  /* ================= ЗНАЧКИ ================= */
 
-    var ov = document.getElementById('u-viewer');
-    if(!ov){
-      ov = document.createElement('div');
-      ov.id = 'u-viewer';
-      ov.className = 'u-viewer';
-      ov.hidden = true;
-
-      var im = document.createElement('img');
-      im.className = 'u-viewer-img';
-      im.alt = '';
-
-      var prev = document.createElement('button');
-      prev.type = 'button';
-      prev.className = 'u-viewer-nav u-viewer-prev';
-      prev.textContent = '‹';
-
-      var next = document.createElement('button');
-      next.type = 'button';
-      next.className = 'u-viewer-nav u-viewer-next';
-      next.textContent = '›';
-
-      var close = document.createElement('button');
-      close.type = 'button';
-      close.className = 'u-viewer-close';
-      close.textContent = '×';
-
-      ov.appendChild(im);
-      ov.appendChild(prev);
-      ov.appendChild(next);
-      ov.appendChild(close);
-      document.body.appendChild(ov);
-
-      close.addEventListener('click', function(){ closeViewer(); });
-      ov.addEventListener('click', function(e){
-        if(e.target === ov) closeViewer();
-      });
-      prev.addEventListener('click', function(e){
-        e.stopPropagation();
-        i = (i - 1 + photos.length) % photos.length;
-        paint();
-      });
-      next.addEventListener('click', function(e){
-        e.stopPropagation();
-        i = (i + 1) % photos.length;
-        paint();
-      });
-      document.addEventListener('keydown', function(e){
-        if(ov.hidden) return;
-        if(e.key === 'Escape') closeViewer();
-        if(e.key === 'ArrowLeft'){ i = (i - 1 + photos.length) % photos.length; paint(); }
-        if(e.key === 'ArrowRight'){ i = (i + 1) % photos.length; paint(); }
-      });
-
-      function paint(){ im.src = photos[i]; }
-      ov._paint = paint;
-    }
-
-    if(ov._photos !== photos){
-      ov._photos = photos;
-    }
-
-    ov.hidden = false;
-    ov.classList.add('is-open');
-    document.body.classList.add('modal-open');
-    ov._paint();
-  }
-
-  function closeViewer(){
-    var ov = document.getElementById('u-viewer');
-    if(!ov) return;
-    ov.hidden = true;
-    ov.classList.remove('is-open');
-    document.body.classList.remove('modal-open');
-  }
-
-  /* ---- значки ---- */
   function loadBadges(id){
     var wrap = document.getElementById('u-badges');
     wrap.innerHTML = '';
