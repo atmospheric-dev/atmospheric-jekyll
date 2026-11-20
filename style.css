@@ -3208,3 +3208,29 @@ body.modal-open{
   .u-albums{grid-template-columns:repeat(2, minmax(0,1fr));}
   .u-hero-inner{flex-direction:column; align-items:flex-start; gap:14px;}
 }
+.cover-row{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin-bottom:20px;
+}
+
+.cover-preview{
+  width:180px;
+  height:64px;
+  flex:0 0 auto;
+  border-radius:2px;
+  border:1px dashed rgba(176,142,90,.3);
+  background:rgba(255,255,255,.02);
+  background-size:cover;
+  background-position:center;
+}
+
+.cover-preview.has{border-style:solid;}
+
+.cover-actions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  align-items:flex-start;
+}
