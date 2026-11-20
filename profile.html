@@ -108,6 +108,8 @@ permalink: /profile.html
     <!-- ===== КОЛЛЕКЦИЯ ===== -->
     <h2 class="profile-sub">Коллекция</h2>
 
+    <p class="profile-note" id="col-limit-note">Можно добавить до 5 записей.</p>
+
     <div class="col-add">
       <div class="col-row">
         <label class="col-label" for="col-kind">Тип</label>
@@ -145,17 +147,19 @@ permalink: /profile.html
         <textarea id="col-comment" class="col-input" rows="3" maxlength="500" placeholder="Издание, состояние, история покупки…"></textarea>
       </div>
 
-      <div class="cover-row">
-        <div class="cover-preview" id="col-preview"></div>
+      <div class="col-row">
+        <label class="col-label">Фотографии</label>
+        <div class="col-photos" id="col-photos"></div>
         <div class="cover-actions">
           <input type="file" id="col-file" accept="image/*" multiple hidden>
-          <button type="button" class="fav-pick" id="col-pick">Выбрать фото</button>
+          <button type="button" class="fav-pick" id="col-pick">Добавить фото</button>
           <span class="profile-note" id="col-photos-count">0 фото</span>
         </div>
       </div>
 
       <div class="col-actions">
         <button type="button" class="fav-pick" id="col-save">Добавить в коллекцию</button>
+        <button type="button" class="fav-clear" id="col-cancel" hidden>Отменить</button>
         <span class="profile-note" id="col-msg"></span>
       </div>
     </div>
@@ -489,6 +493,7 @@ permalink: /profile.html
     }
     return out;
   }
+
 /* ==========================================================
    ПРОДОЛЖЕНИЕ profile.html — часть 2 из 2
    Вставляется сразу после функции readFav(), внутри того же IIFE.
@@ -504,6 +509,7 @@ permalink: /profile.html
     other: { artist: 'Автор',     title: 'Название',  formatPh: 'Свободно',           label: 'Другое' }
   };
 
+  var COL_MAX       = 5;       /* максимум записей у одного пользователя */
   var COL_MAX_SIDE  = 1400;
   var COL_QUALITY   = 0.82;
   var COL_MAX_FILES = 8;
@@ -516,13 +522,18 @@ permalink: /profile.html
   var colComment = document.getElementById('col-comment');
   var colFile    = document.getElementById('col-file');
   var colPick    = document.getElementById('col-pick');
-  var colPreview = document.getElementById('col-preview');
+  var colPhotos  = document.getElementById('col-photos');
   var colCount   = document.getElementById('col-photos-count');
   var colSave    = document.getElementById('col-save');
+  var colCancel  = document.getElementById('col-cancel');
   var colMsg     = document.getElementById('col-msg');
   var colList    = document.getElementById('col-list');
+  var colNote    = document.getElementById('col-limit-note');
 
-  var colPicked = [];   // выбранные файлы
+  var colUrls    = [];         /* массив URL, [0] — обложка карточки */
+  var colEditId  = null;       /* null — новая запись */
+  var colTotal   = 0;          /* сколько записей уже есть */
+  var colBusy    = false;
 
   /* ---- подписи полей зависят от типа ---- */
   function applyKind(){
@@ -571,66 +582,104 @@ permalink: /profile.html
     });
   }
 
-  /* ---- выбор фото ---- */
-  if(colPick){
-    colPick.addEventListener('click', function(e){
-      e.preventDefault();
-      colFile.click();
-    });
-  }
-
-  if(colFile){
-    colFile.addEventListener('change', function(){
-      colPicked = Array.prototype.slice.call(this.files || []).slice(0, COL_MAX_FILES);
-      colCount.textContent = colPicked.length + ' фото';
-
-      if(!colPicked.length){
-        colPreview.style.backgroundImage = '';
-        colPreview.classList.remove('has');
-        return;
-      }
-      colPreview.classList.add('has');
-      colPreview.style.backgroundImage = 'url("' + URL.createObjectURL(colPicked[0]) + '")';
-    });
-  }
-
   function colSetMsg(text, color){
     colMsg.textContent = text;
     colMsg.style.color = color || '';
   }
 
-  function resetCollectionForm(){
-    colArtist.value = '';
-    colTitle.value = '';
-    colFormat.value = '';
-    colYear.value = '';
-    colComment.value = '';
-    colPicked = [];
-    colFile.value = '';
-    colPreview.style.backgroundImage = '';
-    colPreview.classList.remove('has');
-    colCount.textContent = '0 фото';
+  /* ---- состояние формы ---- */
+  function updateCollectionState(){
+    var full = colTotal >= COL_MAX;
+
+    if(colNote){
+      colNote.textContent = full
+        ? 'Достигнут предел: ' + COL_MAX + ' записей. Удалите запись, чтобы добавить новую.'
+        : 'Занято ' + colTotal + ' из ' + COL_MAX + ' записей.';
+      colNote.style.color = full ? '#c0705a' : '';
+    }
+
+    if(colEditId) return;  /* при редактировании кнопка всегда активна */
+
+    colSave.disabled = full;
+    colSave.style.opacity = full ? '.45' : '';
+    colSave.style.cursor  = full ? 'not-allowed' : '';
   }
 
-  /* ---- сохранение записи ---- */
-  if(colSave){
-    colSave.addEventListener('click', async function(){
-      if(!currentUser){ colSetMsg('Нужно войти в аккаунт.', '#c0705a'); return; }
-      if(!colTitle.value.trim()){ colSetMsg('Укажите название.', '#c0705a'); return; }
-      if(!colPicked.length){ colSetMsg('Добавьте хотя бы одно фото.', '#c0705a'); return; }
+  /* ---- отрисовка выбранных фото ---- */
+  function renderColPhotos(){
+    colPhotos.innerHTML = '';
 
-      colSave.disabled = true;
-      colSetMsg('Сохраняем…', '#b08e5a');
+    colUrls.forEach(function(u, i){
+      var cell = document.createElement('div');
+      cell.className = 'col-photo' + (i === 0 ? ' is-cover' : '');
+
+      var img = document.createElement('img');
+      img.src = u;
+      img.alt = '';
+      cell.appendChild(img);
+
+      if(i === 0){
+        var tag = document.createElement('span');
+        tag.className = 'col-photo-tag';
+        tag.textContent = 'Обложка';
+        cell.appendChild(tag);
+      } else {
+        var make = document.createElement('button');
+        make.type = 'button';
+        make.className = 'col-photo-act';
+        make.textContent = 'На обложку';
+        make.addEventListener('click', function(){
+          var picked = colUrls.splice(i, 1)[0];
+          colUrls.unshift(picked);
+          renderColPhotos();
+        });
+        cell.appendChild(make);
+      }
+
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'col-photo-del';
+      del.textContent = '×';
+      del.title = 'Убрать фото';
+      del.addEventListener('click', function(){
+        colUrls.splice(i, 1);
+        renderColPhotos();
+      });
+      cell.appendChild(del);
+
+      colPhotos.appendChild(cell);
+    });
+
+    colCount.textContent = colUrls.length + ' фото';
+  }
+
+  /* ---- выбор файлов ---- */
+  if(colPick){
+    colPick.addEventListener('click', function(e){
+      e.preventDefault();
+      if(colBusy) return;
+      colFile.click();
+    });
+  }
+
+  if(colFile){
+    colFile.addEventListener('change', async function(){
+      var files = Array.prototype.slice.call(this.files || [])
+        .slice(0, Math.max(0, COL_MAX_FILES - colUrls.length));
+      this.value = '';
+
+      if(!files.length) return;
+
+      colBusy = true;
+      colCount.textContent = 'Обрабатываем…';
 
       try{
-        var stamp = Date.now();
-        var urls = [];
+        for(var i = 0; i < files.length; i++){
+          colCount.textContent = 'Фото ' + (i + 1) + ' из ' + files.length + '…';
 
-        for(var i = 0; i < colPicked.length; i++){
-          colSetMsg('Фото ' + (i + 1) + ' из ' + colPicked.length + '…', '#b08e5a');
-
-          var blob = await compressForCollection(colPicked[i]);
-          var path = currentUser.id + '/col-' + stamp + '-' + i + '.jpg';
+          var blob = await compressForCollection(files[i]);
+          var path = currentUser.id + '/' + Date.now() + '-' +
+                     Math.random().toString(36).slice(2, 8) + '.jpg';
 
           var up = await sb.storage.from('collection').upload(path, blob, {
             contentType: 'image/jpeg',
@@ -640,31 +689,129 @@ permalink: /profile.html
           if(up.error) throw new Error(up.error.message);
 
           var pub = sb.storage.from('collection').getPublicUrl(path);
-          urls.push(pub.data.publicUrl);
+          colUrls.push(pub.data.publicUrl);
+        }
+        colSetMsg('');
+      }catch(err){
+        colSetMsg('Ошибка загрузки: ' + (err.message || ''), '#c0705a');
+      }finally{
+        colBusy = false;
+        renderColPhotos();
+      }
+    });
+  }
+
+  /* ---- сброс формы ---- */
+  function resetCollectionForm(){
+    colEditId = null;
+    colUrls   = [];
+
+    colKind.value    = 'music';
+    colArtist.value  = '';
+    colTitle.value   = '';
+    colFormat.value  = '';
+    colYear.value    = '';
+    colComment.value = '';
+
+    colSave.textContent = 'Добавить в коллекцию';
+    colCancel.hidden    = true;
+
+    renderColPhotos();
+    applyKind();
+    updateCollectionState();
+  }
+
+  /* ---- заполнение формы для редактирования ---- */
+  function fillCollectionForm(r){
+    colEditId = r.id;
+    colUrls   = Array.isArray(r.photos) ? r.photos.slice() : [];
+
+    colKind.value    = r.kind || 'music';
+    colArtist.value  = r.artist || '';
+    colTitle.value   = r.title || '';
+    colFormat.value  = r.format || '';
+    colYear.value    = r.year || '';
+    colComment.value = r.comment || '';
+
+    colSave.textContent = 'Сохранить изменения';
+    colCancel.hidden    = false;
+
+    renderColPhotos();
+    applyKind();
+
+    colSave.disabled = false;
+    colSave.style.opacity = '';
+    colSave.style.cursor  = '';
+
+    colSave.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  /* ---- сохранение ---- */
+  if(colSave){
+    colSave.addEventListener('click', async function(){
+      if(!currentUser){ colSetMsg('Нужно войти в аккаунт.', '#c0705a'); return; }
+      if(!colTitle.value.trim()){ colSetMsg('Укажите название.', '#c0705a'); return; }
+      if(!colUrls.length){ colSetMsg('Добавьте хотя бы одно фото.', '#c0705a'); return; }
+      if(!colEditId && colTotal >= COL_MAX){
+        colSetMsg('Можно добавить не больше ' + COL_MAX + ' записей.', '#c0705a');
+        return;
+      }
+
+      colBusy = true;
+      colSave.disabled = true;
+      colSetMsg('Сохраняем…', '#b08e5a');
+
+      var payload = {
+        kind:    colKind.value,
+        artist:  colArtist.value.trim() || null,
+        title:   colTitle.value.trim(),
+        format:  colFormat.value.trim() || null,
+        year:    colYear.value ? parseInt(colYear.value, 10) : null,
+        comment: colComment.value.trim() || null,
+        photos:  colUrls
+      };
+
+      try{
+        var res;
+
+        if(colEditId){
+          res = await sb.from('collection').update(payload).eq('id', colEditId).select().maybeSingle();
+        } else {
+          payload.user_id = currentUser.id;
+          res = await sb.from('collection').insert(payload).select().maybeSingle();
         }
 
-        var ins = await sb.from('collection').insert({
-          user_id: currentUser.id,
-          kind:    colKind.value,
-          artist:  colArtist.value.trim() || null,
-          title:   colTitle.value.trim(),
-          format:  colFormat.value.trim() || null,
-          year:    colYear.value ? parseInt(colYear.value, 10) : null,
-          comment: colComment.value.trim() || null,
-          photos:  urls
-        });
+        if(res.error){
+          var m = res.error.message || '';
+          if(m.indexOf('не больше') !== -1){
+            colSetMsg('Можно добавить не больше ' + COL_MAX + ' записей.', '#c0705a');
+            colTotal = COL_MAX;
+            updateCollectionState();
+          } else {
+            colSetMsg('Ошибка: ' + m, '#c0705a');
+          }
+          return;
+        }
 
-        if(ins.error) throw new Error(ins.error.message);
+        colSetMsg(colEditId ? 'Изменения сохранены.' : 'Добавлено.', '#8fbf7a');
+        if(!colEditId) colTotal++;
 
-        colSetMsg('Добавлено.', '#8fbf7a');
         resetCollectionForm();
         loadCollection();
 
       }catch(err){
         colSetMsg('Ошибка: ' + (err.message || 'не удалось'), '#c0705a');
       }finally{
+        colBusy = false;
         colSave.disabled = false;
       }
+    });
+  }
+
+  if(colCancel){
+    colCancel.addEventListener('click', function(){
+      colSetMsg('');
+      resetCollectionForm();
     });
   }
 
@@ -683,7 +830,10 @@ permalink: /profile.html
       return;
     }
 
-    renderCollection(res.data || []);
+    var rows = res.data || [];
+    colTotal = rows.length;
+    updateCollectionState();
+    renderCollection(rows);
   }
 
   function renderCollection(rows){
@@ -737,21 +887,33 @@ permalink: /profile.html
         info.appendChild(cEl);
       }
 
+      var acts = document.createElement('div');
+      acts.className = 'col-acts';
+
+      var edit = document.createElement('button');
+      edit.type = 'button';
+      edit.className = 'col-del';
+      edit.textContent = 'изменить';
+      edit.addEventListener('click', function(){ fillCollectionForm(r); });
+
       var del = document.createElement('button');
       del.type = 'button';
       del.className = 'col-del';
       del.textContent = 'удалить';
       del.addEventListener('click', function(){ removeCollection(r); });
 
+      acts.appendChild(edit);
+      acts.appendChild(del);
+
       item.appendChild(thumbs);
       item.appendChild(info);
-      item.appendChild(del);
+      item.appendChild(acts);
       colList.appendChild(item);
     });
   }
 
   async function removeCollection(r){
-    if(!confirm('Удалить запись?')) return;
+    if(!confirm('Удалить запись и её фото?')) return;
 
     var paths = (r.photos || []).map(function(u){
       var i = u.indexOf('/collection/');
@@ -767,6 +929,10 @@ permalink: /profile.html
       colSetMsg('Не удалось удалить', '#c0705a');
       return;
     }
+
+    if(colEditId === r.id) resetCollectionForm();
+
+    colTotal = Math.max(0, colTotal - 1);
     loadCollection();
   }
 
@@ -972,6 +1138,7 @@ permalink: /profile.html
   /* ---- старт ---- */
   buildGrid();
   applyKind();
+  resetCollectionForm();
 
   (async function init(){
     var s = await sb.auth.getSession();
