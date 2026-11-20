@@ -2835,3 +2835,39 @@ body.modal-open{
     padding:1rem;
   }
 }
+/* ---------- иконка профиля в шапке ---------- */
+
+.head-socials a.profile-icon{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:38px;
+  height:38px;
+  padding:0;
+  overflow:hidden;
+}
+
+.profile-icon-svg{
+  width:18px;
+  height:18px;
+  fill:#b08e5a;
+  transition:fill .15s;
+}
+
+.profile-icon-img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.head-socials a.profile-icon:hover .profile-icon-svg{
+  fill:#e0bd85;
+}
+
+.head-socials a.profile-icon:hover{
+  border-color:#b08e5a;
+}
