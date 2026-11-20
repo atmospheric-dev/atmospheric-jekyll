@@ -67,7 +67,9 @@ permalink: /my.html
     var html = '<ul class="my-list">';
     rows.forEach(function (d) {
       var url = d.album.charAt(0) === '/' ? d.album : '/albums/' + d.album + '/';
-      var name = d.album.replace(/^\/|\/$/g, '').split('/').pop();
+      var name = (d.artist && d.title)
+        ? d.artist + ' — ' + d.title
+        : d.album.replace(/^\d{4}-/, '').replace(/-/g, ' ');
       var dt = d.marked_at ? new Date(d.marked_at) : null;
       var date = dt ? dt.toLocaleDateString('ru-RU') : '';
 
