@@ -3566,3 +3566,88 @@ body.modal-open{
   .u-viewer-close{top:10px;right:10px;}
   .u-viewer-img{max-width:94vw;max-height:78vh;}
 }
+/* ===== ФОТО В ФОРМЕ КОЛЛЕКЦИИ ===== */
+.col-photos{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(88px, 1fr));
+  gap:8px;
+  margin:6px 0 10px;
+}
+
+.col-photo{
+  position:relative;
+  border:1px solid var(--line);
+  overflow:hidden;
+  background:rgba(255,255,255,.03);
+}
+.col-photo.is-cover{border-color:var(--accent);}
+
+.col-photo img{
+  width:100%;
+  aspect-ratio:1 / 1;
+  object-fit:cover;
+  display:block;
+}
+
+.col-photo-tag{
+  position:absolute;
+  left:0;
+  top:0;
+  padding:3px 6px;
+  font-family:'Courier New',monospace;
+  font-size:.52rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#0d0d0d;
+  background:var(--accent);
+}
+
+.col-photo-act,
+.col-photo-del{
+  position:absolute;
+  font-family:'Courier New',monospace;
+  font-size:.52rem;
+  line-height:1;
+  color:var(--text);
+  background:rgba(12,12,12,.82);
+  border:1px solid rgba(176,142,90,.45);
+  cursor:pointer;
+  padding:4px 5px;
+}
+.col-photo-act:hover,
+.col-photo-del:hover{
+  color:var(--accent);
+  border-color:var(--accent);
+}
+
+.col-photo-act{
+  left:4px;
+  bottom:4px;
+  right:26px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.col-photo-del{
+  right:4px;
+  bottom:4px;
+  width:20px;
+  height:20px;
+  padding:0;
+  font-size:.8rem;
+}
+
+/* кнопки у записи */
+.col-acts{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.col-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
