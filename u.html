@@ -1,0 +1,100 @@
+---
+layout: default
+title: Профиль
+permalink: /u.html
+---
+
+<div class="profile-wrap">
+  <p class="profile-note" id="u-loading">Загружаем профиль…</p>
+  <div id="u-box" hidden>
+    <div class="profile-head">
+      <img class="profile-avatar" id="u-avatar" src="" alt="">
+      <div class="profile-id">
+        <div class="profile-username" id="u-username">—</div>
+        <div class="profile-status" id="u-status"></div>
+        <div class="profile-since" id="u-since"></div>
+      </div>
+    </div>
+
+    <h2 class="profile-sub">Любимый альбом</h2>
+    <p class="profile-fav" id="u-fav">—</p>
+
+    <h2 class="profile-sub">Пол и возраст</h2>
+    <p class="profile-fav" id="u-extra">—</p>
+  </div>
+  <p class="profile-note" id="u-error" hidden>Такого профиля нет.</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  var SUPABASE_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+
+  var GOBLIN_FILES = ['archer-f','archer-m','druid-f','druid-m','bard-f','bard-m',
+                      'mage-f','mage-m','knight-f','knight-m','necro-f','necro-m'];
+
+  var loading = document.getElementById('u-loading');
+  var box     = document.getElementById('u-box');
+  var err     = document.getElementById('u-error');
+  var base    = '{{ site.baseurl }}';
+
+  function fail(){
+    loading.hidden = true;
+    box.hidden = true;
+    err.hidden = false;
+  }
+
+  var name = new URLSearchParams(location.search).get('name');
+  if(!name){ fail(); return; }
+
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  sb.from('profiles')
+    .select('username,status,favorite_album,gender,birthdate,avatar,created_at')
+    .ilike('username', name)
+    .maybeSingle()
+    .then(function(res){
+      if(res.error || !res.data){ fail(); return; }
+      var p = res.data;
+
+      loading.hidden = true;
+      box.hidden = false;
+
+      document.title = p.username + ' — Atmospheric';
+
+      var av = document.getElementById('u-avatar');
+      av.src = base + '/images/goblins/' + (GOBLIN_FILES[p.avatar] || GOBLIN_FILES[0]) + '.jpg';
+      av.onerror = function(){ av.src = base + '/logo.png'; };
+
+      document.getElementById('u-username').textContent = p.username;
+      document.getElementById('u-status').textContent   = p.status || '';
+
+      var since = p.created_at ? new Date(p.created_at).toLocaleDateString('ru-RU') : '';
+      document.getElementById('u-since').textContent = since ? 'На сайте с ' + since : '';
+
+      document.getElementById('u-fav').textContent = p.favorite_album || 'Не указан';
+
+      var parts = [];
+      if(p.gender === 'male')   parts.push('Мужской');
+      if(p.gender === 'female') parts.push('Женский');
+      if(p.birthdate){
+        var b = new Date(p.birthdate);
+        var now = new Date();
+        var age = now.getFullYear() - b.getFullYear();
+        var m = now.getMonth() - b.getMonth();
+        if(m < 0 || (m === 0 && now.getDate() < b.getDate())) age--;
+        if(age > 0 && age < 120) parts.push(age + ' ' + ageWord(age));
+      }
+      document.getElementById('u-extra').textContent = parts.length ? parts.join(' · ') : 'Не указано';
+    });
+
+  function ageWord(n){
+    var t = n % 10, h = n % 100;
+    if(h >= 11 && h <= 14) return 'лет';
+    if(t === 1) return 'год';
+    if(t >= 2 && t <= 4) return 'года';
+    return 'лет';
+  }
+})();
+</script>
