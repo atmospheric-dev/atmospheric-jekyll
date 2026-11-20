@@ -3,6 +3,20 @@
   var SUPABASE_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
 
+  var BASE = '{{ site.baseurl }}';
+
+  var sb = null;
+  var currentUser = null;
+
+  async function initUser() {
+    if (!window.supabase) return;
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    try {
+      var s = await sb.auth.getSession();
+      currentUser = (s && s.data && s.data.session && s.data.session.user) || null;
+    } catch (e) { currentUser = null; }
+  }
+
   function visitorId() {
     var k = 'atmos_visitor';
     var v = localStorage.getItem(k);
@@ -20,6 +34,8 @@
   }
 
   document.addEventListener('DOMContentLoaded', async function () {
+    await initUser();
+
     var section = document.querySelector('.comments');
     if (!section) return;
 
@@ -35,7 +51,7 @@
     var replyName = form.querySelector('.comment-reply-name');
     var cancelBtn = form.querySelector('.comment-cancel-reply');
 
-        /* ---------- панель эмодзи ---------- */
+    /* ---------- панель эмодзи ---------- */
     var EMOJI = [
       '🖤','💀','🦇','🐦‍⬛','🕯️','🔥','⚰️','🌫️',
       '🎸','🎧','💿','📼','🎵','🎼','🥀','🗡️',
@@ -83,10 +99,29 @@
     var savedName = localStorage.getItem('atmos_name');
     if (savedName) nameEl.value = savedName;
 
+    /* ---------- залогинен: имя берём из профиля ---------- */
+    if (currentUser && nameEl) {
+      var row = nameEl.closest('.comment-form-row');
+      var nick = currentUser.email ? currentUser.email.split('@')[0] : 'Гость';
+
+      try {
+        var prof = await sb.from('profiles').select('username').eq('id', currentUser.id).maybeSingle();
+        if (prof && prof.data && prof.data.username) nick = prof.data.username;
+      } catch (e) { /* остаёмся на e-mail */ }
+
+      nameEl.value = nick;
+      nameEl.removeAttribute('required');
+
+      if (row) {
+        row.innerHTML = '<span class="comment-as">Вы пишете как <a href="' + BASE + '/u.html?name='
+          + encodeURIComponent(nick) + '">' + esc(nick) + '</a></span>';
+      }
+    }
+
     /* ---------- загрузка ---------- */
     async function load() {
       try {
-        var url = SUPABASE_URL + '/rest/v1/comments?select=id,parent_id,name,body,created_at'
+        var url = SUPABASE_URL + '/rest/v1/comments?select=id,parent_id,name,body,created_at,user_id'
           + '&page=eq.' + encodeURIComponent(page)
           + '&order=created_at.asc';
         var res = await fetch(url, {
@@ -130,9 +165,14 @@
       });
 
       function node(c, depth) {
+        var author = c.user_id
+          ? '<a class="comment-author comment-author-link" href="' + BASE + '/u.html?name='
+            + encodeURIComponent(c.name) + '">' + esc(c.name) + '</a>'
+          : '<span class="comment-author">' + esc(c.name) + '</span>';
+
         var html = '<div class="comment" data-id="' + c.id + '">'
           + '<div class="comment-head">'
-          +   '<span class="comment-author">' + esc(c.name) + '</span>'
+          +   author
           +   '<span class="comment-date">' + fmtDate(c.created_at) + '</span>'
           + '</div>'
           + '<div class="comment-text">' + esc(c.body).replace(/\n/g, '<br>') + '</div>';
@@ -173,9 +213,10 @@
       e.preventDefault();
       note.textContent = '';
 
-      var name = nameEl.value.trim();
+      var name = nameEl ? nameEl.value.trim() : '';
       var body = bodyEl.value.trim();
-      if (!name) { note.textContent = 'Введите имя.'; nameEl.focus(); return; }
+
+      if (!currentUser && !name) { note.textContent = 'Введите имя.'; if (nameEl) nameEl.focus(); return; }
       if (body.length < 3) { note.textContent = 'Слишком короткий комментарий.'; bodyEl.focus(); return; }
 
       var submit = form.querySelector('.comment-submit');
@@ -183,16 +224,24 @@
       note.textContent = 'Отправляем…';
 
       try {
+        var token = SUPABASE_KEY;
+        if (sb) {
+          var sess = await sb.auth.getSession();
+          if (sess && sess.data && sess.data.session && sess.data.session.access_token) {
+            token = sess.data.session.access_token;
+          }
+        }
+
         var res = await fetch(SUPABASE_URL + '/rest/v1/rpc/add_comment', {
           method: 'POST',
           headers: {
             'apikey': SUPABASE_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_KEY,
+            'Authorization': 'Bearer ' + token,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             p_page: page,
-            p_name: name,
+            p_name: name || 'Аноним',
             p_body: body,
             p_visitor: visitorId(),
             p_parent: parentEl.value ? Number(parentEl.value) : null
@@ -208,7 +257,7 @@
           return;
         }
 
-        localStorage.setItem('atmos_name', name);
+        if (!currentUser) localStorage.setItem('atmos_name', name);
         bodyEl.value = '';
         parentEl.value = '';
         replyBox.hidden = true;
