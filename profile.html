@@ -1,0 +1,89 @@
+---
+layout: default
+title: Профиль
+permalink: /profile.html
+---
+<div class="wrap">
+  <h1 class="album-title">Профиль</h1>
+  <p class="album-date">Отметки хранятся в этом браузере</p>
+
+  <div class="my-stats" id="prof-stats" hidden>
+    <div class="stat">
+      <span class="stat-num" id="st-total">0</span>
+      <span class="stat-label">отмечено</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="st-done">0</span>
+      <span class="stat-label">послушано</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="st-queue">0</span>
+      <span class="stat-label">в очереди</span>
+    </div>
+  </div>
+
+  <div class="prof-links">
+    <a class="prof-card" href="{{ site.baseurl }}/my.html">
+      <span class="prof-title">Мой список</span>
+      <span class="prof-desc">Всё, что отмечено — по состояниям и датам</span>
+    </a>
+    <a class="prof-card" href="{{ site.baseurl }}/diary.html">
+      <span class="prof-title">Дневник прослушивания</span>
+      <span class="prof-desc">Хронология отметок по месяцам</span>
+    </a>
+  </div>
+
+  <p class="my-export" id="prof-export" hidden>
+    <button class="back" id="export-btn" type="button">Экспортировать в файл</button>
+  </p>
+</div>
+
+<script>
+(function () {
+  var BASE = 'https://ojqefhakkmwmztxplcqv.supabase.co';
+  var KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+
+  function visitor() {
+    return localStorage.getItem('atmos_visitor') || '';
+  }
+
+  function rpc(fn, body) {
+    return fetch(BASE + '/rest/v1/rpc/' + fn, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': KEY,
+        'Authorization': 'Bearer ' + KEY
+      },
+      body: JSON.stringify(body)
+    }).then(function (r) {
+      if (!r.ok) throw new Error('rpc ' + fn + ' ' + r.status);
+      return r.json();
+    });
+  }
+
+  var v = visitor();
+  if (!v) return;
+
+  rpc('my_marks', { p_visitor: v }).then(function (rows) {
+    rows = rows || [];
+    if (!rows.length) return;
+
+    var done = rows.filter(function (d) { return d.mark === 'done'; }).length;
+    document.getElementById('st-total').textContent = rows.length;
+    document.getElementById('st-done').textContent = done;
+    document.getElementById('st-queue').textContent = rows.length - done;
+    document.getElementById('prof-stats').hidden = false;
+    document.getElementById('prof-export').hidden = false;
+
+    document.getElementById('export-btn').addEventListener('click', function () {
+      var blob = new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'atmospheric-list.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+  }).catch(function () {});
+})();
+</script>
