@@ -23,6 +23,8 @@
   var album = box.dataset.album;
   var BASE = box.dataset.supabase;
   var KEY = box.dataset.key;
+  var artist = {{ page.artist | jsonify | default: 'null' }};
+  var title  = {{ page.title  | jsonify | default: 'null' }};
   var row = box.querySelector('.marks-row');
   var buttons = box.querySelectorAll('.mark-btn');
   var current = null;
@@ -82,7 +84,7 @@
 
       var action = (current === m)
         ? rpc('unmark_album', { p_album: album, p_visitor: visitor() })
-        : rpc('mark_album', { p_album: album, p_visitor: visitor(), p_mark: m });
+        : rpc('mark_album', { p_album: album, p_visitor: visitor(), p_mark: m, p_artist: artist, p_title: title });
 
       action.then(paint).catch(function () {
         buttons.forEach(function (x) { x.removeAttribute('disabled'); });
