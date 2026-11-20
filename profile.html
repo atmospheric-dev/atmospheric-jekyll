@@ -59,6 +59,16 @@ permalink: /profile.html
     </div>
 
     <h2 class="profile-sub">О себе</h2>
+          <div class="cover-row">
+        <div class="cover-preview" id="cover-preview"></div>
+        <div class="cover-actions">
+          <label class="fav-pick" id="cover-pick">
+            Загрузить фон
+            <input type="file" accept="image/*" id="cover-file" hidden>
+          </label>
+          <button type="button" class="fav-clear" id="cover-clear">Убрать</button>
+        </div>
+      </div>
     <form id="profile-form" class="profile-form">
       <label>Имя пользователя
         <input type="text" name="username" maxlength="24" placeholder="2–24 символа">
