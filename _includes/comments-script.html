@@ -1,6 +1,4 @@
-<script>
-(function () {
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function () {
   var SUPABASE_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
@@ -11,7 +9,7 @@
   var sb = null;
   var currentUser = null;
 
- async function initUser() {
+  async function initUser() {
     var tries = 0;
     while (!window.supabase && tries < 40) {
       await new Promise(function (r) { setTimeout(r, 50); });
