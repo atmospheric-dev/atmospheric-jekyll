@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="45" fill="none" stroke="#b08e5a" stroke-width="1.6" opacity=".75"/>
+  <circle cx="50" cy="50" r="40" fill="none" stroke="#b08e5a" stroke-width="0.7" opacity=".4"/>
+  <g transform="translate(44,58) rotate(-8)" opacity=".55">
+    <rect x="-17.48" y="-11.96" width="34.96" height="23.92" rx="1.38" fill="#1b1917" stroke="#b08e5a" stroke-width=".92"/>
+    <path d="M-17.48 -11.96 L0 1.84 L17.48 -11.96" fill="none" stroke="#b08e5a" stroke-width=".64" opacity=".55"/>
+  </g>
+  <g transform="translate(54,52) rotate(4)">
+    <rect x="-19" y="-13" width="38" height="26" rx="1.5" fill="#1b1917" stroke="#b08e5a" stroke-width="1"/>
+    <path d="M-19 -13 L0 2 L19 -13" fill="none" stroke="#b08e5a" stroke-width=".7" opacity=".55"/>
+  </g>
+  <g transform="translate(72,34) rotate(-22)">
+    <path d="M0 -14 C4.9 -8.4 4.9 0 0 7 C-4.9 0 -4.9 -8.4 0 -14 Z" fill="none" stroke="#b08e5a" stroke-width=".77"/>
+    <path d="M0 -12.6 V8.4" stroke="#b08e5a" stroke-width=".56"/>
+  </g>
+  <g stroke="#b08e5a" stroke-width="1.6" opacity=".85" fill="none">
+    <path d="M10 20 V10 H20"/><path d="M80 10 H90 V20"/>
+    <path d="M90 80 V90 H80"/><path d="M20 90 H10 V80"/>
+  </g>
+</svg>
