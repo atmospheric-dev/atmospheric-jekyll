@@ -119,8 +119,8 @@
       nameEl.removeAttribute('required');
 
       if (row) {
-        row.innerHTML = '<span class="comment-as">Вы пишете как <a href="' + BASE + '/u.html?name='
-          + encodeURIComponent(nick) + '">' + esc(nick) + '</a></span>';
+        row.innerHTML = '<span class="comment-as">Вы пишете как <a href="' + BASE + '/u.html?id='
+          + encodeURIComponent(currentUser.id) + '">' + esc(nick) + '</a></span>';
       }
     }
 
@@ -172,8 +172,8 @@
 
       function node(c, depth) {
         var author = c.user_id
-          ? '<a class="comment-author comment-author-link" href="' + BASE + '/u.html?name='
-            + encodeURIComponent(c.name) + '">' + esc(c.name) + '</a>'
+          ? '<a class="comment-author comment-author-link" href="' + BASE + '/u.html?id='
+            + encodeURIComponent(c.user_id) + '">' + esc(c.name) + '</a>'
           : '<span class="comment-author">' + esc(c.name) + '</span>';
 
         var html = '<div class="comment" data-id="' + c.id + '">'
@@ -238,6 +238,15 @@
           }
         }
 
+        var payload = {
+          p_page: String(page),
+          p_name: String(name || 'Аноним'),
+          p_body: String(body),
+          p_visitor: String(visitorId())
+        };
+        var pid = parentEl.value ? Number(parentEl.value) : 0;
+        if (pid > 0) payload.p_parent = pid;
+
         var res = await fetch(SUPABASE_URL + '/rest/v1/rpc/add_comment', {
           method: 'POST',
           headers: {
@@ -245,13 +254,7 @@
             'Authorization': 'Bearer ' + token,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            p_page: page,
-            p_name: name || 'Аноним',
-            p_body: body,
-            p_visitor: visitorId(),
-            p_parent: parentEl.value ? Number(parentEl.value) : null
-          })
+          body: JSON.stringify(payload)
         });
         if (!res.ok) throw new Error('add_comment: ' + res.status);
         var r = await res.json();
