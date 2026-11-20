@@ -2292,3 +2292,18 @@ footer a:hover{color:var(--accent);opacity:1;}
 }
 .my-empty{color:var(--text-dim);font-style:italic;}
 .my-export{margin-top:30px;}
+/* ===== ДНЕВНИК ===== */
+.diary-month{
+  font-family:'Courier New',monospace;font-size:.72rem;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);margin:36px 0 14px;
+}
+.diary-list{list-style:none;margin:0;padding:0;}
+.diary-item{
+  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  padding:11px 0;border-bottom:1px solid var(--line);
+}
+.diary-day{
+  font-family:'Courier New',monospace;font-size:.72rem;
+  color:var(--text-dim);opacity:.6;min-width:22px;
+}
