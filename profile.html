@@ -3,87 +3,323 @@ layout: default
 title: Профиль
 permalink: /profile.html
 ---
-<div class="wrap">
-  <h1 class="album-title">Профиль</h1>
-  <p class="album-date">Отметки хранятся в этом браузере</p>
 
-  <div class="my-stats" id="prof-stats" hidden>
-    <div class="stat">
-      <span class="stat-num" id="st-total">0</span>
-      <span class="stat-label">отмечено</span>
+<div class="profile-wrap">
+
+  <h1 class="profile-title">Профиль</h1>
+
+  <!-- ===== НЕ ЗАЛОГИНЕН ===== -->
+  <div id="auth-box" hidden>
+    <p class="profile-note">Войдите или создайте аккаунт — данные будут храниться на сервере и не пропадут при очистке кэша.</p>
+
+    <div class="auth-grid">
+      <form class="auth-card" id="login-form">
+        <h2>Вход</h2>
+        <label>E-mail
+          <input type="email" name="email" required autocomplete="email">
+        </label>
+        <label>Пароль
+          <input type="password" name="password" required autocomplete="current-password">
+        </label>
+        <button type="submit">Войти</button>
+      </form>
+
+      <form class="auth-card" id="signup-form">
+        <h2>Регистрация</h2>
+        <label>E-mail
+          <input type="email" name="email" required autocomplete="email">
+        </label>
+        <label>Пароль
+          <input type="password" name="password" required minlength="6" autocomplete="new-password">
+        </label>
+        <button type="submit">Создать аккаунт</button>
+      </form>
     </div>
-    <div class="stat">
-      <span class="stat-num" id="st-done">0</span>
-      <span class="stat-label">послушано</span>
+
+    <p class="auth-msg" id="auth-msg"></p>
+  </div>
+
+  <!-- ===== ЗАЛОГИНЕН ===== -->
+  <div id="profile-box" hidden>
+
+    <div class="profile-head">
+      <img class="profile-avatar" id="avatar-preview" src="" alt="">
+      <div class="profile-id">
+        <div class="profile-username" id="username-line">—</div>
+        <div class="profile-status" id="status-line"></div>
+        <div class="profile-email" id="email-line"></div>
+        <div class="profile-since" id="since-line"></div>
+      </div>
     </div>
-    <div class="stat">
-      <span class="stat-num" id="st-queue">0</span>
-      <span class="stat-label">в очереди</span>
+
+    <h2 class="profile-sub">Аватар</h2>
+    <div class="goblin-grid" id="goblin-grid"></div>
+
+    <h2 class="profile-sub">О себе</h2>
+    <form id="profile-form" class="profile-form">
+      <label>Имя пользователя
+        <input type="text" name="username" maxlength="24" placeholder="2–24 символа">
+      </label>
+      <label>Статус
+        <input type="text" name="status" maxlength="120" placeholder="Любая фраза до 120 символов">
+      </label>
+      <label>Любимый альбом
+        <input type="text" name="favorite_album" maxlength="120" placeholder="Например: Olshanoe — Краеведение">
+      </label>
+      <label>Пол
+        <select name="gender">
+          <option value="none">Не указывать</option>
+          <option value="male">Мужской</option>
+          <option value="female">Женский</option>
+          <option value="other">Другой</option>
+        </select>
+      </label>
+      <label>Дата рождения
+        <input type="date" name="birthdate">
+      </label>
+
+      <div class="profile-actions">
+        <button type="submit">Сохранить</button>
+        <span class="profile-saved" id="saved-msg"></span>
+      </div>
+    </form>
+
+    <h2 class="profile-sub">Мои отметки</h2>
+    <div class="profile-links">
+      <a class="profile-link" href="{{ site.baseurl }}/my.html">Мой список</a>
+      <a class="profile-link" href="{{ site.baseurl }}/diary.html">Дневник прослушивания</a>
+    </div>
+
+    <div class="profile-footer">
+      <button type="button" class="profile-logout" id="logout-btn">Выйти из аккаунта</button>
     </div>
   </div>
 
-  <div class="prof-links">
-    <a class="prof-card" href="{{ site.baseurl }}/my.html">
-      <span class="prof-title">Мой список</span>
-      <span class="prof-desc">Всё, что отмечено — по состояниям и датам</span>
-    </a>
-    <a class="prof-card" href="{{ site.baseurl }}/diary.html">
-      <span class="prof-title">Дневник прослушивания</span>
-      <span class="prof-desc">Хронология отметок по месяцам</span>
-    </a>
-  </div>
-
-  <p class="my-export" id="prof-export" hidden>
-    <button class="back" id="export-btn" type="button">Экспортировать в файл</button>
-  </p>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-(function () {
-  var BASE = 'https://ojqefhakkmwmztxplcqv.supabase.co';
-  var KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+(function(){
+  var SUPABASE_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
 
-  function visitor() {
-    return localStorage.getItem('atmos_visitor') || '';
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  var GOBLINS = [
+    { id: 0,  file: 'archer-f', label: 'Лучница' },
+    { id: 1,  file: 'archer-m', label: 'Лучник' },
+    { id: 2,  file: 'druid-f',  label: 'Друидка' },
+    { id: 3,  file: 'druid-m',  label: 'Друид' },
+    { id: 4,  file: 'bard-f',   label: 'Бардесса' },
+    { id: 5,  file: 'bard-m',   label: 'Бард' },
+    { id: 6,  file: 'mage-f',   label: 'Волшебница' },
+    { id: 7,  file: 'mage-m',   label: 'Маг' },
+    { id: 8,  file: 'knight-f', label: 'Рыцарша' },
+    { id: 9,  file: 'knight-m', label: 'Рыцарь' },
+    { id: 10, file: 'necro-f',  label: 'Некромантка' },
+    { id: 11, file: 'necro-m',  label: 'Некромант' }
+  ];
+
+  var avatarBase     = '{{ site.baseurl }}/images/goblins/';
+  var fallbackAvatar = '{{ site.baseurl }}/logo.png';
+
+  var currentUser     = null;
+  var currentAvatar   = 0;
+
+  var authBox    = document.getElementById('auth-box');
+  var profileBox = document.getElementById('profile-box');
+  var authMsg    = document.getElementById('auth-msg');
+  var savedMsg   = document.getElementById('saved-msg');
+  var grid       = document.getElementById('goblin-grid');
+  var preview    = document.getElementById('avatar-preview');
+
+  function avatarSrc(id){
+    var g = GOBLINS[id] || GOBLINS[0];
+    return avatarBase + g.file + '.jpg';
   }
 
-  function rpc(fn, body) {
-    return fetch(BASE + '/rest/v1/rpc/' + fn, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': KEY,
-        'Authorization': 'Bearer ' + KEY
-      },
-      body: JSON.stringify(body)
-    }).then(function (r) {
-      if (!r.ok) throw new Error('rpc ' + fn + ' ' + r.status);
-      return r.json();
+  function show(el){ el.hidden = false; }
+  function hide(el){ el.hidden = true; }
+
+  function buildGrid(){
+    grid.innerHTML = '';
+    GOBLINS.forEach(function(g){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'goblin-cell';
+      b.dataset.id = g.id;
+      b.title = g.label;
+
+      var img = document.createElement('img');
+      img.src = avatarBase + g.file + '.jpg';
+      img.alt = g.label;
+      img.loading = 'lazy';
+      img.onerror = function(){ img.src = fallbackAvatar; };
+
+      b.appendChild(img);
+      b.addEventListener('click', function(){
+        currentAvatar = g.id;
+        markSelected();
+        preview.src = avatarSrc(g.id);
+      });
+      grid.appendChild(b);
     });
   }
 
-  var v = visitor();
-  if (!v) return;
+  function markSelected(){
+    var cells = grid.querySelectorAll('.goblin-cell');
+    for(var i = 0; i < cells.length; i++){
+      cells[i].classList.toggle('is-active', Number(cells[i].dataset.id) === currentAvatar);
+    }
+  }
 
-  rpc('my_marks', { p_visitor: v }).then(function (rows) {
-    rows = rows || [];
-    if (!rows.length) return;
+  function showProfile(profile){
+    hide(authBox);
+    show(profileBox);
 
-    var done = rows.filter(function (d) { return d.mark === 'done'; }).length;
-    document.getElementById('st-total').textContent = rows.length;
-    document.getElementById('st-done').textContent = done;
-    document.getElementById('st-queue').textContent = rows.length - done;
-    document.getElementById('prof-stats').hidden = false;
-    document.getElementById('prof-export').hidden = false;
+    currentAvatar = profile && typeof profile.avatar === 'number' ? profile.avatar : 0;
 
-    document.getElementById('export-btn').addEventListener('click', function () {
-      var blob = new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json' });
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'atmospheric-list.json';
-      a.click();
-      URL.revokeObjectURL(a.href);
-    });
-  }).catch(function () {});
+    preview.src = avatarSrc(currentAvatar);
+    preview.onerror = function(){ preview.src = fallbackAvatar; };
+
+    document.getElementById('username-line').textContent = (profile && profile.username) || 'Без имени';
+    document.getElementById('status-line').textContent   = (profile && profile.status) || '';
+    document.getElementById('email-line').textContent    = currentUser.email || '';
+
+    var since = profile && profile.created_at ? new Date(profile.created_at) : null;
+    document.getElementById('since-line').textContent = since
+      ? 'На сайте с ' + since.toLocaleDateString('ru-RU')
+      : '';
+
+    var f = document.getElementById('profile-form');
+    f.username.value       = (profile && profile.username) || '';
+    f.status.value         = (profile && profile.status) || '';
+    f.favorite_album.value = (profile && profile.favorite_album) || '';
+    f.gender.value         = (profile && profile.gender) || 'none';
+    f.birthdate.value      = (profile && profile.birthdate) || '';
+
+    markSelected();
+  }
+
+  function showAuth(message){
+    hide(profileBox);
+    show(authBox);
+    authMsg.textContent = message || '';
+  }
+
+  async function loadProfile(){
+    var res = await sb
+      .from('profiles')
+      .select('*')
+      .eq('id', currentUser.id)
+      .maybeSingle();
+
+    if(res.error){
+      showAuth('Ошибка чтения профиля: ' + res.error.message);
+      return;
+    }
+
+    var profile = res.data;
+
+    if(!profile){
+      var ins = await sb.from('profiles').insert({ id: currentUser.id }).select().maybeSingle();
+      profile = ins.data || { id: currentUser.id, avatar: 0, created_at: new Date().toISOString() };
+    }
+
+    showProfile(profile);
+
+    var visitor = localStorage.getItem('atmos_visitor');
+    var claimed = 'atmos_claimed_' + currentUser.id;
+    if(visitor && !localStorage.getItem(claimed)){
+      var r = await sb.rpc('claim_marks', { p_visitor: visitor });
+      if(!r.error){
+        localStorage.setItem(claimed, '1');
+      }
+    }
+  }
+
+  document.getElementById('profile-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var f = e.target;
+    savedMsg.textContent = '';
+    savedMsg.classList.remove('is-error');
+
+    var payload = {
+      username:       f.username.value.trim() || null,
+      status:         f.status.value.trim() || null,
+      favorite_album: f.favorite_album.value.trim() || null,
+      gender:         f.gender.value,
+      birthdate:      f.birthdate.value || null,
+      avatar:         currentAvatar
+    };
+
+    var res = await sb.from('profiles').update(payload).eq('id', currentUser.id).select().maybeSingle();
+
+    if(res.error){
+      savedMsg.classList.add('is-error');
+      savedMsg.textContent = res.error.code === '23505'
+        ? 'Такое имя уже занято.'
+        : 'Не сохранилось: ' + res.error.message;
+      return;
+    }
+
+    savedMsg.textContent = 'Сохранено';
+    showProfile(res.data);
+    setTimeout(function(){ savedMsg.textContent = ''; }, 2500);
+  });
+
+  document.getElementById('login-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+    authMsg.textContent = 'Входим…';
+    var email = e.target.email.value.trim();
+    var password = e.target.password.value;
+
+    var r = await sb.auth.signInWithPassword({ email: email, password: password });
+    if(r.error){
+      authMsg.textContent = 'Не вошло: ' + r.error.message;
+      return;
+    }
+    currentUser = r.data.user;
+    await loadProfile();
+  });
+
+  document.getElementById('signup-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+    authMsg.textContent = 'Создаём аккаунт…';
+    var email = e.target.email.value.trim();
+    var password = e.target.password.value;
+
+    var r = await sb.auth.signUp({ email: email, password: password });
+
+    if(r.error){
+      authMsg.textContent = 'Не получилось: ' + r.error.message;
+      return;
+    }
+    if(!r.data.session){
+      authMsg.textContent = 'Аккаунт создан, но вход не выполнен. Проверьте, выключено ли подтверждение почты в Supabase.';
+      return;
+    }
+    currentUser = r.data.user;
+    await loadProfile();
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', async function(){
+    await sb.auth.signOut();
+    currentUser = null;
+    showAuth('Вы вышли из аккаунта.');
+  });
+
+  buildGrid();
+
+  (async function init(){
+    var s = await sb.auth.getSession();
+    if(s.data && s.data.session && s.data.session.user){
+      currentUser = s.data.session.user;
+      await loadProfile();
+    } else {
+      showAuth('');
+    }
+  })();
+
 })();
 </script>
