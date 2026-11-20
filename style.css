@@ -2343,3 +2343,364 @@ footer a:hover{color:var(--accent);opacity:1;}
   font-size:.65rem;letter-spacing:.06em;
   color:var(--text-dim);opacity:.75;
 }
+/* ==================== ПРОФИЛЬ ==================== */
+
+.profile-wrap{
+  max-width:780px;
+  margin:0 auto;
+  padding:2.4rem 1.2rem 4rem;
+}
+
+.profile-title{
+  font-family:Georgia, 'Times New Roman', serif;
+  font-size:2.2rem;
+  font-weight:400;
+  color:#e8e2d8;
+  margin:0 0 2rem;
+  padding-bottom:.8rem;
+  border-bottom:1px solid #2a2a28;
+}
+
+.profile-note{
+  font-family:'Courier New', monospace;
+  font-size:.72rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#7c7a72;
+  margin:0 0 1.8rem;
+}
+
+/* ---------- вход и регистрация ---------- */
+
+.auth-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1.2rem;
+}
+
+.auth-card{
+  background:#131312;
+  border:1px solid #262624;
+  padding:1.4rem 1.3rem 1.6rem;
+}
+
+.auth-card h2{
+  font-family:Georgia, serif;
+  font-size:1.05rem;
+  font-weight:400;
+  color:#b08e5a;
+  margin:0 0 1.1rem;
+  letter-spacing:.04em;
+}
+
+.profile-form label,
+.auth-card label{
+  display:block;
+  font-family:'Courier New', monospace;
+  font-size:.68rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:#7c7a72;
+  margin-bottom:1rem;
+}
+
+.profile-form input,
+.profile-form select,
+.auth-card input{
+  display:block;
+  width:100%;
+  margin-top:.4rem;
+  box-sizing:border-box;
+  background:#0b0b0a;
+  border:1px solid #2a2a28;
+  color:#ded8cc;
+  font-family:Georgia, serif;
+  font-size:.95rem;
+  padding:.6rem .7rem;
+  outline:none;
+  transition:border-color .15s;
+}
+
+.profile-form input:focus,
+.profile-form select:focus,
+.auth-card input:focus{
+  border-color:#b08e5a;
+}
+
+.profile-form select{
+  appearance:none;
+  -webkit-appearance:none;
+  background-image:linear-gradient(45deg, transparent 50%, #7c7a72 50%),
+                   linear-gradient(135deg, #7c7a72 50%, transparent 50%);
+  background-position:calc(100% - 18px) 55%, calc(100% - 13px) 55%;
+  background-size:5px 5px, 5px 5px;
+  background-repeat:no-repeat;
+  cursor:pointer;
+}
+
+.profile-form input::placeholder,
+.auth-card input::placeholder{
+  color:#4a4a46;
+}
+
+.auth-card button,
+.profile-actions button{
+  font-family:'Courier New', monospace;
+  font-size:.72rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#0e0e0e;
+  background:#b08e5a;
+  border:1px solid #b08e5a;
+  padding:.62rem 1.4rem;
+  cursor:pointer;
+  transition:background .15s, color .15s;
+}
+
+.auth-card button:hover,
+.profile-actions button:hover{
+  background:#c9a672;
+  border-color:#c9a672;
+}
+
+.auth-msg{
+  font-family:'Courier New', monospace;
+  font-size:.78rem;
+  color:#b08e5a;
+  margin-top:1.2rem;
+  min-height:1.2em;
+}
+
+/* ---------- карточка профиля ---------- */
+
+.profile-head{
+  display:flex;
+  align-items:center;
+  gap:1.3rem;
+  background:#131312;
+  border:1px solid #262624;
+  padding:1.3rem;
+  margin-bottom:2rem;
+}
+
+.profile-avatar{
+  width:104px;
+  height:104px;
+  flex:0 0 104px;
+  object-fit:cover;
+  border:1px solid #b08e5a;
+  background:#0b0b0a;
+  display:block;
+}
+
+.profile-id{
+  min-width:0;
+}
+
+.profile-username{
+  font-family:Georgia, serif;
+  font-size:1.4rem;
+  color:#e8e2d8;
+  line-height:1.25;
+  overflow-wrap:anywhere;
+}
+
+.profile-status{
+  font-family:Georgia, serif;
+  font-style:italic;
+  font-size:.92rem;
+  color:#b08e5a;
+  margin-top:.25rem;
+  overflow-wrap:anywhere;
+}
+
+.profile-email{
+  font-family:'Courier New', monospace;
+  font-size:.72rem;
+  color:#7c7a72;
+  margin-top:.5rem;
+  overflow-wrap:anywhere;
+}
+
+.profile-since{
+  font-family:'Courier New', monospace;
+  font-size:.68rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#5c5a54;
+  margin-top:.35rem;
+}
+
+/* ---------- подзаголовки ---------- */
+
+.profile-sub{
+  font-family:'Courier New', monospace;
+  font-size:.7rem;
+  font-weight:400;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:#b08e5a;
+  margin:2.2rem 0 1rem;
+}
+
+/* ---------- сетка гоблинов ---------- */
+
+.goblin-grid{
+  display:grid;
+  grid-template-columns:repeat(6, 1fr);
+  gap:.6rem;
+}
+
+.goblin-cell{
+  padding:0;
+  border:1px solid #262624;
+  background:#0b0b0a;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  transition:border-color .15s, transform .15s;
+}
+
+.goblin-cell img{
+  display:block;
+  width:100%;
+  height:auto;
+  aspect-ratio:1 / 1;
+  object-fit:cover;
+  filter:grayscale(.35) brightness(.85);
+  transition:filter .18s;
+}
+
+.goblin-cell:hover{
+  border-color:#5c5040;
+}
+
+.goblin-cell:hover img{
+  filter:grayscale(0) brightness(1);
+}
+
+.goblin-cell.is-active{
+  border-color:#b08e5a;
+  box-shadow:0 0 0 1px #b08e5a inset;
+}
+
+.goblin-cell.is-active img{
+  filter:none;
+}
+
+.goblin-cell.is-active::after{
+  content:'';
+  position:absolute;
+  left:0; right:0; bottom:0;
+  height:3px;
+  background:#b08e5a;
+}
+
+/* ---------- форма ---------- */
+
+.profile-form{
+  background:#131312;
+  border:1px solid #262624;
+  padding:1.4rem 1.3rem 1.6rem;
+}
+
+.profile-actions{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  margin-top:1.4rem;
+  flex-wrap:wrap;
+}
+
+.profile-saved{
+  font-family:'Courier New', monospace;
+  font-size:.72rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:#b08e5a;
+}
+
+.profile-saved.is-error{
+  color:#c96a5a;
+}
+
+/* ---------- ссылки и выход ---------- */
+
+.profile-links{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1rem;
+}
+
+.profile-link{
+  display:block;
+  font-family:'Courier New', monospace;
+  font-size:.74rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:#ded8cc;
+  text-decoration:none;
+  background:#131312;
+  border:1px solid #262624;
+  padding:1.1rem 1.2rem;
+  transition:border-color .15s, color .15s;
+}
+
+.profile-link:hover{
+  border-color:#b08e5a;
+  color:#b08e5a;
+}
+
+.profile-footer{
+  margin-top:2.4rem;
+  padding-top:1.4rem;
+  border-top:1px solid #222220;
+}
+
+.profile-logout{
+  font-family:'Courier New', monospace;
+  font-size:.7rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#7c7a72;
+  background:transparent;
+  border:1px solid #2a2a28;
+  padding:.55rem 1.2rem;
+  cursor:pointer;
+  transition:color .15s, border-color .15s;
+}
+
+.profile-logout:hover{
+  color:#c96a5a;
+  border-color:#c96a5a;
+}
+
+/* ---------- мобильное ---------- */
+
+@media (max-width:680px){
+  .auth-grid{
+    grid-template-columns:1fr;
+  }
+  .goblin-grid{
+    grid-template-columns:repeat(4, 1fr);
+    gap:.45rem;
+  }
+  .profile-links{
+    grid-template-columns:1fr;
+  }
+  .profile-head{
+    flex-direction:column;
+    align-items:flex-start;
+    text-align:left;
+    gap:1rem;
+  }
+  .profile-title{
+    font-size:1.8rem;
+  }
+}
+
+@media (max-width:420px){
+  .goblin-grid{
+    grid-template-columns:repeat(3, 1fr);
+  }
+}
