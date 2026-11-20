@@ -93,7 +93,7 @@ permalink: /diary.html
     var v = visitor();
     if (!v) return;
 
-    rpc('my_diary', { p_visitor: v }).then(function (rows) {
+    rpc('my_diary', { p_visitor: v, p_limit: 500 }).then(function (rows) {
       if (rows && rows.length) render(rows);
     }).catch(function () {});
   }
