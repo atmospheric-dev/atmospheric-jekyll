@@ -19,7 +19,7 @@ permalink: /my.html
   </div>
 
   <p class="my-export" id="my-export" hidden>
-    <button class="back" id="export-btn" type="button">Экспортировать в файл</button>
+    <a class="back" href="{{ site.baseurl }}/profile.html">Профиль</a>
   </p>
 </div>
 
@@ -66,10 +66,14 @@ permalink: /my.html
 
     var html = '<ul class="my-list">';
     rows.forEach(function (d) {
-      var url = d.album.charAt(0) === '/' ? d.album : '/albums/' + d.album + '/';
+      var url = d.album.charAt(0) === '/'
+        ? d.album
+        : '/albums/' + encodeURIComponent(d.album) + '.html';
+
       var name = (d.artist && d.title)
         ? d.artist + ' — ' + d.title
         : d.album.replace(/^\d{4}-/, '').replace(/-/g, ' ');
+
       var dt = d.marked_at ? new Date(d.marked_at) : null;
       var date = dt ? dt.toLocaleDateString('ru-RU') : '';
 
@@ -90,7 +94,6 @@ permalink: /my.html
     rpc('my_marks', { p_visitor: v }).then(function (rows) {
       data = rows || [];
       if (!data.length) { return; }
-      list.innerHTML = '';
       sw.hidden = false;
       exp.hidden = false;
       render();
@@ -104,15 +107,6 @@ permalink: /my.html
       b.classList.add('is-on');
       render();
     });
-  });
-
-  document.getElementById('export-btn').addEventListener('click', function () {
-    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'atmospheric-list.json';
-    a.click();
-    URL.revokeObjectURL(a.href);
   });
 
   load();
