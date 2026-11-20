@@ -11,6 +11,7 @@ permalink: /u.html
   <div id="u-box" hidden>
 
     <div class="u-hero" id="u-hero">
+      <div class="u-medals" id="u-medals"></div>
       <div class="u-hero-inner">
         <img class="profile-avatar u-avatar" id="u-avatar" src="" alt="">
 
@@ -195,7 +196,7 @@ permalink: /u.html
       var p = res.data;
       render(p);
       loadCollection(p.id);
-      loadBadges(p.id);
+      loadMedals(p.id);
     })
     .catch(function(){ fail(); });
 
@@ -478,7 +479,55 @@ permalink: /u.html
   }
 
   /* ================= ЗНАЧКИ ================= */
+  /* ---- медальоны знаков ---- */
+  var MEDALS = {
+    comment: { dir: 'comment', name: 'Комментарии', of: 'комментариев' },
+    marks:   { dir: 'marks',   name: 'Отметки альбомов', of: 'отметок' },
+    diary:   { dir: 'diary',   name: 'Дневник', of: 'записей' },
+    collect: { dir: 'collect', name: 'Коллекция', of: 'записей' },
+    loyal:   { dir: 'loyal',   name: 'Лояльность', of: 'дней' }
+  };
 
+  var ROMAN = ['', 'I', 'II', 'III'];
+
+  function loadMedals(id){
+    var wrap = document.getElementById('u-medals');
+    if(!wrap) return;
+    wrap.innerHTML = '';
+
+    sb.from('user_levels')
+      .select('category,level')
+      .eq('user_id', id)
+      .then(function(res){
+        if(res.error || !res.data || !res.data.length) return;
+
+        /* порядок фиксированный, чтобы знаки не прыгали */
+        var order = ['comment', 'marks', 'diary', 'collect', 'loyal'];
+
+        order.forEach(function(cat){
+          var row = null;
+          for(var i = 0; i < res.data.length; i++){
+            if(res.data[i].category === cat) row = res.data[i];
+          }
+          if(!row || !row.level) return;
+
+          var m = MEDALS[cat];
+          if(!m) return;
+
+          var img = document.createElement('img');
+          img.className = 'u-medal';
+          img.src = base + '/images/badges/' + m.dir + '-' + row.level + '.svg';
+          img.alt = m.name;
+          img.title = m.name + ' — уровень ' + ROMAN[row.level] + ' из III';
+          img.loading = 'lazy';
+          img.onerror = function(){ this.remove(); };
+
+          wrap.appendChild(img);
+        });
+      })
+      .catch(function(){ /* молча */ });
+  }
+  
   function loadBadges(id){
     var wrap = document.getElementById('u-badges');
     wrap.innerHTML = '';
