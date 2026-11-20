@@ -1,0 +1,118 @@
+---
+layout: default
+title: Мой список
+permalink: /my.html
+---
+<div class="wrap">
+  <h1 class="album-title">Мой список</h1>
+  <p class="album-date">Отметки хранятся в этом браузере</p>
+
+  <div class="my-marks" id="my-marks">
+    <p class="my-empty">Пока пусто. Отмечай альбомы на страницах рецензий — они появятся здесь.</p>
+  </div>
+
+  <div class="my-switch" id="my-switch" hidden>
+    <button class="mark-btn is-on" data-filter="all" type="button">Все</button>
+    <button class="mark-btn" data-filter="now" type="button">Слушаю сейчас</button>
+    <button class="mark-btn" data-filter="done" type="button">Послушал</button>
+    <button class="mark-btn" data-filter="later" type="button">Хочу послушать</button>
+  </div>
+
+  <p class="my-export" id="my-export" hidden>
+    <button class="back" id="export-btn" type="button">Экспортировать в файл</button>
+  </p>
+</div>
+
+<script>
+(function () {
+  var BASE = 'https://ojqefhakkmwmztxplcqv.supabase.co';
+  var KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+  var list = document.getElementById('my-marks');
+  var sw = document.getElementById('my-switch');
+  var exp = document.getElementById('my-export');
+  var data = [];
+  var filter = 'all';
+
+  function visitor() {
+    return localStorage.getItem('atmos_visitor') || '';
+  }
+
+  function rpc(fn, body) {
+    return fetch(BASE + '/rest/v1/rpc/' + fn, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': KEY,
+        'Authorization': 'Bearer ' + KEY
+      },
+      body: JSON.stringify(body)
+    }).then(function (r) {
+      if (!r.ok) throw new Error('rpc ' + fn + ' ' + r.status);
+      return r.json();
+    });
+  }
+
+  var LABEL = { now: 'Слушаю сейчас', done: 'Послушал', later: 'Хочу послушать' };
+
+  function render() {
+    var rows = data.filter(function (d) {
+      return filter === 'all' || d.mark === filter;
+    });
+
+    if (!rows.length) {
+      list.innerHTML = '<p class="my-empty">Пока пусто. Отмечай альбомы на страницах рецензий — они появятся здесь.</p>';
+      return;
+    }
+
+    var html = '<ul class="my-list">';
+    rows.forEach(function (d) {
+      var url = d.album.charAt(0) === '/' ? d.album : '/albums/' + d.album + '/';
+      var name = d.album.replace(/^\/|\/$/g, '').split('/').pop();
+      var dt = d.marked_at ? new Date(d.marked_at) : null;
+      var date = dt ? dt.toLocaleDateString('ru-RU') : '';
+
+      html += '<li class="my-item">' +
+        '<a class="my-link" href="' + url + '">' + name + '</a>' +
+        '<span class="my-mark my-mark-' + d.mark + '">' + LABEL[d.mark] + '</span>' +
+        '<span class="my-date">' + date + '</span>' +
+        '</li>';
+    });
+    html += '</ul>';
+    list.innerHTML = html;
+  }
+
+  function load() {
+    var v = visitor();
+    if (!v) { return; }
+
+    rpc('my_marks', { p_visitor: v }).then(function (rows) {
+      data = rows || [];
+      if (!data.length) { return; }
+      list.innerHTML = '';
+      sw.hidden = false;
+      exp.hidden = false;
+      render();
+    }).catch(function () {});
+  }
+
+  sw.querySelectorAll('.mark-btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      filter = b.dataset.filter;
+      sw.querySelectorAll('.mark-btn').forEach(function (x) { x.classList.remove('is-on'); });
+      b.classList.add('is-on');
+      render();
+    });
+  });
+
+  document.getElementById('export-btn').addEventListener('click', function () {
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'atmospheric-list.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  load();
+})();
+</script>
