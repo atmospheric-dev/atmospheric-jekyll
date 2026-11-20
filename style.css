@@ -2871,3 +2871,27 @@ body.modal-open{
 .head-socials a.profile-icon:hover{
   border-color:#b08e5a;
 }
+.comment-author-link{
+  color:#b08e5a;
+  text-decoration:none;
+  border-bottom:1px solid rgba(176,142,90,.35);
+}
+
+.comment-author-link:hover{
+  color:#e0bd85;
+  border-bottom-color:#e0bd85;
+}
+
+.comment-as{
+  font-family:'Courier New', monospace;
+  font-size:.72rem;
+  letter-spacing:.06em;
+  color:#7c7a72;
+  display:block;
+  padding:.35rem 0;
+}
+
+.comment-as a{
+  color:#b08e5a;
+  text-decoration:none;
+}
