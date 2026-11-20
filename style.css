@@ -2314,3 +2314,23 @@ footer a:hover{color:var(--accent);opacity:1;}
   margin-left:22px;transition:color .2s;
 }
 .topbar-profile:hover{color:var(--accent);}
+/* ===== ПРОФИЛЬ ===== */
+.prof-links{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:16px;margin:0 0 30px;
+}
+.prof-card{
+  display:block;padding:22px 20px;border:1px solid var(--line);
+  text-decoration:none;transition:border-color .2s,background .2s;
+}
+.prof-card:hover{border-color:var(--accent);background:rgba(176,142,90,.05);}
+.prof-title{
+  display:block;font-family:Georgia,serif;font-size:1.15rem;
+  color:var(--text);margin-bottom:6px;
+}
+.prof-card:hover .prof-title{color:var(--accent);}
+.prof-desc{
+  display:block;font-family:'Courier New',monospace;
+  font-size:.65rem;letter-spacing:.06em;
+  color:var(--text-dim);opacity:.75;
+}
