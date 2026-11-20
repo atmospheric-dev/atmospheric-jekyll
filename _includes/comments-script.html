@@ -1,5 +1,8 @@
 <script>
 (function () {
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function () {
   var SUPABASE_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
 
@@ -8,7 +11,12 @@
   var sb = null;
   var currentUser = null;
 
-  async function initUser() {
+ async function initUser() {
+    var tries = 0;
+    while (!window.supabase && tries < 40) {
+      await new Promise(function (r) { setTimeout(r, 50); });
+      tries++;
+    }
     if (!window.supabase) return;
     sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     try {
