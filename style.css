@@ -107,6 +107,13 @@ header .head-top .logo{
   flex:0 0 auto;
 }
 
+header .head-top .logo-link{
+  display:block;
+  flex:0 0 auto;
+  line-height:0;
+}
+header .head-top .logo-link:hover{opacity:1;}
+
 header .head-socials{
   display:flex;
   gap:10px;
