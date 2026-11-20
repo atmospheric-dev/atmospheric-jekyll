@@ -2737,3 +2737,101 @@ footer a:hover{color:var(--accent);opacity:1;}
     grid-template-columns:repeat(3, 1fr);
   }
 }
+/* ---------- окно выбора аватара ---------- */
+
+body.modal-open{
+  overflow:hidden;
+}
+
+.goblin-modal{
+  position:fixed;
+  inset:0;
+  z-index:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:1.2rem;
+}
+
+.goblin-modal[hidden]{
+  display:none;
+}
+
+.goblin-modal-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(5,5,4,.82);
+  backdrop-filter:blur(2px);
+}
+
+.goblin-modal-box{
+  position:relative;
+  width:100%;
+  max-width:620px;
+  max-height:86vh;
+  overflow-y:auto;
+  background:#131312;
+  border:1px solid #3a3630;
+  padding:1.2rem 1.2rem 1.4rem;
+}
+
+.goblin-modal-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  font-family:'Courier New', monospace;
+  font-size:.72rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#b08e5a;
+  padding-bottom:.9rem;
+  margin-bottom:1.1rem;
+  border-bottom:1px solid #262624;
+}
+
+.goblin-modal-close{
+  background:transparent;
+  border:0;
+  color:#7c7a72;
+  font-size:1.3rem;
+  line-height:1;
+  padding:0 .2rem;
+  cursor:pointer;
+}
+
+.goblin-modal-close:hover{
+  color:#c96a5a;
+}
+
+.goblin-modal-foot{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:1.2rem;
+  padding-top:1rem;
+  border-top:1px solid #262624;
+}
+
+.goblin-modal-apply{
+  font-family:'Courier New', monospace;
+  font-size:.72rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#0e0e0e;
+  background:#b08e5a;
+  border:1px solid #b08e5a;
+  padding:.6rem 1.5rem;
+  cursor:pointer;
+}
+
+.goblin-modal-apply:hover{
+  background:#c9a672;
+  border-color:#c9a672;
+}
+
+@media (max-width:680px){
+  .goblin-modal-box{
+    max-height:90vh;
+    padding:1rem;
+  }
+}
