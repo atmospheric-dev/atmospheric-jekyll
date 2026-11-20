@@ -3074,3 +3074,137 @@ body.modal-open{
   width:100%;
   margin-bottom:6px;
 }
+/* ===== Витрина публичного профиля ===== */
+
+.u-hero{
+  position:relative;
+  margin:0 0 20px;
+  padding:26px 22px;
+  border-radius:3px;
+  background:#15130f;
+  background-size:cover;
+  background-position:center;
+  overflow:hidden;
+}
+
+.u-hero.has-cover::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg, rgba(10,10,10,.35), rgba(10,10,10,.85));
+}
+
+.u-hero-inner{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
+
+.u-avatar{
+  width:96px;
+  height:96px;
+  border-radius:2px;
+  border:1px solid rgba(176,142,90,.35);
+  object-fit:cover;
+  flex:0 0 auto;
+}
+
+.u-username{
+  font-family:Georgia, serif;
+  font-size:1.7rem;
+  color:#f0e9dc;
+  line-height:1.15;
+}
+
+.u-meta{
+  font-family:'Courier New', monospace;
+  font-size:.72rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:rgba(222,216,204,.5);
+  margin-bottom:22px;
+}
+
+.u-about{
+  white-space:pre-line;
+  line-height:1.7;
+}
+
+.u-about.is-empty,
+.u-albums .is-empty{
+  color:rgba(222,216,204,.4);
+}
+
+/* ---- альбомы ---- */
+
+.u-albums{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:14px;
+  margin-bottom:26px;
+}
+
+.u-album{
+  display:block;
+  text-decoration:none;
+  color:inherit;
+}
+
+.u-album-cover{
+  width:100%;
+  aspect-ratio:1/1;
+  object-fit:cover;
+  border-radius:2px;
+  border:1px solid rgba(176,142,90,.2);
+  background:rgba(255,255,255,.03);
+  display:block;
+}
+
+.u-album-cover.is-missing{
+  background:rgba(255,255,255,.03);
+  border-style:dashed;
+}
+
+.u-album-artist{
+  margin-top:8px;
+  font-family:'Courier New', monospace;
+  font-size:.68rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#b08e5a;
+}
+
+.u-album-name{
+  font-family:Georgia, serif;
+  font-size:.95rem;
+  color:#ded8cc;
+  line-height:1.35;
+}
+
+/* ---- значки ---- */
+
+.u-badges{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:26px;
+}
+
+.u-badge{
+  display:inline-block;
+  padding:6px 12px;
+  font-family:'Courier New', monospace;
+  font-size:.7rem;
+  letter-spacing:.05em;
+  color:#ded8cc;
+  border:1px solid rgba(176,142,90,.25);
+  border-radius:2px;
+  background:rgba(176,142,90,.06);
+}
+
+@media (max-width:560px){
+  .u-albums{grid-template-columns:repeat(2, minmax(0,1fr));}
+  .u-hero-inner{flex-direction:column; align-items:flex-start; gap:14px;}
+}
