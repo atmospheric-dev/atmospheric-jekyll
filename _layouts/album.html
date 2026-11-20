@@ -7,6 +7,8 @@ layout: default
     <p class="album-date">{{ page.year }} · {{ page.genres | join: ", " }} · {{ page.country }}</p>
 
     {% include rating.html %}
+
+    {% include album-marks.html %}
     
     <div class="album-layout">
       <img class="album-cover" src="{{ site.baseurl }}/{{ page.cover }}" alt="{{ page.artist }} — {{ page.title }}">
