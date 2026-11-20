@@ -1,0 +1,106 @@
+---
+layout: default
+title: Сброс пароля
+permalink: /reset.html
+---
+
+<div class="profile-wrap">
+  <h1 class="profile-title">Сброс пароля</h1>
+
+  <p class="profile-note" id="r-wait">Проверяем ссылку…</p>
+  <p class="profile-note" id="r-bad" hidden>Ссылка недействительна или устарела. Запросите новую на странице профиля.</p>
+
+  <form class="profile-form" id="r-form" hidden>
+    <label class="profile-label">Новый пароль</label>
+    <input class="profile-input" type="password" id="r-pass" autocomplete="new-password" minlength="6" required>
+
+    <label class="profile-label">Повторите пароль</label>
+    <input class="profile-input" type="password" id="r-pass2" autocomplete="new-password" minlength="6" required>
+
+    <p class="profile-note" id="r-note"></p>
+    <button class="profile-btn" type="submit" id="r-send">Сохранить пароль</button>
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  var SUPABASE_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+  var BASE = '{{ site.baseurl }}';
+
+  var wait = document.getElementById('r-wait');
+  var bad  = document.getElementById('r-bad');
+  var form = document.getElementById('r-form');
+  var pass = document.getElementById('r-pass');
+  var pass2 = document.getElementById('r-pass2');
+  var note = document.getElementById('r-note');
+
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  function showBad(){
+    wait.hidden = true;
+    form.hidden = true;
+    bad.hidden = false;
+  }
+
+  /* Supabase кладёт токен в хеш: #access_token=...&type=recovery */
+  var hash = new URLSearchParams(location.hash.replace(/^#/, ''));
+  var accessToken = hash.get('access_token');
+  var refreshToken = hash.get('refresh_token');
+  var errDesc = hash.get('error_description');
+
+  if (errDesc || !accessToken) {
+    /* запасной путь: возможно, сессия уже установлена */
+    sb.auth.getSession().then(function(res){
+      var has = res && res.data && res.data.session;
+      if (has) {
+        wait.hidden = true;
+        form.hidden = false;
+      } else {
+        showBad();
+      }
+    });
+    return;
+  }
+
+  sb.auth.setSession({ access_token: accessToken, refresh_token: refreshToken || '' })
+    .then(function(res){
+      if (res.error) { showBad(); return; }
+      wait.hidden = true;
+      form.hidden = false;
+      history.replaceState(null, '', location.pathname + location.search);
+    })
+    .catch(showBad);
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    note.textContent = '';
+
+    var p1 = pass.value;
+    var p2 = pass2.value;
+
+    if (p1.length < 6) { note.textContent = 'Пароль короче 6 символов.'; pass.focus(); return; }
+    if (p1 !== p2) { note.textContent = 'Пароли не совпадают.'; pass2.focus(); return; }
+
+    var btn = document.getElementById('r-send');
+    btn.disabled = true;
+    note.textContent = 'Сохраняем…';
+
+    sb.auth.updateUser({ password: p1 }).then(function(res){
+      if (res.error) {
+        note.textContent = 'Не получилось: ' + res.error.message;
+        btn.disabled = false;
+        return;
+      }
+      note.textContent = 'Пароль изменён. Переходим в профиль…';
+      setTimeout(function(){
+        location.href = BASE + '/profile.html';
+      }, 1200);
+    }).catch(function(){
+      note.textContent = 'Ошибка сети. Попробуйте ещё раз.';
+      btn.disabled = false;
+    });
+  });
+})();
+</script>
