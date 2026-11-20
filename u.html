@@ -45,15 +45,21 @@ permalink: /u.html
     err.hidden = false;
   }
 
-  var name = new URLSearchParams(location.search).get('name');
-  if(!name){ fail(); return; }
+  var params = new URLSearchParams(location.search);
+  var uid    = params.get('id');
+  var name   = params.get('name');
+
+  if(!uid && !name){ fail(); return; }
 
   var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  sb.from('profiles')
-    .select('username,status,favorite_album,gender,birthdate,avatar,created_at')
-    .ilike('username', name)
-    .maybeSingle()
+  var q = sb
+    .from('profiles')
+    .select('username,status,favorite_album,gender,birthdate,avatar,created_at');
+
+  q = uid ? q.eq('id', uid) : q.ilike('username', name);
+
+  q.maybeSingle()
     .then(function(res){
       if(res.error || !res.data){ fail(); return; }
       var p = res.data;
@@ -61,13 +67,13 @@ permalink: /u.html
       loading.hidden = true;
       box.hidden = false;
 
-      document.title = p.username + ' — Atmospheric';
+      document.title = (p.username || 'Профиль') + ' — Atmospheric';
 
       var av = document.getElementById('u-avatar');
       av.src = base + '/images/goblins/' + (GOBLIN_FILES[p.avatar] || GOBLIN_FILES[0]) + '.jpg';
       av.onerror = function(){ av.src = base + '/logo.png'; };
 
-      document.getElementById('u-username').textContent = p.username;
+      document.getElementById('u-username').textContent = p.username || 'Без имени';
       document.getElementById('u-status').textContent   = p.status || '';
 
       var since = p.created_at ? new Date(p.created_at).toLocaleDateString('ru-RU') : '';
