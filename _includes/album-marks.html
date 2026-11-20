@@ -1,0 +1,79 @@
+<script>
+(function () {
+  var box = document.querySelector('.album-marks');
+  if (!box) return;
+
+  var album = box.dataset.album;
+  var BASE = box.dataset.supabase;
+  var KEY = box.dataset.key;
+  var row = box.querySelector('.marks-row');
+  var buttons = box.querySelectorAll('.mark-btn');
+  var current = null;
+
+  function visitor() {
+    var k = 'atmos_visitor';
+    var v = localStorage.getItem(k);
+    if (!v) {
+      v = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : 'v-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      localStorage.setItem(k, v);
+    }
+    return v;
+  }
+
+  function rpc(fn, body) {
+    return fetch(BASE + '/rest/v1/rpc/' + fn, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': KEY,
+        'Authorization': 'Bearer ' + KEY
+      },
+      body: JSON.stringify(body)
+    }).then(function (r) {
+      if (!r.ok) throw new Error('rpc ' + fn + ' ' + r.status);
+      return r.json();
+    });
+  }
+
+  function paint(state) {
+    var counts = (state && state.counts) || { now: 0, done: 0, later: 0 };
+    current = state ? state.mark : null;
+
+    buttons.forEach(function (b) {
+      var m = b.dataset.mark;
+      b.querySelector('.mark-count').textContent = counts[m] || 0;
+      b.classList.toggle('is-on', current === m);
+      b.removeAttribute('disabled');
+    });
+
+    var total = (counts.now || 0) + (counts.done || 0) + (counts.later || 0);
+    row.hidden = total === 0;
+  }
+
+  function load() {
+    rpc('album_marks_get', { p_album: album, p_visitor: visitor() })
+      .then(paint)
+      .catch(function () { row.hidden = true; });
+  }
+
+  buttons.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var m = b.dataset.mark;
+
+      buttons.forEach(function (x) { x.setAttribute('disabled', 'disabled'); });
+
+      var action = (current === m)
+        ? rpc('unmark_album', { p_album: album, p_visitor: visitor() })
+        : rpc('mark_album', { p_album: album, p_visitor: visitor(), p_mark: m });
+
+      action.then(paint).catch(function () {
+        buttons.forEach(function (x) { x.removeAttribute('disabled'); });
+      });
+    });
+  });
+
+  load();
+})();
+</script>
