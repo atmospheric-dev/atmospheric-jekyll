@@ -7,7 +7,7 @@ permalink: /diary.html
   <h1 class="album-title">Дневник прослушивания</h1>
   <p class="album-date">Отметки хранятся в этом браузере</p>
 
-   <div class="my-marks" id="diary" data-base="{{ site.baseurl }}/albums">
+  <div class="my-marks" id="diary" data-base="{{ site.baseurl }}/albums">
     <p class="my-empty">Пока пусто. Каждая отметка на странице рецензии записывается сюда с датой.</p>
   </div>
 </div>
@@ -17,6 +17,7 @@ permalink: /diary.html
   var BASE = 'https://ojqefhakkmwmztxplcqv.supabase.co';
   var KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
   var box = document.getElementById('diary');
+  var base = box.dataset.base || '/albums';
   var LABEL = { now: 'Слушаю сейчас', done: 'Послушал', later: 'Хочу послушать' };
   var MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь',
                 'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
@@ -40,13 +41,24 @@ permalink: /diary.html
     });
   }
 
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
   function nameOf(d) {
     if (d.artist && d.title) return d.artist + ' — ' + d.title;
     return d.album.replace(/^\d{4}-/, '').replace(/-/g, ' ');
   }
 
   function render(rows) {
-    if (!rows.length) return;
+    if (!rows.length) {
+      box.innerHTML = '<p class="my-empty">Пока пусто. Каждая отметка на странице рецензии записывается сюда с датой.</p>';
+      return;
+    }
 
     // один альбом — одна запись за день (оставляем самую свежую)
     var seen = {};
@@ -54,6 +66,7 @@ permalink: /diary.html
 
     rows.forEach(function (d) {
       var dt = new Date(d.logged_at);
+      if (isNaN(dt.getTime())) return;
       var id = d.album + '|' + dt.toDateString();
       if (seen[id]) return;
       seen[id] = true;
@@ -76,12 +89,12 @@ permalink: /diary.html
       }
 
       var day = dt.getDate();
-      var url = box.dataset.base + '/' + encodeURIComponent(d.album) + '.html';
+      var url = base + '/' + encodeURIComponent(d.album) + '.html';
 
       html += '<li class="diary-item">' +
         '<span class="diary-day">' + (day < 10 ? '0' + day : day) + '</span>' +
-        '<a class="my-link" href="' + url + '">' + nameOf(d) + '</a>' +
-        '<span class="my-mark my-mark-' + d.mark + '">' + LABEL[d.mark] + '</span>' +
+        '<a class="my-link" href="' + url + '">' + esc(nameOf(d)) + '</a>' +
+        '<span class="my-mark my-mark-' + esc(d.mark) + '">' + esc(LABEL[d.mark] || d.mark) + '</span>' +
         '</li>';
     });
 
@@ -94,8 +107,10 @@ permalink: /diary.html
     if (!v) return;
 
     rpc('my_diary', { p_visitor: v, p_limit: 500 }).then(function (rows) {
-      if (rows && rows.length) render(rows);
-    }).catch(function () {});
+      render(rows || []);
+    }).catch(function () {
+      box.innerHTML = '<p class="my-empty">Не удалось загрузить дневник. Обнови страницу.</p>';
+    });
   }
 
   load();
