@@ -2307,3 +2307,10 @@ footer a:hover{color:var(--accent);opacity:1;}
   font-family:'Courier New',monospace;font-size:.72rem;
   color:var(--text-dim);opacity:.6;min-width:22px;
 }
+.topbar-profile{
+  font-family:'Courier New',monospace;
+  font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text-dim);text-decoration:none;
+  margin-left:22px;transition:color .2s;
+}
+.topbar-profile:hover{color:var(--accent);}
