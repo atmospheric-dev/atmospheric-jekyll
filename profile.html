@@ -21,6 +21,9 @@ permalink: /profile.html
         <label>Пароль
           <input type="password" name="password" required autocomplete="current-password">
         </label>
+        <p class="profile-forgot">
+          <a href="#" id="p-forgot">Забыли пароль?</a>
+        </p>
         <button type="submit">Войти</button>
       </form>
 
@@ -354,6 +357,33 @@ permalink: /profile.html
     currentUser = null;
     showAuth('Вы вышли из аккаунта.');
   });
+
+  /* ===== ВОССТАНОВЛЕНИЕ ПАРОЛЯ ===== */
+  var forgotEl = document.getElementById('p-forgot');
+  if (forgotEl) {
+    forgotEl.addEventListener('click', async function(ev){
+      ev.preventDefault();
+
+      var emailInput = document.querySelector('#login-form input[name="email"]');
+      var email = emailInput ? emailInput.value.trim() : '';
+
+      if (!email) {
+        authMsg.textContent = 'Введите e-mail — на него придёт ссылка.';
+        if (emailInput) emailInput.focus();
+        return;
+      }
+
+      authMsg.textContent = 'Отправляем письмо…';
+
+      var res = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://atmospheric-zine.ru/reset.html'
+      });
+
+      authMsg.textContent = res.error
+        ? 'Ошибка: ' + res.error.message
+        : 'Письмо отправлено на ' + email + '. Проверьте почту и папку «Спам».';
+    });
+  }
 
   buildGrid();
 
