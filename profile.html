@@ -58,18 +58,21 @@ permalink: /profile.html
       </div>
     </div>
 
-    <h2 class="profile-sub">О себе</h2>
-          <div class="cover-row">
+    <form id="profile-form" class="profile-form">
+
+      <h2 class="profile-sub">Фон витрины</h2>
+      <div class="cover-row">
         <div class="cover-preview" id="cover-preview"></div>
         <div class="cover-actions">
           <label class="fav-pick" id="cover-pick">
-            Загрузить фон
+            <span class="cover-pick-text">Загрузить фон</span>
             <input type="file" accept="image/*" id="cover-file" hidden>
           </label>
           <button type="button" class="fav-clear" id="cover-clear">Убрать</button>
         </div>
       </div>
-    <form id="profile-form" class="profile-form">
+
+      <h2 class="profile-sub">О себе</h2>
       <label>Имя пользователя
         <input type="text" name="username" maxlength="24" placeholder="2–24 символа">
       </label>
@@ -160,7 +163,7 @@ permalink: /profile.html
 
   var currentUser   = null;
   var currentAvatar = 0;
-  var currentCover = '';
+  var currentCover  = '';
   var favAlbums     = [];
 
   var authBox    = document.getElementById('auth-box');
@@ -172,6 +175,12 @@ permalink: /profile.html
   var modal      = document.getElementById('goblin-modal');
   var avatarBtn  = document.getElementById('avatar-btn');
   var favWrap    = document.getElementById('fav-albums');
+
+  var coverFile  = document.getElementById('cover-file');
+  var coverPick  = document.getElementById('cover-pick');
+  var coverText  = coverPick.querySelector('.cover-pick-text');
+  var coverPrev  = document.getElementById('cover-preview');
+  var coverClear = document.getElementById('cover-clear');
 
   function avatarSrc(id){
     var g = GOBLINS[id] || GOBLINS[0];
@@ -224,10 +233,10 @@ permalink: /profile.html
     document.body.classList.remove('modal-open');
   }
 
-  /* ---- загрузка обложки в Supabase Storage ---- */
+  /* ---- загрузка картинки в Supabase Storage ---- */
   async function uploadCover(file){
-    if(file.size > 2 * 1024 * 1024){
-      alert('Файл больше 2 МБ.');
+    if(file.size > 3 * 1024 * 1024){
+      alert('Файл больше 3 МБ.');
       return null;
     }
     var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
@@ -245,6 +254,35 @@ permalink: /profile.html
     var pub = sb.storage.from('covers').getPublicUrl(path);
     return pub.data.publicUrl;
   }
+
+  /* ---- фон витрины ---- */
+  function paintCover(){
+    if(currentCover){
+      coverPrev.style.backgroundImage = 'url("' + currentCover + '")';
+      coverPrev.classList.add('has');
+      coverText.textContent = 'Сменить фон';
+    } else {
+      coverPrev.style.backgroundImage = '';
+      coverPrev.classList.remove('has');
+      coverText.textContent = 'Загрузить фон';
+    }
+  }
+
+  coverFile.addEventListener('change', function(){
+    var f = this.files && this.files[0];
+    if(!f) return;
+    coverText.textContent = 'Загружаем…';
+    uploadCover(f).then(function(url){
+      if(!url){ paintCover(); return; }
+      currentCover = url;
+      paintCover();
+    });
+  });
+
+  coverClear.addEventListener('click', function(){
+    currentCover = '';
+    paintCover();
+  });
 
   /* ---- три любимых альбома ---- */
   function buildFav(){
@@ -352,6 +390,7 @@ permalink: /profile.html
     show(profileBox);
 
     currentAvatar = profile && typeof profile.avatar === 'number' ? profile.avatar : 0;
+    currentCover  = (profile && profile.cover_url) || '';
 
     preview.src = avatarSrc(currentAvatar);
     preview.onerror = function(){ preview.src = fallbackAvatar; };
@@ -378,7 +417,7 @@ permalink: /profile.html
 
     favAlbums = Array.isArray(profile && profile.fav_albums) ? profile.fav_albums : [];
     buildFav();
-
+    paintCover();
     markSelected();
   }
 
@@ -432,6 +471,7 @@ permalink: /profile.html
       gender:     f.gender.value,
       birthdate:  f.birthdate.value || null,
       avatar:     currentAvatar,
+      cover_url:  currentCover || null,
       fav_albums: readFav()
     };
 
