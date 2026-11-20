@@ -1,0 +1,90 @@
+---
+layout: default
+title: Дневник прослушивания
+permalink: /diary.html
+---
+<div class="wrap">
+  <h1 class="album-title">Дневник прослушивания</h1>
+  <p class="album-date">Отметки хранятся в этом браузере</p>
+
+  <div class="my-marks" id="diary">
+    <p class="my-empty">Пока пусто. Каждая отметка на странице рецензии записывается сюда с датой.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var BASE = 'https://ojqefhakkmwmztxplcqv.supabase.co';
+  var KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+  var box = document.getElementById('diary');
+  var LABEL = { now: 'Слушаю сейчас', done: 'Послушал', later: 'Хочу послушать' };
+  var MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь',
+                'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+
+  function visitor() {
+    return localStorage.getItem('atmos_visitor') || '';
+  }
+
+  function rpc(fn, body) {
+    return fetch(BASE + '/rest/v1/rpc/' + fn, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': KEY,
+        'Authorization': 'Bearer ' + KEY
+      },
+      body: JSON.stringify(body)
+    }).then(function (r) {
+      if (!r.ok) throw new Error('rpc ' + fn + ' ' + r.status);
+      return r.json();
+    });
+  }
+
+  function nameOf(d) {
+    if (d.artist && d.title) return d.artist + ' — ' + d.title;
+    return d.album.replace(/^\d{4}-/, '').replace(/-/g, ' ');
+  }
+
+  function render(rows) {
+    if (!rows.length) return;
+
+    var html = '';
+    var group = '';
+
+    rows.forEach(function (d) {
+      var dt = new Date(d.logged_at);
+      var key = dt.getFullYear() + '-' + dt.getMonth();
+      var head = MONTHS[dt.getMonth()] + ' ' + dt.getFullYear();
+
+      if (key !== group) {
+        if (group) html += '</ul>';
+        html += '<h2 class="diary-month">' + head + '</h2><ul class="diary-list">';
+        group = key;
+      }
+
+      var day = dt.getDate();
+      var url = '/albums/' + d.album + '/';
+
+      html += '<li class="diary-item">' +
+        '<span class="diary-day">' + (day < 10 ? '0' + day : day) + '</span>' +
+        '<a class="my-link" href="' + url + '">' + nameOf(d) + '</a>' +
+        '<span class="my-mark my-mark-' + d.mark + '">' + LABEL[d.mark] + '</span>' +
+        '</li>';
+    });
+
+    if (group) html += '</ul>';
+    box.innerHTML = html;
+  }
+
+  function load() {
+    var v = visitor();
+    if (!v) return;
+
+    rpc('my_diary', { p_visitor: v }).then(function (rows) {
+      if (rows && rows.length) render(rows);
+    }).catch(function () {});
+  }
+
+  load();
+})();
+</script>
