@@ -3692,14 +3692,12 @@ body.modal-open{
   }
 }
 /* ====== КНОПКИ В ПРОФИЛЕ ====== */
-.u-actions{
-  position:absolute;
-  top:14px;
-  right:16px;
+.u-hero-top{
   display:flex;
+  justify-content:flex-end;
   align-items:center;
   gap:6px;
-  z-index:4;
+  margin:0 0 10px;
 }
 
 .u-action{
@@ -3722,6 +3720,10 @@ body.modal-open{
 .u-action--edit{border-color:#b08e5a;color:#b08e5a;}
 .u-action--edit:hover{color:#0b0b0a;}
 
+@media (max-width:680px){
+  .u-hero-top{gap:4px;margin:0 0 8px;}
+  .u-action{font-size:.55rem;padding:.28rem .5rem;}
+}
 /* значки уезжают ниже, если есть кнопки */
 .u-actions:not([hidden]) ~ .u-medals,
 .u-hero:has(.u-actions:not([hidden])) .u-medals{
