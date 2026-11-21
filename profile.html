@@ -1,0 +1,140 @@
+---
+layout: default
+title: Профиль
+permalink: /profile.html
+---
+
+<div class="profile-wrap">
+  <h1 class="profile-title">Профиль</h1>
+
+  <p class="profile-note" id="auth-status">Проверяем вход…</p>
+
+  <div id="auth-box" hidden>
+    <p class="profile-note">Войдите или создайте аккаунт — данные будут храниться на сервере и не пропадут при очистке кэша.</p>
+
+    <div class="auth-grid">
+      <form class="auth-card" id="login-form">
+        <h2>Вход</h2>
+        <label>E-mail
+          <input type="email" name="email" required autocomplete="email">
+        </label>
+        <label>Пароль
+          <input type="password" name="password" required autocomplete="current-password">
+        </label>
+        <p class="profile-forgot">
+          <a href="#" id="p-forgot">Забыли пароль?</a>
+        </p>
+        <button type="submit">Войти</button>
+      </form>
+
+      <form class="auth-card" id="signup-form">
+        <h2>Регистрация</h2>
+        <label>E-mail
+          <input type="email" name="email" required autocomplete="email">
+        </label>
+        <label>Пароль
+          <input type="password" name="password" required minlength="6" autocomplete="new-password">
+        </label>
+        <button type="submit">Создать аккаунт</button>
+      </form>
+    </div>
+
+    <p class="auth-msg" id="auth-msg"></p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  var SUPABASE_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+
+  var sb     = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var base   = '{{ site.baseurl }}';
+  var status = document.getElementById('auth-status');
+  var authBox= document.getElementById('auth-box');
+  var authMsg= document.getElementById('auth-msg');
+
+  function toProfile(id){
+    location.replace(base + '/u.html?id=' + id);
+  }
+
+  /* ---- вход уже есть: сразу на публичный профиль ---- */
+  sb.auth.getSession().then(function(s){
+    if(s.data && s.data.session && s.data.session.user){
+      toProfile(s.data.session.user.id);
+      return;
+    }
+    status.hidden = true;
+    authBox.hidden = false;
+  }).catch(function(){
+    status.hidden = true;
+    authBox.hidden = false;
+  });
+
+  /* ---- вход ---- */
+  document.getElementById('login-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+    authMsg.textContent = 'Входим…';
+
+    var email = e.target.email.value.trim();
+    var password = e.target.password.value;
+
+    var r = await sb.auth.signInWithPassword({ email: email, password: password });
+
+    if(r.error){
+      authMsg.textContent = 'Не вошло: ' + r.error.message;
+      return;
+    }
+    toProfile(r.data.user.id);
+  });
+
+  /* ---- регистрация ---- */
+  document.getElementById('signup-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+    authMsg.textContent = 'Создаём аккаунт…';
+
+    var email = e.target.email.value.trim();
+    var password = e.target.password.value;
+
+    var r = await sb.auth.signUp({ email: email, password: password });
+
+    if(r.error){
+      authMsg.textContent = 'Не получилось: ' + r.error.message;
+      return;
+    }
+    if(!r.data.session){
+      authMsg.textContent = 'Аккаунт создан, но вход не выполнен. Проверьте, выключено ли подтверждение почты в Supabase.';
+      return;
+    }
+    toProfile(r.data.user.id);
+  });
+
+  /* ---- восстановление пароля ---- */
+  var forgotEl = document.getElementById('p-forgot');
+  if(forgotEl){
+    forgotEl.addEventListener('click', async function(ev){
+      ev.preventDefault();
+
+      var emailInput = document.querySelector('#login-form input[name="email"]');
+      var email = emailInput ? emailInput.value.trim() : '';
+
+      if(!email){
+        authMsg.textContent = 'Введите e-mail — на него придёт ссылка.';
+        if(emailInput) emailInput.focus();
+        return;
+      }
+
+      authMsg.textContent = 'Отправляем письмо…';
+
+      var res = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://atmospheric-zine.ru/reset.html'
+      });
+
+      authMsg.textContent = res.error
+        ? 'Ошибка: ' + res.error.message
+        : 'Письмо отправлено на ' + email + '. Проверьте почту и папку «Спам».';
+    });
+  }
+})();
+</script>
