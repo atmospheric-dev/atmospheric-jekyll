@@ -3743,3 +3743,7 @@ body.modal-open{
     padding:.28rem .5rem;
   }
 }
+/* ====== КНОПКА «В ПРОФИЛЬ» В ДНЕВНИКЕ ====== */
+.diary-back{
+  margin:0 0 28px;
+}
