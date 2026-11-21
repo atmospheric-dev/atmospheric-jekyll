@@ -12,6 +12,13 @@ permalink: /u.html
 
     <div class="u-hero" id="u-hero">
       <div class="u-medals" id="u-medals"></div>
+
+      <div class="u-actions" id="u-actions" hidden>
+        <a class="u-action" id="u-act-my" href="{{ site.baseurl }}/my.html">Слушаю</a>
+        <a class="u-action" id="u-act-diary" href="{{ site.baseurl }}/diary.html">Дневник</a>
+        <a class="u-action u-action--edit" id="u-act-edit" href="{{ site.baseurl }}/profile.html">Редактировать</a>
+      </div>
+
       <div class="u-hero-inner">
         <img class="profile-avatar u-avatar" id="u-avatar" src="" alt="">
 
@@ -60,15 +67,6 @@ permalink: /u.html
   var GOBLIN_FILES = ['archer-f','archer-m','druid-f','druid-m','bard-f','bard-m',
                       'mage-f','mage-m','knight-f','knight-m','necro-f','necro-m'];
 
-  var BADGES = {
-    talker:    { icon: '🖤', name: 'Первый комментарий' },
-    speaker:   { icon: '🗣️', name: 'Собеседник' },
-    listener:  { icon: '🎧', name: 'Слушатель' },
-    meloman:   { icon: '💿', name: 'Меломан' },
-    collector: { icon: '📼', name: 'Коллекционер' },
-    veteran:   { icon: '🕯️', name: 'Старожил' }
-  };
-
   var KIND_NAMES = {
     music: 'Музыка',
     book:  'Книга',
@@ -94,8 +92,7 @@ permalink: /u.html
   var uid    = params.get('id');
   var name   = params.get('name');
 
-  if(!uid && !name){ fail(); return; }
-
+  /* без параметров — покажем заглушку, но сначала попробуем понять, мой ли это профиль */
   var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   /* ================= ПРОСМОТР ФОТО ================= */
@@ -164,7 +161,6 @@ permalink: /u.html
     viewerStep(1);
   });
 
-  /* клик по тёмной подложке закрывает, по картинке — нет */
   viewer.root.addEventListener('click', function(e){
     if(e.target === viewer.root) closeViewer();
   });
@@ -184,384 +180,59 @@ permalink: /u.html
 
   /* ================= ПРОФИЛЬ ================= */
 
-  var q = sb
-    .from('profiles')
-    .select('id,username,status,about,city,cover_url,fav_albums,gender,birthdate,avatar,created_at');
+  var myId = null;   /* id залогиненного пользователя, если он есть */
 
-  q = uid ? q.eq('id', uid) : q.ilike('username', name);
+  function isMine(id){
+    return !!myId && !!id && String(myId) === String(id);
+  }
 
-  q.maybeSingle()
-    .then(function(res){
-      if(res.error || !res.data){ fail(); return; }
-      var p = res.data;
-      render(p);
-      loadCollection(p.id);
-      loadMedals(p.id);
-    })
-    .catch(function(){ fail(); });
+  function showActions(id){
+    var acts = document.getElementById('u-actions');
+    if(!acts) return;
 
-  function render(p){
-    loading.hidden = true;
-    box.hidden = false;
-
-    document.title = (p.username || 'Профиль') + ' — Atmospheric';
-
-    /* ---- фон за аватаром ---- */
-    var hero = document.getElementById('u-hero');
-    if(p.cover_url){
-      hero.style.backgroundImage = 'url("' + p.cover_url + '")';
-      hero.classList.add('has-cover');
+    if(!isMine(id)){
+      acts.hidden = true;
+      return;
     }
+    acts.hidden = false;
+  }
 
-    /* ---- аватар ---- */
-    var av = document.getElementById('u-avatar');
-    av.src = base + '/images/goblins/' + (GOBLIN_FILES[p.avatar] || GOBLIN_FILES[0]) + '.jpg';
-    av.onerror = function(){ av.src = base + '/logo.png'; };
-
-    /* ---- имя и статус ---- */
-    document.getElementById('u-username').textContent = p.username || 'Без имени';
-    document.getElementById('u-status').textContent   = p.status || '';
-
-    var since = p.created_at ? new Date(p.created_at).toLocaleDateString('ru-RU') : '';
-    document.getElementById('u-since').textContent = since ? 'На сайте с ' + since : '';
-
-    /* ---- город, пол, возраст ---- */
-    var meta = [];
-    if(p.city) meta.push(p.city);
-    if(p.gender === 'male')   meta.push('Мужской');
-    if(p.gender === 'female') meta.push('Женский');
-    if(p.birthdate){
-      var b = new Date(p.birthdate);
-      var now = new Date();
-      var age = now.getFullYear() - b.getFullYear();
-      var m = now.getMonth() - b.getMonth();
-      if(m < 0 || (m === 0 && now.getDate() < b.getDate())) age--;
-      if(age > 0 && age < 120) meta.push(age + ' ' + ageWord(age));
-    }
-    document.getElementById('u-meta').textContent = meta.join(' · ');
-
-    /* ---- о себе ---- */
-    var about = document.getElementById('u-about');
-    if(p.about){
-      about.textContent = p.about;
-    } else {
-      about.textContent = 'Не рассказал о себе.';
-      about.classList.add('is-empty');
-    }
-
-    /* ---- три любимых альбома ---- */
-    var wrap = document.getElementById('u-albums');
-    wrap.innerHTML = '';
-    var list = Array.isArray(p.fav_albums) ? p.fav_albums.slice(0, 3) : [];
-
-    if(!list.length){
-      wrap.innerHTML = '<p class="profile-fav is-empty">Не указаны.</p>';
-    } else {
-      list.forEach(function(a){
-        var card = document.createElement('div');
-        card.className = 'u-album';
-
-        var img = document.createElement('img');
-        img.className = 'u-album-cover';
-        img.alt = '';
-        if(a.cover){
-          img.src = a.cover;
-          img.onerror = function(){ img.classList.add('is-missing'); };
+  function start(){
+    if(!uid && !name){
+      /* зашли на /u.html без id — перекидываем на свой профиль */
+      sb.auth.getSession().then(function(s){
+        if(s.data && s.data.session && s.data.session.user){
+          location.replace(base + '/u.html?id=' + s.data.session.user.id);
         } else {
-          img.classList.add('is-missing');
+          fail();
         }
-
-        var cap = document.createElement('div');
-        cap.className = 'u-album-cap';
-
-        var artist = document.createElement('div');
-        artist.className = 'u-album-artist';
-        artist.textContent = a.artist || '';
-
-        var album = document.createElement('div');
-        album.className = 'u-album-name';
-        album.textContent = a.album || '';
-
-        var shade = document.createElement('div');
-        shade.className = 'u-album-shade';
-
-        cap.appendChild(shade);
-        cap.appendChild(artist);
-        cap.appendChild(album);
-
-        card.appendChild(img);
-        card.appendChild(cap);
-        wrap.appendChild(card);
-      });
-
-      /* ---- подгонка шрифта под ширину обложки ---- */
-      requestAnimationFrame(function(){
-        var caps = wrap.querySelectorAll('.u-album-artist, .u-album-name');
-        for(var k = 0; k < caps.length; k++) fitText(caps[k]);
-      });
-
-      window.addEventListener('resize', function(){
-        var caps = wrap.querySelectorAll('.u-album-artist, .u-album-name');
-        for(var k = 0; k < caps.length; k++) fitText(caps[k]);
-      });
-    }
-  }
-
-  /* ---- уменьшение шрифта, пока строка не влезет ---- */
-  function fitText(el){
-    if(!el.dataset.max){
-      el.dataset.max = parseFloat(getComputedStyle(el).fontSize);
-    }
-    var max = parseFloat(el.dataset.max);
-    var min = Math.max(7, max * 0.6);
-    var size = max;
-    var guard = 0;
-
-    el.style.fontSize = max + 'px';
-
-    while(el.scrollWidth > el.clientWidth + 1 && size > min && guard < 80){
-      size -= 0.5;
-      el.style.fontSize = size + 'px';
-      guard++;
-    }
-  }
-
-  /* ================= КОЛЛЕКЦИЯ ================= */
-
-  function loadCollection(id){
-    var wrap = document.getElementById('u-collection');
-    if(!wrap) return;
-
-    wrap.innerHTML = '<p class="profile-fav is-empty">Загружаем…</p>';
-
-    sb.from('collection')
-      .select('id,kind,artist,title,format,year,comment,photos,created_at')
-      .eq('user_id', id)
-      .order('created_at', { ascending: false })
-      .then(function(res){
-        if(res.error){ showCollectionEmpty(wrap, res.error.message); return; }
-        renderCollection(wrap, res.data || []);
-      })
-      .catch(function(){ showCollectionEmpty(wrap); });
-  }
-
-  function showCollectionEmpty(wrap, msg){
-    wrap.innerHTML = '';
-    var p = document.createElement('p');
-    p.className = 'profile-fav is-empty';
-    p.textContent = 'Пока пусто.';
-    wrap.appendChild(p);
-    if(msg && window.console) console.warn('collection:', msg);
-  }
-
-  function renderCollection(wrap, rows){
-    wrap.innerHTML = '';
-
-    if(!rows.length){
-      showCollectionEmpty(wrap);
+      }).catch(fail);
       return;
     }
 
-    /* ---- счётчик по типам ---- */
-    var counts = {};
-    rows.forEach(function(r){
-      var k = KIND_NAMES[r.kind] ? r.kind : 'other';
-      counts[k] = (counts[k] || 0) + 1;
-    });
+    var q = sb
+      .from('profiles')
+      .select('id,username,status,about,city,cover_url,fav_albums,gender,birthdate,avatar,created_at');
 
-    var stat = document.createElement('div');
-    stat.className = 'u-col-stat';
-    KIND_ORDER.forEach(function(k){
-      if(!counts[k]) return;
-      var s = document.createElement('span');
-      s.className = 'u-col-stat-item';
-      s.textContent = KIND_NAMES[k] + ' — ' + counts[k];
-      stat.appendChild(s);
-    });
-    wrap.appendChild(stat);
+    q = uid ? q.eq('id', uid) : q.ilike('username', name);
 
-    /* ---- сетка карточек ---- */
-    var grid = document.createElement('div');
-    grid.className = 'u-col-grid';
-
-    rows.forEach(function(r){
-      var card = document.createElement('div');
-      card.className = 'u-col-card';
-
-      var photos = Array.isArray(r.photos) ? r.photos.filter(Boolean) : [];
-
-      var media = document.createElement('div');
-      media.className = 'u-col-media';
-
-      if(photos.length){
-        var img = document.createElement('img');
-        img.className = 'u-col-img';
-        img.src = photos[0];
-        img.alt = '';
-        img.loading = 'lazy';
-        img.onerror = function(){
-          img.classList.add('is-missing');
-          img.removeAttribute('src');
-        };
-        media.appendChild(img);
-
-        if(photos.length > 1){
-          var more = document.createElement('span');
-          more.className = 'u-col-more';
-          more.textContent = '+' + (photos.length - 1);
-          media.appendChild(more);
-        }
-
-        /* клик по фото открывает просмотр — для любого числа фото */
-        media.classList.add('is-clickable');
-        media.addEventListener('click', function(){ openViewer(photos, 0); });
-
-        /* ---- полоска миниатюр ---- */
-        if(photos.length > 1){
-          var strip = document.createElement('div');
-          strip.className = 'u-col-strip';
-
-          photos.slice(0, 6).forEach(function(u, n){
-            var t = document.createElement('img');
-            t.className = 'u-col-thumb';
-            t.src = u;
-            t.alt = '';
-            t.loading = 'lazy';
-            t.addEventListener('click', function(e){
-              e.stopPropagation();
-              openViewer(photos, n);
-            });
-            strip.appendChild(t);
-          });
-
-          media.appendChild(strip);
-        }
-      } else {
-        media.classList.add('u-col-media--empty');
-      }
-
-      card.appendChild(media);
-
-      var body = document.createElement('div');
-      body.className = 'u-col-body';
-
-      var k = document.createElement('div');
-      k.className = 'u-col-kind';
-      k.textContent = KIND_NAMES[r.kind] || 'Другое';
-
-      var t = document.createElement('div');
-      t.className = 'u-col-title';
-      t.textContent = r.title || '';
-
-      body.appendChild(k);
-      body.appendChild(t);
-
-      var sub = [r.artist, r.format, r.year].filter(Boolean).join(' · ');
-      if(sub){
-        var s = document.createElement('div');
-        s.className = 'u-col-sub';
-        s.textContent = sub;
-        body.appendChild(s);
-      }
-
-      if(r.comment){
-        var c = document.createElement('div');
-        c.className = 'u-col-text';
-        c.textContent = r.comment;
-        body.appendChild(c);
-      }
-
-      card.appendChild(body);
-      grid.appendChild(card);
-    });
-
-    wrap.appendChild(grid);
-  }
-
-  /* ================= ЗНАЧКИ ================= */
-  /* ---- медальоны знаков ---- */
-  var MEDALS = {
-    comment: { dir: 'comment', name: 'Комментарии', of: 'комментариев' },
-    marks:   { dir: 'marks',   name: 'Отметки альбомов', of: 'отметок' },
-    diary:   { dir: 'diary',   name: 'Дневник', of: 'записей' },
-    collect: { dir: 'collect', name: 'Коллекция', of: 'записей' },
-    loyal:   { dir: 'loyal',   name: 'Лояльность', of: 'дней' }
-  };
-
-  var ROMAN = ['', 'I', 'II', 'III'];
-
-  function loadMedals(id){
-    var wrap = document.getElementById('u-medals');
-    if(!wrap) return;
-    wrap.innerHTML = '';
-
-    sb.from('user_levels')
-      .select('category,level')
-      .eq('user_id', id)
+    q.maybeSingle()
       .then(function(res){
-        if(res.error || !res.data || !res.data.length) return;
-
-        /* порядок фиксированный, чтобы знаки не прыгали */
-        var order = ['comment', 'marks', 'diary', 'collect', 'loyal'];
-
-        order.forEach(function(cat){
-          var row = null;
-          for(var i = 0; i < res.data.length; i++){
-            if(res.data[i].category === cat) row = res.data[i];
-          }
-          if(!row || !row.level) return;
-
-          var m = MEDALS[cat];
-          if(!m) return;
-
-          var img = document.createElement('img');
-          img.className = 'u-medal';
-          img.src = base + '/images/badges/' + m.dir + '-' + row.level + '.svg';
-          img.alt = m.name;
-          img.title = m.name + ' — уровень ' + ROMAN[row.level] + ' из III';
-          img.loading = 'lazy';
-          img.onerror = function(){ this.remove(); };
-
-          wrap.appendChild(img);
-        });
+        if(res.error || !res.data){ fail(); return; }
+        var p = res.data;
+        render(p);
+        showActions(p.id);
+        loadCollection(p.id);
+        loadMedals(p.id);
       })
-      .catch(function(){ /* молча */ });
-  }
-  
-  function loadBadges(id){
-    var wrap = document.getElementById('u-badges');
-    wrap.innerHTML = '';
-
-    sb.from('profile_badges')
-      .select('badge')
-      .eq('user_id', id)
-      .then(function(res){
-        if(res.error || !res.data || !res.data.length){
-          wrap.innerHTML = '<p class="profile-fav is-empty">Пока нет.</p>';
-          return;
-        }
-        res.data.forEach(function(row){
-          var b = BADGES[row.badge];
-          if(!b) return;
-
-          var el = document.createElement('span');
-          el.className = 'u-badge';
-          el.title = b.name;
-          el.textContent = b.icon + ' ' + b.name;
-          wrap.appendChild(el);
-        });
-      })
-      .catch(function(){
-        wrap.innerHTML = '<p class="profile-fav is-empty">Пока нет.</p>';
-      });
+      .catch(function(){ fail(); });
   }
 
-  function ageWord(n){
-    var t = n % 10, h = n % 100;
-    if(h >= 11 && h <= 14) return 'лет';
-    if(t === 1) return 'год';
-    if(t >= 2 && t <= 4) return 'года';
-    return 'лет';
-  }
-})();
-</script>
+  sb.auth.getSession().then(function(s){
+    if(s.data && s.data.session && s.data.session.user){
+      myId = s.data.session.user.id;
+    }
+    start();
+  }).catch(function(){
+    start();
+  });
