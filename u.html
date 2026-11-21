@@ -10,15 +10,14 @@ permalink: /u.html
 
   <div id="u-box" hidden>
 
+    <div class="u-hero-top" id="u-actions" hidden>
+      <a class="u-action" id="u-act-my" href="{{ site.baseurl }}/my.html">Слушаю</a>
+      <a class="u-action" id="u-act-diary" href="{{ site.baseurl }}/diary.html">Дневник</a>
+      <a class="u-action u-action--edit" id="u-act-edit" href="{{ site.baseurl }}/profile-edit.html">Редактировать</a>
+    </div>
+
     <div class="u-hero" id="u-hero">
       <div class="u-medals" id="u-medals"></div>
-
-      <div class="u-actions" id="u-actions" hidden>
-        <a class="u-action" id="u-act-my" href="{{ site.baseurl }}/my.html">Слушаю</a>
-        <a class="u-action" id="u-act-diary" href="{{ site.baseurl }}/diary.html">Дневник</a>
-        <a class="u-action u-action--edit" id="u-act-edit" href="{{ site.baseurl }}/profile-edit.html">Редактировать</a>
-      </div>
-
       <div class="u-hero-inner">
         <img class="profile-avatar u-avatar" id="u-avatar" src="" alt="">
 
@@ -92,7 +91,6 @@ permalink: /u.html
   var uid    = params.get('id');
   var name   = params.get('name');
 
-  /* без параметров — покажем заглушку, но сначала попробуем понять, мой ли это профиль */
   var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   /* ================= ПРОСМОТР ФОТО ================= */
@@ -180,7 +178,7 @@ permalink: /u.html
 
   /* ================= ПРОФИЛЬ ================= */
 
-  var myId = null;   /* id залогиненного пользователя, если он есть */
+  var myId = null;
 
   function isMine(id){
     return !!myId && !!id && String(myId) === String(id);
@@ -199,7 +197,6 @@ permalink: /u.html
 
   function start(){
     if(!uid && !name){
-      /* зашли на /u.html без id — перекидываем на свой профиль */
       sb.auth.getSession().then(function(s){
         if(s.data && s.data.session && s.data.session.user){
           location.replace(base + '/u.html?id=' + s.data.session.user.id);
@@ -236,6 +233,7 @@ permalink: /u.html
   }).catch(function(){
     start();
   });
+
   /* ---- отрисовка профиля ---- */
   function render(p){
     loading.hidden = true;
