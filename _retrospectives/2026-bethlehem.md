@@ -10,7 +10,7 @@ genres:
   - black metal
   - industrial
 cover: /covers/bethlehem/01.jpg
-date: 2026-11-23
+date: 2025-11-18
 toc:
 
   - { id: "dark-metal",   label: "Dark Metal (1994)" }
