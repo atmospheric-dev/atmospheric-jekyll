@@ -3929,9 +3929,14 @@ body.modal-open{
 .bell-item.is-unread .bell-item-who{color:var(--accent);}
 
 .bell-item-who{
-  font-family:Georgia,serif;
-  font-size:.9rem;
-  color:#e8e2d8;
+  font-family:'Courier New',monospace;
+  font-size:.66rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:4px;
+  white-space:normal;
+  overflow:visible;
 }
 .bell-item-body{
   font-family:Georgia,serif;
