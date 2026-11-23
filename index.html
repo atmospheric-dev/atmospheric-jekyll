@@ -318,63 +318,72 @@ layout: default
   var SB_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
   var TOP = 3;
 
-  /* --- 1. Дата последнего понедельника 20:00 МСК --- */
+  /* --- 1. Последний понедельник 20:00 МСК --- */
   function lastCutoff(){
-    // текущее время по Москве
     var now = new Date();
     var msk = new Date(now.getTime() + (now.getTimezoneOffset() + 180) * 60000);
 
-    var day = msk.getDay();            // 0=вс, 1=пн
-    var daysBack = (day === 1 && msk.getHours() >= 20) ? 0
-                 : (day === 1 ? 7 : (day + 6) % 7);
+    var day = msk.getDay();                       // 0=вс, 1=пн
+    var daysBack;
+    if(day === 1){
+      daysBack = msk.getHours() >= 20 ? 0 : 7;
+    } else {
+      daysBack = (day + 6) % 7;                   // пн=0, вт=1, ... вс=6
+    }
 
     var cut = new Date(msk);
     cut.setDate(msk.getDate() - daysBack);
     cut.setHours(20, 0, 0, 0);
-    if(daysBack === 0 && msk.getHours() < 20) cut.setDate(cut.getDate() - 7);
-    else if(daysBack === 0) {} // сегодня
-    else if(day === 1) cut.setDate(cut.getDate() - 0);
     return cut;
   }
 
   var cutoff = lastCutoff();
   var iso = cutoff.toISOString();
 
-  function fmtCut(d){
-    var p = function(n){ return n < 10 ? '0' + n : n; };
-    return p(d.getDate()) + '.' + p(d.getMonth() + 1) + '.' + d.getFullYear()
-         + ', 20:00 МСК';
+  function p2(n){ return n < 10 ? '0' + n : n; }
+  if(dateEl){
+    dateEl.textContent = p2(cutoff.getDate()) + '.' + p2(cutoff.getMonth() + 1)
+      + '.' + cutoff.getFullYear() + ', 20:00 МСК';
   }
-  if(dateEl) dateEl.textContent = fmtCut(cutoff);
 
   /* --- 2. Запросы --- */
   function sbGet(path){
     return fetch(SB_URL + '/rest/v1/' + path, {
-      headers: {
-        'apikey': SB_KEY,
-        'Authorization': 'Bearer ' + SB_KEY
-      }
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
     }).then(function(r){ return r.json(); });
   }
 
   Promise.all([
     sbGet('ratings?select=album,value,created_at&created_at=gte.' + encodeURIComponent(iso)),
-    sbGet('views?select=path,count')
+    sbGet('views?select=path,count'),
+    fetch('{{ site.baseurl }}/search.json').then(function(r){ return r.json(); })
   ]).then(function(res){
     var ratings = res[0] || [];
-    var views = res[1] || [];
+    var views   = res[1] || [];
+    var index   = res[2] || [];
 
-    /* --- 3. Агрегация оценок --- */
+    /* --- 3. Карта альбомов из search.json --- */
+    var meta = {};
+    index.forEach(function(i){
+      if(i.type !== 'release' || !i.slug) return;
+      meta[i.slug] = {
+        url: i.url,
+        artist: i.artist || i.subtitle || '',
+        title: i.title || '',
+        cover: i.cover || ''
+      };
+    });
+
+    /* --- 4. Агрегация оценок за неделю --- */
     var agg = {};
     ratings.forEach(function(r){
       if(!r.album) return;
-      var k = r.album;
-      if(!agg[k]) agg[k] = { sum:0, n:0 };
-      agg[k].sum += Number(r.value) || 0;
-      agg[k].n   += 1;
+      if(!agg[r.album]) agg[r.album] = { sum: 0, n: 0 };
+      agg[r.album].sum += Number(r.value) || 0;
+      agg[r.album].n   += 1;
     });
 
-    /* --- 4. Просмотры: path = "/albums/2026-slug.html" --- */
+    /* --- 5. Просмотры --- */
     var viewMap = {};
     views.forEach(function(v){
       if(!v.path) return;
@@ -382,16 +391,13 @@ layout: default
       viewMap[k] = (viewMap[k] || 0) + (Number(v.count) || 0);
     });
 
-    /* --- 5. Балл --- */
+    /* --- 6. Балл --- */
     var list = Object.keys(agg).map(function(k){
-      var avg = agg[k].sum / agg[k].n;
+      var avg   = agg[k].sum / agg[k].n;
       var votes = agg[k].n;
-      var vw = viewMap[k] || 0;
+      var vw    = viewMap[k] || 0;
       return {
-        album: k,
-        avg: avg,
-        votes: votes,
-        views: vw,
+        slug: k, avg: avg, votes: votes, views: vw,
         score: avg * 20 + votes * 3 + vw / 10
       };
     }).sort(function(a,b){ return b.score - a.score; }).slice(0, TOP);
@@ -401,36 +407,46 @@ layout: default
       return;
     }
 
-    /* --- 6. Отрисовка --- */
+    /* --- 7. Отрисовка --- */
     grid.innerHTML = '';
     list.forEach(function(item){
+      var m = meta[item.slug] || {};
+
       var a = document.createElement('a');
       a.className = 'lr-card';
-      a.href = '{{ site.baseurl }}/albums/' + item.album + '.html';
+      a.href = m.url ? '{{ site.baseurl }}' + m.url
+                     : '{{ site.baseurl }}/albums/' + item.slug + '.html';
 
       var cover = document.createElement('span');
       cover.className = 'lr-cover';
       var img = document.createElement('img');
-      img.src = '{{ site.baseurl }}/covers/' + item.album + '.jpg';
-      img.alt = item.album;
+      img.src = m.cover ? '{{ site.baseurl }}/' + m.cover
+                        : '{{ site.baseurl }}/logo.png';
+      img.alt = (m.artist ? m.artist + ' — ' : '') + (m.title || '');
       img.loading = 'lazy';
-      img.onerror = function(){ img.style.display = 'none'; };
       cover.appendChild(img);
 
       var body = document.createElement('span');
       body.className = 'lr-body';
 
+      if(m.artist){
+        var art = document.createElement('span');
+        art.className = 'lr-artist';
+        art.textContent = m.artist;
+        body.appendChild(art);
+      }
+
       var title = document.createElement('span');
       title.className = 'lr-title';
-      title.textContent = item.album.replace(/^\d{4}-/, '').replace(/-/g, ' ');
-
-      var meta = document.createElement('span');
-      meta.className = 'lr-year';
-      meta.textContent = item.avg.toFixed(1) + ' · голосов ' + item.votes
-                       + ' · просмотров ' + item.views;
-
+      title.textContent = m.title || item.slug.replace(/^\d{4}-/, '').replace(/-/g, ' ');
       body.appendChild(title);
-      body.appendChild(meta);
+
+      var metaEl = document.createElement('span');
+      metaEl.className = 'lr-year';
+      metaEl.textContent = item.avg.toFixed(1) + ' · ' + item.votes + ' гол. · '
+                         + item.views + ' просм.';
+      body.appendChild(metaEl);
+
       a.appendChild(cover);
       a.appendChild(body);
       grid.appendChild(a);
@@ -469,7 +485,7 @@ layout: default
         var id = typeof p.avatar === 'number' ? p.avatar : 0;
         var name = GOBLIN_FILES[id] || GOBLIN_FILES[0];
         img.src = '{{ site.baseurl }}/images/goblins/' + name + '.jpg';
-        img.alt = p.username || 'Профиль';
+        img.alt = p.username || 'noop';
         img.onerror = function(){ img.src = '{{ site.baseurl }}/logo.png'; };
         img.hidden = false;
         svg.hidden = true;
