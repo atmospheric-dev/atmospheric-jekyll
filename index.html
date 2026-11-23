@@ -142,6 +142,18 @@ layout: default
 
   <section>
     <div class="wrap">
+      <h2>Актуальное</h2>
+      <div class="latest" id="latest-list">
+        <p class="latest-empty">Загружаем…</p>
+      </div>
+      <p style="margin-top:24px">
+        <a class="back" href="{{ site.baseurl }}/search.html">Все материалы →</a>
+      </p>
+    </div>
+  </section>
+  
+  <section>
+    <div class="wrap">
       <h2>О нас</h2>
       <p style="max-width:680px">
         Мы публикуем обзоры релизов, заметки с концертов, тематические подборки
@@ -228,6 +240,59 @@ layout: default
       </div>
     </div>
   </section>
+
+  <script>
+(function(){
+  var box = document.getElementById('latest-list');
+  if(!box) return;
+  var LIMIT = 6;
+
+  function fmt(d){
+    if(!d) return '';
+    var p = d.split('-');
+    return p.length === 3 ? p[2] + '.' + p[1] + '.' + p[0] : d;
+  }
+
+  fetch('{{ site.baseurl }}/search.json')
+    .then(function(r){ return r.json(); })
+    .then(function(list){
+      list = (list || [])
+        .filter(function(i){ return i.date; })
+        .sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); })
+        .slice(0, LIMIT);
+
+      if(!list.length){
+        box.innerHTML = '<p class="latest-empty">Пока пусто.</p>';
+        return;
+      }
+
+      box.innerHTML = '';
+      list.forEach(function(item){
+        var a = document.createElement('a');
+        a.className = 'latest-item';
+        a.href = '{{ site.baseurl }}' + item.url;
+
+        var t = document.createElement('span');
+        t.className = 'latest-title';
+        t.textContent = item.subtitle
+          ? item.subtitle + ' — ' + item.title
+          : item.title;
+
+        var m = document.createElement('span');
+        m.className = 'latest-meta';
+        m.textContent = item.rubric + (item.date ? ' · ' + fmt(item.date) : '');
+
+        a.appendChild(t);
+        a.appendChild(m);
+        box.appendChild(a);
+      });
+    })
+    .catch(function(){
+      box.innerHTML = '<p class="latest-empty">Не удалось загрузить список.</p>';
+    });
+})();
+</script>
+  
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
