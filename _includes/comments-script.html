@@ -233,7 +233,7 @@
             + encodeURIComponent(c.user_id) + '">' + esc(c.name) + '</a>'
           : '<span class="comment-author">' + esc(c.name) + '</span>';
 
-        var html = '<div class="comment" data-id="' + c.id + '">'
+        var html = '<div class="comment" id="comment-' + c.id + '" data-id="' + c.id + '">'
           + '<div class="comment-head">'
           +   author
           +   '<span class="comment-date">' + fmtDate(c.created_at) + '</span>'
@@ -255,8 +255,22 @@
 
       list.innerHTML = roots.map(function (r) { return node(r, 0); }).join('');
 
-      var hint = section.querySelector('.comment-reactions-hint');
+            var hint = section.querySelector('.comment-reactions-hint');
       if (hint) hint.hidden = !!currentUser;
+
+      /* ---------- переход к комментарию из уведомления ---------- */
+      if (location.hash.indexOf('#comment-') === 0) {
+        var target = document.getElementById(location.hash.slice(1));
+        if (target) {
+          target.classList.add('is-highlight');
+          setTimeout(function () {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 120);
+          setTimeout(function () {
+            target.classList.remove('is-highlight');
+          }, 2600);
+        }
+      }
     }
 
     load();
