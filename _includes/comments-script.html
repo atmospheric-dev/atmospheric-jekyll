@@ -185,9 +185,8 @@
       var html = '<div class="comment-reactions" data-id="' + cid + '">';
       REACTIONS.forEach(function (em) {
         var st = mine[em] || { n: 0, mine: false };
-        html += '<button type="button" class="reaction' + (st.mine ? ' is-mine' : '') + '"'
+        html += '<button type="button" class="reaction' + (st.mine ? ' is-mine' : '') + (st.n ? '' : ' is-rest') + '"'
               + ' data-emoji="' + em + '"'
-              + (st.n ? '' : ' hidden')
               + ' title="' + em + '">'
               + '<span class="reaction-em">' + em + '</span>'
               + '<span class="reaction-n">' + (st.n || '') + '</span>'
