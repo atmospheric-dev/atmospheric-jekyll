@@ -4833,24 +4833,27 @@ body.modal-open{
   .qsearch-top{flex-wrap:wrap;}
   .qsearch-input{min-width:100%;}
 }
-/* ====== АКТУАЛЬНОЕ НА ГЛАВНОЙ ====== */
+/* ====== ПОСЛЕДНИЕ ПУБЛИКАЦИИ (правая колонка) ====== */
+.latest-block{
+  margin-bottom:34px;
+}
+
 .latest{
   display:flex;
   flex-direction:column;
   border-top:1px solid var(--line);
-  margin-top:8px;
 }
 
 .latest-item{
   display:block;
-  padding:16px 0;
+  padding:12px 0;
   border-bottom:1px solid var(--line);
   text-decoration:none;
   color:inherit;
   transition:padding-left .2s, border-color .2s;
 }
 .latest-item:hover{
-  padding-left:8px;
+  padding-left:6px;
   border-color:var(--accent);
   opacity:1;
   text-decoration:none;
@@ -4859,9 +4862,10 @@ body.modal-open{
 .latest-title{
   display:block;
   font-family:Georgia,serif;
-  font-size:1.05rem;
+  font-size:.92rem;
+  line-height:1.35;
   color:var(--text);
-  margin-bottom:6px;
+  margin-bottom:5px;
   transition:color .2s;
 }
 .latest-item:hover .latest-title{color:var(--accent);}
@@ -4869,19 +4873,27 @@ body.modal-open{
 .latest-meta{
   display:block;
   font-family:'Courier New',monospace;
-  font-size:.64rem;
-  letter-spacing:.09em;
+  font-size:.6rem;
+  letter-spacing:.08em;
   text-transform:uppercase;
   color:var(--text-dim);
 }
 
-.latest-empty{
-  padding:16px 0;
-  color:var(--text-dim);
-  font-size:.92rem;
-  margin:0;
+.latest-more{
+  display:block;
+  padding:12px 0 0;
+  font-family:'Courier New',monospace;
+  font-size:.66rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--accent);
+  text-decoration:none;
 }
+.latest-more:hover{color:var(--text);opacity:1;}
 
-@media (max-width:600px){
-  .latest-title{font-size:1rem;}
+.latest-empty{
+  padding:12px 0;
+  color:var(--text-dim);
+  font-size:.85rem;
+  margin:0;
 }
