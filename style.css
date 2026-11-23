@@ -4031,3 +4031,22 @@ body.modal-open{
   0%,100%{opacity:1;}
   50%{opacity:.45;}
 }
+/* ====== ПОДВАЛ: ПРАВОВАЯ ССЫЛКА ====== */
+.footer-legal{
+  margin:10px 0 0;
+  font-family:'Courier New',monospace;
+  font-size:.62rem;
+  letter-spacing:.08em;
+}
+
+.footer-legal a{
+  color:var(--text-dim);
+  text-decoration:none;
+  border-bottom:1px solid transparent;
+  transition:color .18s, border-bottom-color .18s;
+}
+
+.footer-legal a:hover{
+  color:var(--accent);
+  border-bottom-color:var(--accent);
+}
