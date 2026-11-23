@@ -97,10 +97,11 @@ permalink: /zines.html
 
   var me        = null;
   var zines     = [];
-  var pages     = {};   /* zine_id -> массив путей */
+  var pages     = {};
   var curZine   = null;
   var curIndex  = 0;
   var signCache = {};
+
   /* ================= ДОСТУП ================= */
 
   function signedPath(path){
@@ -220,7 +221,10 @@ permalink: /zines.html
       .eq('zine_id', zine.id)
       .order('page_no', { ascending: true });
 
-    if(res.error) return [];
+    if(res.error){
+      console.warn('zine_pages', res.error.message);
+      return [];
+    }
 
     var list = [{ path: zine.cover_url, no: 0 }].concat(
       (res.data || []).map(function(p){
@@ -232,7 +236,7 @@ permalink: /zines.html
     return list;
   }
 
-    async function openViewer(zine){
+  async function openViewer(zine){
     curZine = zine;
     curIndex = 0;
 
@@ -248,7 +252,7 @@ permalink: /zines.html
     pages[zine.id] = list;
 
     if(!list.length || !list[0].path){
-      alert('Страницы не найдены. Проверьте zine_pages и файлы в Storage.');
+      alert('Страницы не найдены. Проверьте таблицу zine_pages и файлы в Storage.');
       return;
     }
 
