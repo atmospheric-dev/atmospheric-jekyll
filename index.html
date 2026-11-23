@@ -35,9 +35,10 @@ layout: default
 <main>
   <section>
     <div class="wrap">
-      <div class="front-layout">
+      <div class="front-grid">
 
-        <aside class="shop-block">
+        <!-- ЛЕВО: МЕРЧ -->
+        <aside class="side-left">
           <p class="section-heading">Мерч и диски</p>
 
           <div class="shop-list">
@@ -75,73 +76,87 @@ layout: default
           </div>
         </aside>
 
+        <!-- ЦЕНТР: РЕЦЕНЗИИ + ЛУЧШИЕ -->
         <div class="front-main">
-          <h2>Выбор редакции</h2>
 
-          <div class="top-layout">
-            <div>
-              <div class="picks">
-                {% assign featured = site.albums | where: "featured", true %}
-                {% for album in featured limit: 3 %}
-                <div class="pick">
-                  <h3 class="pick-title"><a href="{{ site.baseurl }}{{ album.url }}">{{ album.artist }} — {{ album.title }} ({{ album.year }})</a></h3>
-                  <a href="{{ site.baseurl }}{{ album.url }}">
-                    <img class="pick-cover" src="{{ site.baseurl }}/{{ album.cover }}" alt="{{ album.artist }} — {{ album.title }}">
-                  </a>
-                </div>
-                {% endfor %}
-              </div>
+          <h2>Рецензии</h2>
 
-              <p style="margin-top:28px;font-family:'Courier New',monospace;font-size:.7rem;letter-spacing:.08em;color:var(--text-dim)">
-                Лучшие обзоры за последнее время.
-              </p>
-
-              <p style="margin-top:20px">
-                <a class="back" href="{{ site.baseurl }}/releases.html">Все обзоры →</a>
-              </p>
-            </div>
-
-            <aside class="latest-block">
-              <p class="section-heading">Последние публикации</p>
-                <div class="latest" id="latest-list">
-              <p class="latest-empty">Загружаем…</p>
-             </div>
-            </aside>
-
-            <aside class="concert-block">
-              <p class="section-heading">Ближайшие концерты</p>
-
-              <div class="concerts-list">
-
-                <a class="concert-card" href="https://vk.ru/theosophy_samara2026"
-                   style="--poster:url('{{ site.baseurl }}/covers/posters/poster-1.jpg')">
-                  <div class="concert-inner">
-                    <p class="concert-title">Birth of the Monolith, Самара</p>
-                    <p class="concert-date">11 ноября 2026</p>
-                  </div>
-                </a>
-
-                <a class="concert-card" href="https://vk.ru/club240885644"
-                   style="--poster:url('{{ site.baseurl }}/covers/posters/poster-2.jpg')">
-                  <div class="concert-inner">
-                    <p class="concert-title">Birth of the Monolith, Екатеринбург</p>
-                    <p class="concert-date">13 ноября 2026</p>
-                  </div>
-                </a>
-
-                <a class="concert-card" href="https://vk.ru/club240885807"
-                   style="--poster:url('{{ site.baseurl }}/covers/posters/poster-3.jpg')">
-                  <div class="concert-inner">
-                    <p class="concert-title">Birth of the Monolith, Омск</p>
-                    <p class="concert-date">14 ноября 2026</p>
-                  </div>
-                </a>
-
-              </div>
-            </aside>
-
+          <div class="latest-releases">
+            {% assign recent = site.albums | sort: "date" | reverse %}
+            {% for album in recent limit: 6 %}
+            <a class="lr-card" href="{{ site.baseurl }}{{ album.url }}">
+              <span class="lr-cover">
+                <img src="{{ site.baseurl }}/{{ album.cover }}"
+                     alt="{{ album.artist }} — {{ album.title }}" loading="lazy">
+              </span>
+              <span class="lr-body">
+                <span class="lr-artist">{{ album.artist }}</span>
+                <span class="lr-title">{{ album.title }}</span>
+                <span class="lr-year">{{ album.year }}</span>
+              </span>
+            </a>
+            {% endfor %}
           </div>
+
+          <p class="front-more">
+            <a class="back" href="{{ site.baseurl }}/releases.html">Все обзоры →</a>
+          </p>
+
+          <div class="weekly">
+            <h2>Лучшие альбомы за неделю</h2>
+            <p class="weekly-note">
+              обновлено <span id="weekly-date">—</span>
+            </p>
+            <div class="weekly-grid" id="weekly-grid">
+              <p class="weekly-empty">Считаем…</p>
+            </div>
+          </div>
+
         </div>
+
+        <!-- ПРАВО: ПОСЛЕДНИЕ ПУБЛИКАЦИИ + КОНЦЕРТЫ -->
+        <aside class="side-right">
+
+          <div class="side-block">
+            <p class="section-heading">Последние публикации</p>
+            <div class="latest" id="latest-list">
+              <p class="latest-empty">Загружаем…</p>
+            </div>
+          </div>
+
+          <div class="side-block concert-block">
+            <p class="section-heading">Ближайшие концерты</p>
+
+            <div class="concerts-list">
+
+              <a class="concert-card" href="https://vk.ru/theosophy_samara2026"
+                 style="--poster:url('{{ site.baseurl }}/covers/posters/poster-1.jpg')">
+                <div class="concert-inner">
+                  <p class="concert-title">Birth of the Monolith, Самара</p>
+                  <p class="concert-date">11 ноября 2026</p>
+                </div>
+              </a>
+
+              <a class="concert-card" href="https://vk.ru/club240885644"
+                 style="--poster:url('{{ site.baseurl }}/covers/posters/poster-2.jpg')">
+                <div class="concert-inner">
+                  <p class="concert-title">Birth of the Monolith, Екатеринбург</p>
+                  <p class="concert-date">13 ноября 2026</p>
+                </div>
+              </a>
+
+              <a class="concert-card" href="https://vk.ru/club240885807"
+                 style="--poster:url('{{ site.baseurl }}/covers/posters/poster-3.jpg')">
+                <div class="concert-inner">
+                  <p class="concert-title">Birth of the Monolith, Омск</p>
+                  <p class="concert-date">14 ноября 2026</p>
+                </div>
+              </a>
+
+            </div>
+          </div>
+
+        </aside>
 
       </div>
     </div>
