@@ -183,6 +183,7 @@ permalink: /profile-edit.html
 
     <div class="profile-footer">
       <button type="button" class="profile-logout" id="logout-btn">Выйти из аккаунта</button>
+      <button type="button" class="profile-delete" id="delete-account-btn">Удалить аккаунт</button>
     </div>
   </div>
 
@@ -209,7 +210,8 @@ permalink: /profile-edit.html
   var SUPABASE_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
 
-  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var sb   = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var base = '{{ site.baseurl }}';
 
   var GOBLINS = [
     { id: 0,  file: 'archer-f', label: 'Лучница' },
@@ -1108,7 +1110,75 @@ permalink: /profile-edit.html
     currentUser = r.data.user;
     await loadProfile();
   });
+  /* ===== УДАЛЕНИЕ АККАУНТА ===== */
+  var deleteBtn = document.getElementById('delete-account-btn');
 
+  if(deleteBtn){
+    deleteBtn.addEventListener('click', async function(){
+      if(!currentUser){
+        alert('Нужно войти в аккаунт.');
+        return;
+      }
+
+      var ok = confirm(
+        'Удалить аккаунт?\n\n' +
+        'Будут удалены профиль, аватар, фон, коллекция, комментарии и уведомления. ' +
+        'Действие необратимо.'
+      );
+      if(!ok) return;
+
+      var word = prompt('Чтобы подтвердить, напишите слово УДАЛИТЬ заглавными буквами:');
+      if(word !== 'УДАЛИТЬ'){
+        alert('Отменено.');
+        return;
+      }
+
+      deleteBtn.disabled = true;
+      deleteBtn.textContent = 'Удаляем…';
+
+      try{
+        /* 1. Убираем файлы из Storage */
+        var buckets = [
+          { name: 'covers',     prefix: currentUser.id + '/' },
+          { name: 'collection', prefix: currentUser.id + '/' },
+          { name: 'avatars',    prefix: currentUser.id + '/' }
+        ];
+
+        for(var b = 0; b < buckets.length; b++){
+          try{
+            var list = await sb.storage.from(buckets[b].name).list(currentUser.id);
+            if(list.data && list.data.length){
+              var paths = list.data.map(function(f){
+                return currentUser.id + '/' + f.name;
+              });
+              await sb.storage.from(buckets[b].name).remove(paths);
+            }
+          }catch(e){ /* бакета может не быть — не критично */ }
+        }
+
+        /* 2. Удаляем данные и сам аккаунт через SQL-функцию */
+        var res = await sb.rpc('delete_my_account');
+
+        if(res.error){
+          alert('Не удалось удалить: ' + res.error.message);
+          deleteBtn.disabled = false;
+          deleteBtn.textContent = 'Удалить аккаунт';
+          return;
+        }
+
+        /* 3. Выходим локально */
+        await sb.auth.signOut();
+        currentUser = null;
+
+        alert('Аккаунт удалён.');
+        location.href = base + '/';
+      }catch(err){
+        alert('Ошибка: ' + (err.message || 'не удалось'));
+        deleteBtn.disabled = false;
+        deleteBtn.textContent = 'Удалить аккаунт';
+      }
+    });
+  }
   document.getElementById('logout-btn').addEventListener('click', async function(){
     await sb.auth.signOut();
     currentUser = null;
