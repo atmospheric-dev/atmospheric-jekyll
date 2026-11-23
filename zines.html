@@ -104,14 +104,18 @@ permalink: /zines.html
   /* ================= ДОСТУП ================= */
 
   function signedPath(path){
+    if(!path) return Promise.resolve('');
     if(signCache[path]) return Promise.resolve(signCache[path]);
     return sb.storage.from(BUCKET).createSignedUrl(path, 3600)
       .then(function(r){
-        if(r.error) return '';
+        if(r.error){
+          console.warn('signedUrl', path, r.error.message);
+          return '';
+        }
         signCache[path] = r.data.signedUrl;
         return signCache[path];
       })
-      .catch(function(){ return ''; });
+      .catch(function(e){ console.warn('signedUrl', path, e); return ''; });
   }
 
   function show(el){ if(el) el.hidden = false; }
