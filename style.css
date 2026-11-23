@@ -4612,3 +4612,21 @@ body.modal-open{
     flex:1 1 100%;
   }
 }
+/* ====== ССЫЛКА-ЗАГОЛОВОК ====== */
+.title-link{
+  color:inherit;
+  text-decoration:none;
+  transition:color .2s;
+}
+.title-link:hover{
+  color:var(--accent);
+  opacity:1;
+}
+
+/* ====== КНОПКА «ЧИТАТЬ» ====== */
+.zine-cta{
+  margin:26px 0 0;
+}
+.zine-cta .zine-btn{
+  display:inline-block;
+}
