@@ -30,6 +30,127 @@
   });
 })();
 </script>
+<script>
+(function(){
+  var INDEX_URL = '{{ site.baseurl }}/search.json';
+  var LIMIT = 6;
+
+  var panel = document.getElementById('qsearch');
+  var openBtn = document.getElementById('open-qsearch');
+  var closeBtn = document.getElementById('qsearch-close');
+  var input = document.getElementById('qsearch-input');
+  var hits = document.getElementById('qsearch-hits');
+  var adv = document.getElementById('qsearch-adv');
+
+  if(!panel || !openBtn) return;
+
+  var data = null;
+  var loading = false;
+
+  function norm(s){ return (s || '').toString().toLowerCase(); }
+
+  function loadIndex(){
+    if(data || loading) return;
+    loading = true;
+    fetch(INDEX_URL)
+      .then(function(r){ return r.json(); })
+      .then(function(j){ data = j || []; query(); })
+      .catch(function(){ data = []; })
+      .finally(function(){ loading = false; });
+  }
+
+  function query(){
+    var q = norm(input.value.trim());
+    if(!q){ hits.innerHTML = ''; return; }
+
+    var list = (data || []).filter(function(i){
+      var hay = norm([i.title, i.subtitle, i.text, (i.tags||[]).join(' '), i.label].join(' '));
+      return q.split(/\s+/).every(function(w){ return !w || hay.indexOf(w) !== -1; });
+    }).sort(function(a,b){
+      return (b.date || '').localeCompare(a.date || '');
+    });
+
+    hits.innerHTML = '';
+    if(!list.length){
+      var e = document.createElement('p');
+      e.className = 'qsearch-hit';
+      e.style.color = 'var(--text-dim)';
+      e.textContent = 'Ничего не найдено';
+      hits.appendChild(e);
+      return;
+    }
+
+    list.slice(0, LIMIT).forEach(function(item){
+      var a = document.createElement('a');
+      a.className = 'qsearch-hit';
+      a.href = '{{ site.baseurl }}' + item.url;
+
+      var n = document.createElement('span');
+      n.className = 'qsearch-hit-name';
+      n.textContent = item.subtitle ? item.subtitle + ' — ' + item.title : item.title;
+
+      var r = document.createElement('span');
+      r.className = 'qsearch-hit-rubric';
+      r.textContent = item.rubric;
+
+      a.appendChild(n);
+      a.appendChild(r);
+      hits.appendChild(a);
+    });
+
+    if(list.length > LIMIT){
+      var m = document.createElement('a');
+      m.className = 'qsearch-more';
+      m.href = '{{ site.baseurl }}/search.html?q=' + encodeURIComponent(input.value.trim());
+      m.textContent = 'Показать все результаты (' + list.length + ')';
+      hits.appendChild(m);
+    }
+  }
+
+  function openPanel(){
+    panel.hidden = false;
+    panel.classList.add('is-open');
+    loadIndex();
+    setTimeout(function(){ input.focus(); }, 120);
+  }
+
+  function closePanel(){
+    panel.classList.remove('is-open');
+    setTimeout(function(){ panel.hidden = true; }, 260);
+  }
+
+  openBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    if(panel.hidden) openPanel(); else closePanel();
+  });
+
+  closeBtn.addEventListener('click', closePanel);
+
+  input.addEventListener('input', function(){
+    loadIndex();
+    query();
+    adv.href = '{{ site.baseurl }}/search.html' + (input.value.trim()
+      ? '?q=' + encodeURIComponent(input.value.trim())
+      : '');
+  });
+
+  input.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      var q = input.value.trim();
+      location.href = '{{ site.baseurl }}/search.html' + (q ? '?q=' + encodeURIComponent(q) : '');
+    }
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && !panel.hidden) closePanel();
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'){
+      e.preventDefault();
+      openPanel();
+    }
+  });
+})();
+</script>
   <script src="https://vk.ru/js/api/openapi.js"></script>
   {% include notifications-script.html %}
   {% include scripts.html %}
