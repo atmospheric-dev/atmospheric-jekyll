@@ -26,6 +26,22 @@ permalink: /u.html
           <div class="profile-since" id="u-since"></div>
         </div>
       </div>
+
+      <div class="bell-wrap" id="bell-wrap" hidden>
+        <button type="button" class="bell-btn" id="bell-btn" aria-label="Уведомления">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none"
+               stroke="currentColor" stroke-width="1.4"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/>
+            <path d="M13.7 21a2 2 0 0 1-3.4 0"/>
+          </svg>
+          <span class="bell-count" id="bell-count" hidden>0</span>
+        </button>
+        <div class="bell-pop" id="bell-pop" hidden>
+          <div class="bell-head">Уведомления</div>
+          <div class="bell-list" id="bell-list"></div>
+        </div>
+      </div>
     </div>
 
     <div class="u-meta" id="u-meta"></div>
