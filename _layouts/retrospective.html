@@ -12,7 +12,7 @@ layout: default
 
     <div class="retro-top">
       <div class="retro-cover">
-        <img src="{{ site.baseurl }}/{{ page.cover }}" alt="{{ page.artist }}">
+        <img src="{{ page.cover | relative_url }}" alt="{{ page.artist }}">
       </div>
 
       <div class="retro-facts">
@@ -36,6 +36,14 @@ layout: default
           <a href="#{{ item.id }}">{{ item.label }}</a>
           {% endfor %}
         </nav>
+        {% endif %}
+
+        {% if page.tags %}
+        <div class="retro-tags">
+          {% for tag in page.tags %}
+          <a href="{{ '/retrospectives.html?tag=' | relative_url }}" data-tag="{{ tag | slugify }}">{{ tag }}</a>
+          {% endfor %}
+        </div>
         {% endif %}
       </div>
     </div>
