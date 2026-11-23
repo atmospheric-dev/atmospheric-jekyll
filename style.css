@@ -1916,61 +1916,46 @@ footer a:hover{color:var(--accent);opacity:1;}
   .retro-cover{max-width:100%;}
 }
 /* ===== СЕТКА И КАРТОЧКИ РЕТРОСПЕКТИВ ===== */
+/* ===== РЕТРОСПЕКТИВА: ВЕРТИКАЛЬНЫЕ КАРТОЧКИ ===== */
 .retro-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-  gap:24px;
-  margin-top:32px;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:28px 24px;
+  padding:36px 0 72px;
+  max-width:920px;
 }
 .retro-card{
-  display:block;
+  display:flex;flex-direction:column;
   border:1px solid var(--line);
-  background:rgba(176,142,90,.03);
-  overflow:hidden;
   text-decoration:none;
   transition:border-color .25s;
 }
-.retro-card:hover{border-color:var(--accent);}
+.retro-card:hover{border-color:var(--accent);opacity:1;}
 .retro-card-strip{
-  width:100%;
-  height:180px;
+  aspect-ratio:2/3;
   overflow:hidden;
-  border-bottom:1px solid var(--line);
-  background:#121212;
+  background:rgba(0,0,0,.35);
 }
 .retro-card-strip img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  object-position:center 30%;
-  display:block;
-  filter:grayscale(.15) brightness(.88);
-  transition:transform .4s, filter .3s;
+  width:100%;height:100%;
+  object-fit:cover;display:block;
+  transition:transform .4s;
 }
-.retro-card:hover .retro-card-strip img{
-  transform:scale(1.03);
-  filter:grayscale(0) brightness(1);
-}
-.retro-card-inner{padding:16px 20px 18px;}
+.retro-card:hover .retro-card-strip img{transform:scale(1.03);}
+.retro-card-inner{padding:14px 16px 18px;}
 .retro-card-title{
-  font-family:Georgia,serif;
-  font-size:1.05rem;
-  color:#cbc5b7;
-  margin:0 0 6px;
-  transition:color .2s;
+  font-family:Georgia,serif;font-size:1rem;line-height:1.35;
+  color:var(--text);margin:0 0 6px;
 }
-.retro-card:hover .retro-card-title{color:var(--accent);}
 .retro-card-artist{
-  font-family:'Courier New',monospace;
-  font-size:.66rem;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  color:var(--text-dim);
-  margin:0;
+  font-family:'Courier New',monospace;font-size:.62rem;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text-dim);margin:0;
 }
-@media (max-width:720px){
-  .retro-grid{grid-template-columns:1fr;gap:16px;}
-  .retro-card-strip{height:140px;}
+
+@media (max-width:600px){
+  .retro-grid{grid-template-columns:repeat(2,1fr);gap:20px 14px;max-width:100%;}
+  .retro-card-title{font-size:.9rem;}
 }
 /* ===== ОБТЕКАНИЕ ОБЛОЖКИ РЕТРОСПЕКТИВЫ ===== */
 .retro-float{
