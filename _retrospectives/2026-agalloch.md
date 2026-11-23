@@ -11,6 +11,7 @@ genres:
   - doom metal
 cover: /covers/agalloch/03.jpg
 date: 2026-11-18
+tags: ["Agalloch", "dark metal", "neofolk", "post-metal"]
 toc:
 
   - { id: "from-which",   label: "From Which Of This Oak (1997)" }
