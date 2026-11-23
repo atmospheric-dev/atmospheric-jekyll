@@ -101,3 +101,348 @@ permalink: /zines.html
   var curZine   = null;
   var curIndex  = 0;
   var signCache = {};
+  /* ================= ДОСТУП ================= */
+
+  function signedPath(path){
+    if(signCache[path]) return Promise.resolve(signCache[path]);
+    return sb.storage.from(BUCKET).createSignedUrl(path, 3600)
+      .then(function(r){
+        if(r.error) return '';
+        signCache[path] = r.data.signedUrl;
+        return signCache[path];
+      })
+      .catch(function(){ return ''; });
+  }
+
+  function show(el){ if(el) el.hidden = false; }
+  function hide(el){ if(el) el.hidden = true; }
+
+  /* ================= ЗАГРУЗКА ВЫПУСКОВ ================= */
+
+  async function loadZines(){
+    var res = await sb.from('zines')
+      .select('id,number,title,subtitle,released_on,pages,cover_url,description')
+      .order('number', { ascending: false });
+
+    if(res.error){
+      document.getElementById('zine-status').textContent =
+        'Не удалось загрузить: ' + res.error.message;
+      return;
+    }
+    zines = res.data || [];
+    renderGrid();
+  }
+
+  function renderGrid(){
+    var grid  = document.getElementById('zine-grid');
+    var empty = document.getElementById('zine-empty');
+    grid.innerHTML = '';
+
+    if(!zines.length){
+      show(empty);
+      return;
+    }
+    hide(empty);
+
+    zines.forEach(function(z){
+      var card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'zine-card';
+      card.dataset.id = z.id;
+
+      var coverBox = document.createElement('div');
+      coverBox.className = 'zine-cover';
+
+      var img = document.createElement('img');
+      img.alt = 'Обложка выпуска ' + z.number;
+      img.loading = 'lazy';
+      coverBox.appendChild(img);
+
+      var badge = document.createElement('span');
+      badge.className = 'zine-badge';
+      badge.textContent = '№' + z.number;
+      coverBox.appendChild(badge);
+
+      card.appendChild(coverBox);
+
+      var info = document.createElement('div');
+      info.className = 'zine-info';
+
+      var t = document.createElement('div');
+      t.className = 'zine-name';
+      t.textContent = z.subtitle || ('Выпуск ' + z.number);
+      info.appendChild(t);
+
+      if(z.title){
+        var sub = document.createElement('div');
+        sub.className = 'zine-subname';
+        sub.textContent = z.title;
+        info.appendChild(sub);
+      }
+
+      var meta = [];
+      if(z.pages) meta.push(z.pages + ' стр.');
+      if(z.released_on){
+        meta.push(new Date(z.released_on).toLocaleDateString('ru-RU',
+          { month: 'long', year: 'numeric' }));
+      }
+      if(meta.length){
+        var m = document.createElement('div');
+        m.className = 'zine-meta';
+        m.textContent = meta.join(' · ');
+        info.appendChild(m);
+      }
+
+      card.appendChild(info);
+
+      card.addEventListener('click', function(){ openViewer(z); });
+      grid.appendChild(card);
+
+      if(z.cover_url){
+        signedPath(z.cover_url).then(function(url){
+          if(url) img.src = url;
+        });
+      }
+    });
+  }
+
+  /* ================= ЛИСТАЛКА ================= */
+
+  async function loadPages(zine){
+    if(pages[zine.id]) return pages[zine.id];
+
+    var res = await sb.from('zine_pages')
+      .select('page_no,image_url')
+      .eq('zine_id', zine.id)
+      .order('page_no', { ascending: true });
+
+    if(res.error) return [];
+
+    var list = [{ path: zine.cover_url, no: 0 }].concat(
+      (res.data || []).map(function(p){
+        return { path: p.image_url, no: p.page_no };
+      })
+    );
+
+    pages[zine.id] = list;
+    return list;
+  }
+
+  async function openViewer(zine){
+    curZine = zine;
+    curIndex = 0;
+
+    document.getElementById('viewer-title').textContent =
+      (zine.subtitle || ('Выпуск ' + zine.number)) +
+      (zine.title ? ' — ' + zine.title : '');
+
+    show(document.getElementById('zine-viewer'));
+    document.body.classList.add('modal-open');
+
+    var imgs = document.getElementById('viewer-img');
+    imgs.removeAttribute('src');
+    imgs.alt = 'Загружаем…';
+
+    var list = await loadPages(zine);
+    pages[zine.id] = list;
+    paintPage();
+  }
+
+  async function paintPage(){
+    var list = pages[curZine.id] || [];
+    var img  = document.getElementById('viewer-img');
+    var cnt  = document.getElementById('viewer-counter');
+
+    cnt.textContent = (curIndex + 1) + ' / ' + list.length;
+
+    var item = list[curIndex];
+    if(!item || !item.path){ img.alt = 'Страница не найдена'; return; }
+
+    var url = await signedPath(item.path);
+    img.src = url || '';
+    img.alt = 'Страница ' + (curIndex + 1);
+
+    document.getElementById('viewer-prev').disabled = curIndex === 0;
+    document.getElementById('viewer-next').disabled = curIndex >= list.length - 1;
+  }
+
+  function stepPage(delta){
+    var list = pages[curZine.id] || [];
+    var next = curIndex + delta;
+    if(next < 0 || next >= list.length) return;
+    curIndex = next;
+    paintPage();
+  }
+
+  function closeViewer(){
+    hide(document.getElementById('zine-viewer'));
+    document.body.classList.remove('modal-open');
+    curZine = null;
+  }
+
+  document.getElementById('viewer-close').addEventListener('click', closeViewer);
+  document.getElementById('viewer-prev').addEventListener('click', function(){ stepPage(-1); });
+  document.getElementById('viewer-next').addEventListener('click', function(){ stepPage(1); });
+
+  document.getElementById('zine-viewer').addEventListener('click', function(e){
+    if(e.target.id === 'viewer-stage') closeViewer();
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(!curZine) return;
+    if(e.key === 'ArrowLeft')  stepPage(-1);
+    if(e.key === 'ArrowRight') stepPage(1);
+    if(e.key === 'Escape')     closeViewer();
+  });
+
+  /* ================= КОММЕНТАРИИ ================= */
+
+  function cmtAvatar(id){
+    var file = AVATARS[Number(id) || 0] || AVATARS[0];
+    return BASE + '/images/goblins/' + file + '.jpg';
+  }
+
+  async function loadComments(){
+    var list = document.getElementById('zine-cmt-list');
+    list.innerHTML = '<p class="zine-cmt-empty">Загружаем…</p>';
+
+    var res = await sb.from('zine_comments')
+      .select('id,zine_id,user_id,body,created_at,profiles(username,avatar)')
+      .order('created_at', { ascending: false })
+      .limit(200);
+
+    if(res.error){
+      list.innerHTML = '<p class="zine-cmt-empty">Не удалось загрузить обсуждение.</p>';
+      return;
+    }
+
+    var rows = res.data || [];
+    list.innerHTML = '';
+
+    if(!rows.length){
+      list.innerHTML = '<p class="zine-cmt-empty">Пока никто не высказался.</p>';
+      return;
+    }
+
+    rows.forEach(function(c){
+      var item = document.createElement('div');
+      item.className = 'zine-cmt';
+
+      var img = document.createElement('img');
+      img.className = 'zine-cmt-ava';
+      img.src = cmtAvatar(c.profiles && c.profiles.avatar);
+      img.alt = '';
+      img.onerror = function(){ this.src = BASE + '/logo.png'; };
+      item.appendChild(img);
+
+      var body = document.createElement('div');
+      body.className = 'zine-cmt-body';
+
+      var head = document.createElement('div');
+      head.className = 'zine-cmt-head';
+
+      var name = document.createElement('span');
+      name.className = 'zine-cmt-name';
+      name.textContent = (c.profiles && c.profiles.username) || 'Гость';
+
+      var date = document.createElement('span');
+      date.className = 'zine-cmt-date';
+      date.textContent = new Date(c.created_at).toLocaleString('ru-RU',
+        { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+      head.appendChild(name);
+      head.appendChild(date);
+      body.appendChild(head);
+
+      var text = document.createElement('p');
+      text.className = 'zine-cmt-text';
+      text.textContent = c.body;
+      body.appendChild(text);
+
+      if(c.user_id === me.id){
+        var del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'zine-cmt-del';
+        del.textContent = 'удалить';
+        del.addEventListener('click', function(){ removeComment(c.id); });
+        body.appendChild(del);
+      }
+
+      item.appendChild(body);
+      list.appendChild(item);
+    });
+  }
+
+  async function sendComment(){
+    var ta  = document.getElementById('zine-cmt-body');
+    var sel = document.getElementById('zine-cmt-issue');
+    var msg = document.getElementById('zine-cmt-msg');
+
+    var text = ta.value.trim();
+    if(!text){ msg.textContent = 'Напишите хоть пару слов.'; return; }
+    if(!sel.value){ msg.textContent = 'Выберите выпуск.'; return; }
+
+    msg.textContent = 'Отправляем…';
+
+    var res = await sb.from('zine_comments').insert({
+      zine_id: Number(sel.value),
+      user_id: me.id,
+      body: text
+    });
+
+    if(res.error){
+      msg.textContent = 'Не отправилось: ' + res.error.message;
+      return;
+    }
+
+    ta.value = '';
+    msg.textContent = '';
+    loadComments();
+  }
+
+  async function removeComment(id){
+    if(!confirm('Удалить комментарий?')) return;
+    var res = await sb.from('zine_comments').delete().eq('id', id);
+    if(res.error){ alert('Не удалось: ' + res.error.message); return; }
+    loadComments();
+  }
+
+  document.getElementById('zine-cmt-send').addEventListener('click', sendComment);
+
+  function fillIssueSelect(){
+    var sel = document.getElementById('zine-cmt-issue');
+    sel.innerHTML = '';
+    zines.forEach(function(z){
+      var o = document.createElement('option');
+      o.value = z.id;
+      o.textContent = (z.subtitle || ('Выпуск ' + z.number)) +
+        (z.title ? ' — ' + z.title : '');
+      sel.appendChild(o);
+    });
+  }
+
+  /* ================= СТАРТ ================= */
+
+  (async function init(){
+    var status = document.getElementById('zine-status');
+    var s = await sb.auth.getSession();
+    var user = s.data && s.data.session && s.data.session.user;
+
+    if(!user){
+      status.hidden = true;
+      show(document.getElementById('zine-lock'));
+      return;
+    }
+
+    me = user;
+    status.hidden = true;
+    show(document.getElementById('zine-main'));
+    show(document.getElementById('zine-comments'));
+
+    await loadZines();
+    fillIssueSelect();
+    loadComments();
+  })();
+
+})();
+</script>
