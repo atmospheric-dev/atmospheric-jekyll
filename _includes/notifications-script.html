@@ -99,6 +99,10 @@
 
         if (one) one.is_read = true;
         paintBadges();
+
+        /* обновляем и класс элемента в списке, чтобы он перестал быть непрочитанным */
+        a.classList.remove('is-unread');
+
         window.location.href = a.getAttribute('href');
       });
     }
