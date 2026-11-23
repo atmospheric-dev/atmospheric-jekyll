@@ -3799,7 +3799,8 @@ body.modal-open{
 }
 
 /* раскрытый набор — показать все */
-.comment-reactions.is-open .reaction[hidden]{display:inline-flex;}
+.reaction.is-rest{display:none;}
+.comment-reactions.is-open .reaction.is-rest{display:inline-flex;}
 
 .comment-reactions-hint{
   margin:14px 0 0;
