@@ -4326,6 +4326,7 @@ body.modal-open{
 }
 
 /* -------- листалка -------- */
+[hidden]{display:none !important;}
 
 .zine-viewer{
   position:fixed;
