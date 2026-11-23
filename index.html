@@ -63,6 +63,16 @@ layout: default
               </span>
             </a>
 
+            <a class="shop-card" href="https://vk.ru/market/product/atmospheric-drugs-6-188962763-13212145" target="_blank" rel="noopener">
+              <span class="shop-img">
+                <img src="{{ site.baseurl }}/covers/shop/03.jpg" alt="Atmospheric Zine #6" loading="lazy">
+              </span>
+              <span class="shop-body">
+                <span class="shop-title">Atmospheric Zine #6</span>
+                <span class="shop-note">печатный зин</span>
+              </span>
+            </a>
+
           </div>
 
           <div class="radio-box">
@@ -86,12 +96,9 @@ layout: default
               </div>
             </div>
 
-            <audio id="radio-audio" preload="none"
-                   src="https://s1.sibstation2.ru/listen/sibstation2/radio.mp3"></audio>
+            <audio id="radio-audio" preload="none"></audio>
           </div>
         </aside>
-
-        <!-- ЦЕНТР: РЕЦЕНЗИИ + ЛУЧШИЕ -->
 
         <!-- ЦЕНТР: РЕЦЕНЗИИ + ЛУЧШИЕ -->
         <div class="front-main">
@@ -484,7 +491,12 @@ layout: default
   var aEl   = document.getElementById('radio-artist');
   if(!audio || !play) return;
 
-  var API = 'https://s1.sibstation2.ru/api/nowplaying/sibstation2';
+  var STATION = encodeURIComponent('сибирская_станция_2.0');
+  var BASE    = 'https://sibstation2.ru';
+  var API     = BASE + '/api/nowplaying/' + STATION;
+  var STREAM  = BASE + '/listen/' + STATION + '/radio.mp3';
+
+  audio.src = STREAM;
 
   function loadNow(){
     fetch(API)
@@ -492,8 +504,10 @@ layout: default
       .then(function(d){
         var np = d.now_playing && d.now_playing.song;
         if(!np) return;
-        if(np.title) tEl.textContent = np.title;
+
+        tEl.textContent = np.title || 'Сибирская Станция 2.0';
         aEl.textContent = np.artist || (d.station && d.station.name) || '';
+
         if(np.art && art){
           art.style.backgroundImage = 'url("' + np.art + '")';
         }
@@ -505,7 +519,7 @@ layout: default
 
   play.addEventListener('click', function(){
     if(audio.paused){
-      audio.src = audio.src;
+      audio.src = STREAM + '?_=' + Date.now();
       audio.play();
     } else {
       audio.pause();
@@ -519,6 +533,10 @@ layout: default
   audio.addEventListener('pause', function(){
     play.classList.remove('is-playing');
     play.setAttribute('aria-label', 'Включить');
+  });
+
+  audio.addEventListener('error', function(){
+    aEl.textContent = 'поток недоступен';
   });
 
   stop.addEventListener('click', function(){
