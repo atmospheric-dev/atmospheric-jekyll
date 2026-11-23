@@ -14,8 +14,7 @@ layout: null
   "year": {{ a.year | jsonify }},
   "date": {{ a.date | date: "%Y-%m-%d" | jsonify }},
   "tags": {{ a.genres | jsonify }},
-  "label": {{ a.label | jsonify }},
-  "crows": {{ a.crows | default: 0 | jsonify }},
+  "label": {{ a.label | default: "" | jsonify }},
   "text": {{ a.excerpt | strip_html | strip_newlines | truncate: 200 | jsonify }}
 }
 {% endfor %}
@@ -30,7 +29,6 @@ layout: null
   "date": {{ p.date | date: "%Y-%m-%d" | jsonify }},
   "tags": [],
   "label": "",
-  "crows": 0,
   "text": {{ p.description | default: "" | strip_html | strip_newlines | truncate: 200 | jsonify }}
 }
 {% endfor %}
@@ -45,7 +43,6 @@ layout: null
   "date": {{ p.date | date: "%Y-%m-%d" | jsonify }},
   "tags": [],
   "label": "",
-  "crows": 0,
   "text": {{ p.description | default: "" | strip_html | strip_newlines | truncate: 200 | jsonify }}
 }
 {% endfor %}
@@ -60,7 +57,6 @@ layout: null
   "date": {{ p.date | date: "%Y-%m-%d" | jsonify }},
   "tags": [],
   "label": "",
-  "crows": 0,
   "text": {{ p.description | default: "" | strip_html | strip_newlines | truncate: 200 | jsonify }}
 }
 {% endfor %}
@@ -75,7 +71,6 @@ layout: null
   "date": {{ p.date | date: "%Y-%m-%d" | jsonify }},
   "tags": [],
   "label": "",
-  "crows": 0,
   "text": {{ p.description | default: "" | strip_html | strip_newlines | truncate: 200 | jsonify }}
 }
 {% endfor %}
@@ -90,7 +85,6 @@ layout: null
   "date": {{ p.date | date: "%Y-%m-%d" | jsonify }},
   "tags": [],
   "label": "",
-  "crows": 0,
   "text": {{ p.description | default: "" | strip_html | strip_newlines | truncate: 200 | jsonify }}
 }
 {% endfor %}
