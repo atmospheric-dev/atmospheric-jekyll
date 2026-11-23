@@ -4,7 +4,7 @@
     Комментарии<span class="comments-count"> · <span class="comments-num">0</span></span>
   </h2>
 
- <form class="comment-form" novalidate>
+  <form class="comment-form" novalidate>
     <input type="hidden" name="parent_id" value="">
     <div class="comment-form-row">
       <input type="text" name="name" class="comment-input" placeholder="Имя"
@@ -29,6 +29,7 @@
   </form>
 
   <div class="comment-list"></div>
+  <p class="comment-reactions-hint" hidden>Войдите через профиль, чтобы ставить реакции.</p>
 </section>
 
 {% include comments-script.html %}
