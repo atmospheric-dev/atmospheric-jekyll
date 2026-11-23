@@ -146,19 +146,7 @@ layout: default
       </div>
     </div>
   </section>
-
-  <section>
-    <div class="wrap">
-      <h2>Актуальное</h2>
-      <div class="latest" id="latest-list">
-        <p class="latest-empty">Загружаем…</p>
-      </div>
-      <p style="margin-top:24px">
-        <a class="back" href="{{ site.baseurl }}/search.html">Все материалы →</a>
-      </p>
-    </div>
-  </section>
-  
+   
   <section>
     <div class="wrap">
       <h2>О нас</h2>
@@ -293,6 +281,12 @@ layout: default
         a.appendChild(m);
         box.appendChild(a);
       });
+      var more = document.createElement('a');
+      more.className = 'latest-more';
+      more.href = '{{ site.baseurl }}/search.html';
+      more.textContent = 'Все материалы →';
+      box.appendChild(more);
+    })
     })
     .catch(function(){
       box.innerHTML = '<p class="latest-empty">Не удалось загрузить список.</p>';
