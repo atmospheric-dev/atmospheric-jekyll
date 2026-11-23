@@ -9,10 +9,10 @@ title: Ретроспектива
 
   <div class="retro-grid">
     {% for r in site.retrospectives %}
-      <a class="retro-card" href="{{ site.baseurl }}{{ r.url }}">
+      <a class="retro-card" href="{{ r.url | relative_url }}" data-tags="{{ r.tags | join: ' ' | slugify }}">
         <div class="retro-card-strip">
           {% if r.cover %}
-            <img src="{{ site.baseurl }}/{{ r.cover }}" alt="{{ r.artist }}">
+            <img src="{{ r.cover | relative_url }}" alt="{{ r.artist }}">
           {% endif %}
         </div>
         <div class="retro-card-inner">
@@ -23,3 +23,24 @@ title: Ретроспектива
     {% endfor %}
   </div>
 </div>
+
+<script>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var tag = params.get("tag");
+    if (!tag) return;
+    var cards = document.querySelectorAll(".retro-card");
+    var shown = 0;
+    cards.forEach(function (card) {
+      var tags = (card.getAttribute("data-tags") || "").split(" ");
+      if (tags.indexOf(tag) === -1) {
+        card.style.display = "none";
+      } else {
+        shown++;
+      }
+    });
+    if (shown === 0) {
+      cards.forEach(function (card) { card.style.display = ""; });
+    }
+  }());
+</script>
