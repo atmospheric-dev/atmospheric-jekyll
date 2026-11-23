@@ -4084,3 +4084,33 @@ body.modal-open{
 .auth-consent a:hover{
   border-bottom-color:#b08e5a;
 }
+/* ====== КНОПКА УДАЛЕНИЯ АККАУНТА ====== */
+.profile-footer{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.7rem;
+}
+
+.profile-delete{
+  font-family:'Courier New', monospace;
+  font-size:.7rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#7c4a42;
+  background:transparent;
+  border:1px solid #3a2624;
+  padding:.55rem 1.2rem;
+  cursor:pointer;
+  transition:color .15s, border-color .15s, background .15s;
+}
+
+.profile-delete:hover{
+  color:#e07a62;
+  border-color:#c96a5a;
+  background:rgba(201,106,90,.08);
+}
+
+.profile-delete:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
