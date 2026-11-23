@@ -4630,3 +4630,91 @@ body.modal-open{
 .zine-cta .zine-btn{
   display:inline-block;
 }
+/* ====== ПОИСК ====== */
+.search-page{max-width:860px;margin:0 auto;padding:8px 0 60px;}
+
+.search-field{position:relative;margin-bottom:26px;}
+.search-input{
+  width:100%;
+  padding:14px 44px 14px 16px;
+  background:rgba(0,0,0,.25);
+  border:1px solid var(--line);
+  color:var(--text);
+  font-family:Georgia,serif;
+  font-size:1rem;
+  outline:none;
+  transition:border-color .2s;
+}
+.search-input:focus{border-color:var(--accent);}
+.search-input::placeholder{color:var(--text-dim);}
+
+.search-clear{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  background:none;border:0;color:var(--text-dim);
+  font-size:1.3rem;line-height:1;cursor:pointer;padding:6px 10px;
+}
+.search-clear:hover{color:var(--accent);}
+
+.search-filters{
+  display:flex;flex-wrap:wrap;gap:22px;
+  padding-bottom:22px;border-bottom:1px solid var(--line);
+}
+.search-fgroup{display:flex;flex-direction:column;gap:8px;}
+.search-flabel{
+  font-family:'Courier New',monospace;font-size:.68rem;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);
+  margin:0;
+}
+.search-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{
+  font-family:'Courier New',monospace;font-size:.68rem;letter-spacing:.08em;
+  text-transform:uppercase;padding:6px 12px;
+  background:none;border:1px solid var(--line);color:var(--text-dim);
+  cursor:pointer;transition:all .2s;
+}
+.chip:hover{border-color:var(--accent);color:var(--text);}
+.chip.is-on{border-color:var(--accent);color:var(--accent);background:rgba(176,142,90,.08);}
+
+.search-select{
+  background:rgba(0,0,0,.25);border:1px solid var(--line);
+  color:var(--text);font-family:Georgia,serif;font-size:.9rem;
+  padding:7px 10px;outline:none;cursor:pointer;
+}
+.search-select:focus{border-color:var(--accent);}
+
+.search-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;}
+.search-tags:empty{display:none;}
+
+.search-count{
+  font-family:'Courier New',monospace;font-size:.7rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text-dim);margin:30px 0 18px;
+}
+
+.search-results{display:flex;flex-direction:column;}
+
+.search-hit{
+  display:block;text-decoration:none;color:inherit;
+  padding:18px 0;border-bottom:1px solid var(--line);
+  transition:padding-left .2s,border-color .2s;
+}
+.search-hit:hover{padding-left:8px;border-color:var(--accent);opacity:1;text-decoration:none;}
+
+.search-hit-title{
+  font-family:Georgia,serif;font-size:1.12rem;color:var(--text);
+  margin-bottom:6px;
+}
+.search-hit:hover .search-hit-title{color:var(--accent);}
+
+.search-hit-meta{
+  font-family:'Courier New',monospace;font-size:.66rem;letter-spacing:.09em;
+  color:var(--accent);text-transform:uppercase;margin-bottom:8px;
+}
+
+.search-hit-text{
+  font-size:.92rem;color:var(--text-dim);line-height:1.65;margin:0;
+}
+
+@media (max-width:600px){
+  .search-filters{gap:16px;}
+  .search-field{margin-bottom:20px;}
+}
