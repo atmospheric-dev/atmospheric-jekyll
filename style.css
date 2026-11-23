@@ -4050,3 +4050,37 @@ body.modal-open{
   color:var(--accent);
   border-bottom-color:var(--accent);
 }
+/* ====== СОГЛАСИЕ ПРИ РЕГИСТРАЦИИ ====== */
+.auth-consent{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  font-family:'Courier New',monospace;
+  font-size:.64rem;
+  line-height:1.55;
+  letter-spacing:.03em;
+  color:#7c7a72;
+  margin:0 0 1rem;
+  text-transform:none;
+  font-weight:normal;
+  cursor:pointer;
+}
+
+.auth-consent input[type="checkbox"]{
+  flex:0 0 auto;
+  width:14px;
+  height:14px;
+  margin:2px 0 0;
+  accent-color:#b08e5a;
+  cursor:pointer;
+}
+
+.auth-consent a{
+  color:#b08e5a;
+  text-decoration:none;
+  border-bottom:1px solid rgba(176,142,90,.4);
+}
+
+.auth-consent a:hover{
+  border-bottom-color:#b08e5a;
+}
