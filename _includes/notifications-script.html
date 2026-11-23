@@ -1,433 +1,190 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function () {
-  var SUPABASE_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
-  var SUPABASE_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+  var URL_  = 'https://ojqefhakkmwmztxplcqv.supabase.co';
+  var KEY_  = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+  var BASE  = '{{ site.baseurl }}';
 
-  var BASE = '{{ site.baseurl }}';
+  var GOBLIN_FILES = ['archer-f','archer-m','druid-f','druid-m','bard-f','bard-m',
+                      'mage-f','mage-m','knight-f','knight-m','necro-f','necro-m'];
 
-  var sb = null;
-  var currentUser = null;
-
-  var REACTIONS = ['🖤','💀','🔥','💩','🤡','👎'];
-  var myReactions = {};
-
-  async function initUser() {
-    var tries = 0;
-    while (!window.supabase && tries < 40) {
-      await new Promise(function (r) { setTimeout(r, 50); });
-      tries++;
-    }
-    if (!window.supabase) return;
-    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    try {
-      var s = await sb.auth.getSession();
-      currentUser = (s && s.data && s.data.session && s.data.session.user) || null;
-    } catch (e) { currentUser = null; }
-  }
-
-  function visitorId() {
-    var k = 'atmos_visitor';
-    var v = localStorage.getItem(k);
-    if (!v) {
-      v = 'v_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
-      localStorage.setItem(k, v);
-    }
-    return v;
-  }
-
-  function esc(s) {
+  function esc(s){
     var d = document.createElement('div');
     d.textContent = s == null ? '' : String(s);
     return d.innerHTML;
   }
 
-  document.addEventListener('DOMContentLoaded', async function () {
-    await initUser();
+  function fmt(iso){
+    var d = new Date(iso);
+    var m = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+    var hh = String(d.getHours()).padStart(2,'0');
+    var mm = String(d.getMinutes()).padStart(2,'0');
+    return d.getDate() + ' ' + m[d.getMonth()] + ', ' + hh + ':' + mm;
+  }
 
-    var section = document.querySelector('.comments');
-    if (!section) return;
-
-    var page = section.dataset.page;
-    var list = section.querySelector('.comment-list');
-    var num = section.querySelector('.comments-num');
-    var form = section.querySelector('.comment-form');
-    var nameEl = form.querySelector('[name="name"]');
-    var bodyEl = form.querySelector('[name="body"]');
-    var parentEl = form.querySelector('[name="parent_id"]');
-    var note = form.querySelector('.comment-note');
-    var replyBox = form.querySelector('.comment-reply-to');
-    var replyName = form.querySelector('.comment-reply-name');
-    var cancelBtn = form.querySelector('.comment-cancel-reply');
-
-    /* ---------- панель эмодзи ---------- */
-    var EMOJI = [
-      '🖤','💀','🦇','🐦‍⬛','🕯️','🔥','⚰️','🌫️',
-      '🎸','🎧','💿','📼','🎵','🎼','🥀','🗡️',
-      '🩸','⛧','☾','🌑','⚡','🕸️','🧛','👁️'
-    ];
-
-    var editor = form.querySelector('.comment-editor');
-    var emojiToggle = form.querySelector('.comment-emoji-toggle');
-    var emojiPanel = form.querySelector('.comment-emoji-panel');
-
-    emojiPanel.innerHTML = EMOJI.map(function (s) {
-      return '<button type="button" class="comment-emoji" data-emoji="' + s + '">' + s + '</button>';
-    }).join('');
-
-    emojiToggle.addEventListener('click', function (e) {
-      e.stopPropagation();
-      emojiPanel.hidden = !emojiPanel.hidden;
-    });
-
-    emojiPanel.addEventListener('click', function (e) {
-      var btn = e.target.closest('.comment-emoji');
-      if (!btn) return;
-      var sym = btn.dataset.emoji;
-      var start = bodyEl.selectionStart;
-      var end = bodyEl.selectionEnd;
-      var val = bodyEl.value;
-      bodyEl.value = val.slice(0, start) + sym + val.slice(end);
-      var pos = start + sym.length;
-      bodyEl.setSelectionRange(pos, pos);
-      bodyEl.focus();
-    });
-
-    document.addEventListener('click', function (e) {
-      if (emojiPanel.hidden) return;
-      if (!editor.contains(e.target)) emojiPanel.hidden = true;
-    });
-
-    bodyEl.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !emojiPanel.hidden) {
-        emojiPanel.hidden = true;
-        bodyEl.focus();
-      }
-    });
-
-    var savedName = localStorage.getItem('atmos_name');
-    if (savedName) nameEl.value = savedName;
-
-    /* ---------- залогинен: имя берём из профиля ---------- */
-    if (currentUser && nameEl) {
-      var row = nameEl.closest('.comment-form-row');
-      var nick = currentUser.email ? currentUser.email.split('@')[0] : 'Гость';
-
-      try {
-        var prof = await sb.from('profiles').select('username').eq('id', currentUser.id).maybeSingle();
-        if (prof && prof.data && prof.data.username) nick = prof.data.username;
-      } catch (e) { /* остаёмся на e-mail */ }
-
-      nameEl.value = nick;
-      nameEl.removeAttribute('required');
-
-      if (row) {
-        row.innerHTML = '<span class="comment-as">Вы пишете как <a href="' + BASE + '/u.html?id='
-          + encodeURIComponent(currentUser.id) + '">' + esc(nick) + '</a></span>';
-      }
+  async function init(){
+    var tries = 0;
+    while(!window.supabase && tries < 40){
+      await new Promise(function(r){ setTimeout(r, 50); });
+      tries++;
     }
+    if(!window.supabase) return null;
 
-    /* ---------- загрузка ---------- */
-    async function load() {
-      try {
-        var url = SUPABASE_URL + '/rest/v1/comments?select=id,parent_id,name,body,created_at,user_id'
-          + '&page=eq.' + encodeURIComponent(page)
-          + '&order=created_at.asc';
-        var res = await fetch(url, {
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_KEY
-          }
-        });
-        if (!res.ok) throw new Error('load: ' + res.status);
-        var rows = await res.json();
-        var agg = await loadReactions(rows);
-        render(rows, agg);
-      } catch (e) { console.warn(e); }
-    }
+    var sb = window.supabase.createClient(URL_, KEY_);
+    var s = await sb.auth.getSession();
+    var user = (s && s.data && s.data.session && s.data.session.user) || null;
+    if(!user) return null;
+    return { sb: sb, user: user };
+  }
 
-    /* ---------- реакции ---------- */
-    async function loadReactions(rows) {
-      myReactions = {};
-      if (!rows.length) return {};
+  init().then(function (ctx) {
+    if (!ctx) return;
+    var sb = ctx.sb, user = ctx.user;
 
-      var ids = rows.map(function (r) { return r.id; }).join(',');
-      var url = SUPABASE_URL + '/rest/v1/comment_reactions'
-        + '?select=id,comment_id,user_id,emoji&comment_id=in.(' + ids + ')';
+    var wrap  = document.getElementById('bell-wrap');
+    var btn   = document.getElementById('bell-btn');
+    var pop   = document.getElementById('bell-pop');
+    var list  = document.getElementById('bell-list');
+    var count = document.getElementById('bell-count');
+    var dot   = document.getElementById('topbar-dot');
 
-      var res = await fetch(url, {
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY
-        }
-      });
-      if (!res.ok) return {};
+    var onProfile = !!(wrap && btn && pop && list);
+    var loaded = [];
 
-      var data = await res.json();
-      var agg = {};
+    /* ---- колокольчик в профиле ---- */
+    if (onProfile) {
+      wrap.hidden = false;
 
-      data.forEach(function (r) {
-        if (!agg[r.comment_id]) agg[r.comment_id] = {};
-        agg[r.comment_id][r.emoji] = agg[r.comment_id][r.emoji] || { n: 0, mine: false };
-        agg[r.comment_id][r.emoji].n++;
-
-        if (currentUser && r.user_id === currentUser.id) {
-          agg[r.comment_id][r.emoji].mine = true;
-          myReactions[r.comment_id + '|' + r.emoji] = r.id;
-        }
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        pop.hidden = !pop.hidden;
+        if (!pop.hidden) load();
       });
 
-      return agg;
-    }
-
-    function reactionsBar(cid, agg) {
-      var mine = agg[cid] || {};
-
-      var html = '<div class="comment-reactions" data-id="' + cid + '">';
-      REACTIONS.forEach(function (em) {
-        var st = mine[em] || { n: 0, mine: false };
-        html += '<button type="button" class="reaction' + (st.mine ? ' is-mine' : '') + (st.n ? '' : ' is-rest') + '"'
-              + ' data-emoji="' + em + '"'
-              + ' title="' + em + '">'
-              + '<span class="reaction-em">' + em + '</span>'
-              + '<span class="reaction-n">' + (st.n || '') + '</span>'
-              + '</button>';
-      });
-      html += '<button type="button" class="reaction-add" title="Добавить реакцию">＋</button>';
-      html += '</div>';
-
-      return html;
-    }
-
-    function fmtDate(iso) {
-      var d = new Date(iso);
-      var months = ['января','февраля','марта','апреля','мая','июня',
-                    'июля','августа','сентября','октября','ноября','декабря'];
-      var hh = String(d.getHours()).padStart(2, '0');
-      var mm = String(d.getMinutes()).padStart(2, '0');
-      return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ', ' + hh + ':' + mm;
-    }
-
-    function render(rows, agg) {
-      agg = agg || {};
-      num.textContent = rows.length;
-      if (!rows.length) {
-        list.innerHTML = '<p class="comment-empty">Пока никто не высказался. Будьте первым.</p>';
-        return;
-      }
-
-      var byId = {};
-      rows.forEach(function (r) { byId[r.id] = r; r.children = []; });
-
-      var roots = [];
-      rows.forEach(function (r) {
-        if (r.parent_id && byId[r.parent_id]) {
-          byId[r.parent_id].children.push(r);
-        } else {
-          roots.push(r);
-        }
+      document.addEventListener('click', function (e) {
+        if (!pop.hidden && !wrap.contains(e.target)) pop.hidden = true;
       });
 
-      function node(c, depth) {
-        var author = c.user_id
-          ? '<a class="comment-author comment-author-link" href="' + BASE + '/u.html?id='
-            + encodeURIComponent(c.user_id) + '">' + esc(c.name) + '</a>'
-          : '<span class="comment-author">' + esc(c.name) + '</span>';
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') pop.hidden = true;
+      });
 
-        var html = '<div class="comment" id="comment-' + c.id + '" data-id="' + c.id + '">'
-          + '<div class="comment-head">'
-          +   author
-          +   '<span class="comment-date">' + fmtDate(c.created_at) + '</span>'
-          + '</div>'
-          + '<div class="comment-text">' + esc(c.body).replace(/\n/g, '<br>') + '</div>'
-          + reactionsBar(c.id, agg);
+      list.addEventListener('click', async function (e) {
+        var a = e.target.closest('.bell-item');
+        if (!a) return;
 
-        if (depth < 1) {
-          html += '<button type="button" class="comment-reply" data-id="' + c.id
-                + '" data-name="' + esc(c.name) + '">Ответить</button>';
+        var id  = a.dataset.id;
+        var one = null;
+        for (var i = 0; i < loaded.length; i++) {
+          if (String(loaded[i].id) === String(id)) one = loaded[i];
         }
-        if (c.children.length) {
-          html += '<div class="comment-children">';
-          c.children.forEach(function (ch) { html += node(ch, depth + 1); });
-          html += '</div>';
-        }
-        return html + '</div>';
-      }
+        if (one && one.is_read) return;
 
-      list.innerHTML = roots.map(function (r) { return node(r, 0); }).join('');
+        e.preventDefault();
 
-      var hint = section.querySelector('.comment-reactions-hint');
-      if (hint) hint.hidden = !!currentUser;
-
-      /* ---------- переход к комментарию из уведомления ---------- */
-      if (location.hash.indexOf('#comment-') === 0) {
-        var target = document.getElementById(location.hash.slice(1));
-        if (target) {
-          target.classList.add('is-highlight');
-          setTimeout(function () {
-            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }, 120);
-          setTimeout(function () {
-            target.classList.remove('is-highlight');
-          }, 2600);
-        }
-      }
-    }
-
-    load();
-
-    /* ---------- клик по реакции ---------- */
-    list.addEventListener('click', async function (e) {
-      var addBtn = e.target.closest('.reaction-add');
-      if (addBtn) {
-        var bar0 = addBtn.closest('.comment-reactions');
-        bar0.classList.toggle('is-open');
-        return;
-      }
-
-      var btn = e.target.closest('.reaction');
-      if (!btn) return;
-
-      if (!currentUser) {
-        var hint = section.querySelector('.comment-reactions-hint');
-        if (hint) hint.hidden = false;
-        return;
-      }
-
-      var bar = btn.closest('.comment-reactions');
-      var cid = bar.dataset.id;
-      var emoji = btn.dataset.emoji;
-      var key = cid + '|' + emoji;
-
-      btn.disabled = true;
-
-      try {
-        var sess = await sb.auth.getSession();
-        var token = sess.data.session.access_token;
-
-        if (myReactions[key]) {
-          var del = await fetch(SUPABASE_URL + '/rest/v1/comment_reactions?id=eq.' + myReactions[key], {
-            method: 'DELETE',
+        try {
+          var sess  = await sb.auth.getSession();
+          var token = sess.data.session.access_token;
+          await fetch(URL_ + '/rest/v1/notifications?id=eq.' + id, {
+            method: 'PATCH',
             headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': 'Bearer ' + token
-            }
-          });
-          if (!del.ok) throw new Error('unreact');
-          delete myReactions[key];
-        } else {
-          var ins = await fetch(SUPABASE_URL + '/rest/v1/comment_reactions', {
-            method: 'POST',
-            headers: {
-              'apikey': SUPABASE_KEY,
+              'apikey': KEY_,
               'Authorization': 'Bearer ' + token,
               'Content-Type': 'application/json',
-              'Prefer': 'return=representation'
+              'Prefer': 'return=minimal'
             },
-            body: JSON.stringify({
-              comment_id: Number(cid),
-              user_id: currentUser.id,
-              emoji: emoji
-            })
+            body: JSON.stringify({ is_read: true })
           });
-          if (!ins.ok) throw new Error('react');
-          var created = await ins.json();
-          myReactions[key] = created[0].id;
-        }
+        } catch (err) { console.warn(err); }
 
-        load();
-      } catch (err) {
-        console.warn(err);
-      } finally {
-        btn.disabled = false;
+        if (one) one.is_read = true;
+        paintBadges();
+        window.location.href = a.getAttribute('href');
+      });
+    }
+
+    /* ---- мини-аватарка в шапке ---- */
+    var tu  = document.getElementById('topbar-user');
+    var tav = document.getElementById('topbar-avatar');
+
+    if (tu && tav) {
+      sb.from('profiles').select('avatar,username').eq('id', user.id).maybeSingle()
+        .then(function (res) {
+          var p = res && res.data;
+          tav.src = BASE + '/images/goblins/' + (GOBLIN_FILES[p && p.avatar] || GOBLIN_FILES[0]) + '.jpg';
+          tav.onerror = function(){ tav.src = BASE + '/logo.png'; };
+          if (p && p.username) tu.title = p.username;
+          tu.hidden = false;
+
+          var prof = document.querySelector('.topbar-profile');
+          if (prof) prof.hidden = true;
+        })
+        .catch(function(){});
+    }
+
+    /* ---- счётчики ---- */
+    function paintBadges(){
+      var unread = 0;
+      for (var i = 0; i < loaded.length; i++) {
+        if (!loaded[i].is_read) unread++;
       }
-    });
 
-    /* ---------- ответ ---------- */
-    list.addEventListener('click', function (e) {
-      var btn = e.target.closest('.comment-reply');
-      if (!btn) return;
-      parentEl.value = btn.dataset.id;
-      replyName.textContent = btn.dataset.name;
-      replyBox.hidden = false;
-      bodyEl.focus();
-    });
+      if (onProfile && count) {
+        count.textContent = unread;
+        count.hidden = !unread;
+      }
+      if (dot) dot.hidden = !unread;
+    }
 
-    cancelBtn.addEventListener('click', function () {
-      parentEl.value = '';
-      replyBox.hidden = true;
-    });
+    function render(items){
+      loaded = items;
+      paintBadges();
 
-    /* ---------- отправка ---------- */
-    form.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      note.textContent = '';
+      if (!onProfile) return;
 
-      var name = nameEl ? nameEl.value.trim() : '';
-      var body = bodyEl.value.trim();
+      if (!items.length) {
+        list.innerHTML = '<div class="bell-empty">Пока тихо.</div>';
+        return;
+      }
 
-      if (!currentUser && !name) { note.textContent = 'Введите имя.'; if (nameEl) nameEl.focus(); return; }
-      if (body.length < 3) { note.textContent = 'Слишком короткий комментарий.'; bodyEl.focus(); return; }
+      list.innerHTML = items.map(function (n) {
+        var page = n.page || '/';
+        var href = BASE + page + '#comment-' + n.comment_id;
+        return '<a class="bell-item' + (n.is_read ? '' : ' is-unread') + '"'
+          + ' href="' + esc(href) + '" data-id="' + n.id + '">'
+          + '<div class="bell-item-who">' + esc(n.actor_name || 'Кто-то') + ' ответил вам</div>'
+          + '<div class="bell-item-body">' + esc(n.body || '') + '</div>'
+          + '<div class="bell-item-where">' + esc(page) + ' · ' + fmt(n.created_at) + '</div>'
+          + '</a>';
+      }).join('');
+    }
 
-      var submit = form.querySelector('.comment-submit');
-      submit.disabled = true;
-      note.textContent = 'Отправляем…';
-
+    /* ---- загрузка: ВАЖНО — с токеном сессии, а не publishable ---- */
+    async function load(){
       try {
-        var token = SUPABASE_KEY;
-        if (sb) {
-          var sess = await sb.auth.getSession();
-          if (sess && sess.data && sess.data.session && sess.data.session.access_token) {
-            token = sess.data.session.access_token;
-          }
-        }
+        var sess  = await sb.auth.getSession();
+        var token = (sess && sess.data && sess.data.session && sess.data.session.access_token) || KEY_;
 
-        var payload = {
-          p_page: String(page),
-          p_name: String(name || 'Аноним'),
-          p_body: String(body),
-          p_visitor: String(visitorId())
-        };
-        var pid = parentEl.value ? Number(parentEl.value) : 0;
-        if (pid > 0) payload.p_parent = pid;
-
-        var res = await fetch(SUPABASE_URL + '/rest/v1/rpc/add_comment', {
-          method: 'POST',
+        var res = await fetch(URL_ + '/rest/v1/notifications'
+          + '?select=id,comment_id,actor_name,body,page,is_read,created_at'
+          + '&user_id=eq.' + encodeURIComponent(user.id)
+          + '&order=created_at.desc&limit=10', {
           headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': 'Bearer ' + token,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
+            'apikey': KEY_,
+            'Authorization': 'Bearer ' + token
+          }
         });
-        if (!res.ok) throw new Error('add_comment: ' + res.status);
-        var r = await res.json();
 
-        if (!r.ok) {
-          note.textContent = r.error === 'rate'
-            ? 'Слишком часто. Попробуйте через час.'
-            : 'Не получилось отправить.';
+        if (!res.ok) {
+          console.warn('notifications', res.status, await res.text());
           return;
         }
 
-        if (!currentUser) localStorage.setItem('atmos_name', name);
-        bodyEl.value = '';
-        parentEl.value = '';
-        replyBox.hidden = true;
+        render(await res.json());
+      } catch (e) { console.warn(e); }
+    }
 
-        if (r.approved) {
-          note.textContent = 'Отправлено.';
-          load();
-        } else {
-          note.textContent = 'Отправлено. Комментарий появится после проверки.';
-        }
-      } catch (err) {
-        console.warn(err);
-        note.textContent = 'Ошибка отправки.';
-      } finally {
-        submit.disabled = false;
-      }
-    });
+    load();
   });
 })();
 </script>
