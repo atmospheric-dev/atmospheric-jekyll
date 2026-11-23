@@ -4,6 +4,9 @@
   var KEY_ = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
   var BASE = '{{ site.baseurl }}';
 
+  var GOBLIN_FILES = ['archer-f','archer-m','druid-f','druid-m','bard-f','bard-m',
+                      'mage-f','mage-m','knight-f','knight-m','necro-f','necro-m'];
+
   function esc(s){
     var d = document.createElement('div');
     d.textContent = s == null ? '' : String(s);
@@ -44,42 +47,123 @@
     var count = document.getElementById('bell-count');
     var dot   = document.getElementById('topbar-dot');
 
-    var onProfile = !!wrap;
-    if (onProfile) wrap.hidden = false;
+    var onProfile = !!(wrap && btn && pop && list);
 
+    /* ---- колокольчик в профиле ---- */
+    if (onProfile) {
+      wrap.hidden = false;
+
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        pop.hidden = !pop.hidden;
+        if (!pop.hidden) load();
+      });
+
+      document.addEventListener('click', function (e) {
+        if (!pop.hidden && !wrap.contains(e.target)) pop.hidden = true;
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') pop.hidden = true;
+      });
+
+      list.addEventListener('click', async function (e) {
+        var a = e.target.closest('.bell-item');
+        if (!a) return;
+
+        var id  = a.dataset.id;
+        var one = null;
+        for (var i = 0; i < loaded.length; i++) {
+          if (String(loaded[i].id) === String(id)) one = loaded[i];
+        }
+        if (one && one.is_read) return;
+
+        e.preventDefault();
+
+        try {
+          var sess  = await sb.auth.getSession();
+          var token = sess.data.session.access_token;
+          await fetch(URL_ + '/rest/v1/notifications?id=eq.' + id, {
+            method: 'PATCH',
+            headers: {
+              'apikey': KEY_,
+              'Authorization': 'Bearer ' + token,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({ is_read: true })
+          });
+        } catch (err) { console.warn(err); }
+
+        if (one) one.is_read = true;
+        paintBadges();
+        window.location.href = a.getAttribute('href');
+      });
+    }
+
+    /* ---- мини-аватарка в шапке ---- */
+    var tu  = document.getElementById('topbar-user');
+    var tav = document.getElementById('topbar-avatar');
+
+    if (tu && tav) {
+      sb.from('profiles').select('avatar,username').eq('id', user.id).maybeSingle()
+        .then(function (res) {
+          var p = res && res.data;
+          tav.src = BASE + '/images/goblins/' + (GOBLIN_FILES[p && p.avatar] || GOBLIN_FILES[0]) + '.jpg';
+          tav.onerror = function(){ tav.src = BASE + '/logo.png'; };
+          if (p && p.username) tu.title = p.username;
+          tu.hidden = false;
+
+          var prof = document.querySelector('.topbar-profile');
+          if (prof) prof.hidden = true;
+        })
+        .catch(function(){});
+    }
+
+    /* ---- данные ---- */
     var loaded = [];
 
-    function render(items){
-      loaded = items;
-      var unread = items.filter(function(n){ return !n.is_read; }).length;
+    function paintBadges(){
+      var unread = 0;
+      for (var i = 0; i < loaded.length; i++) {
+        if (!loaded[i].is_read) unread++;
+      }
 
       if (onProfile && count) {
         count.textContent = unread;
         count.hidden = !unread;
       }
       if (dot) dot.hidden = !unread;
+    }
 
-      if (!onProfile || !list) return;
+    function render(items){
+      loaded = items;
+      paintBadges();
 
-      if (!items.length){
+      if (!onProfile) return;
+
+      if (!items.length) {
         list.innerHTML = '<div class="bell-empty">Пока тихо.</div>';
         return;
       }
 
       list.innerHTML = items.map(function (n) {
-        var href = BASE + (n.page || '/') + '#comment-' + n.comment_id;
+        var page = n.page || '/';
+        var href = BASE + page + '#comment-' + n.comment_id;
         return '<a class="bell-item' + (n.is_read ? '' : ' is-unread') + '"'
           + ' href="' + esc(href) + '" data-id="' + n.id + '">'
           + '<div class="bell-item-who">' + esc(n.actor_name || 'Кто-то') + ' ответил вам</div>'
           + '<div class="bell-item-body">' + esc(n.body || '') + '</div>'
-          + '<div class="bell-item-where">' + esc(n.page || '') + ' · ' + fmt(n.created_at) + '</div>'
+          + '<div class="bell-item-where">' + esc(page) + ' · ' + fmt(n.created_at) + '</div>'
           + '</a>';
       }).join('');
     }
 
     function load(){
-      return fetch(URL_ + '/rest/v1/notifications?select=id,comment_id,actor_name,body,page,is_read,created_at'
-        + '&user_id=eq.' + user.id + '&order=created_at.desc&limit=10', {
+      return fetch(URL_ + '/rest/v1/notifications'
+        + '?select=id,comment_id,actor_name,body,page,is_read,created_at'
+        + '&user_id=eq.' + encodeURIComponent(user.id)
+        + '&order=created_at.desc&limit=10', {
         headers: { 'apikey': KEY_, 'Authorization': 'Bearer ' + KEY_ }
       })
       .then(function(r){ return r.ok ? r.json() : []; })
@@ -88,52 +172,6 @@
     }
 
     load();
-
-    if (!onProfile) return;
-
-    btn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      pop.hidden = !pop.hidden;
-      if (!pop.hidden) load();
-    });
-
-    document.addEventListener('click', function (e) {
-      if (!pop.hidden && !wrap.contains(e.target)) pop.hidden = true;
-    });
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') pop.hidden = true;
-    });
-
-    list.addEventListener('click', async function (e) {
-      var a = e.target.closest('.bell-item');
-      if (!a) return;
-
-      var id = a.dataset.id;
-      var n = loaded.find(function(x){ return String(x.id) === String(id); });
-      if (n && n.is_read) return;
-
-      e.preventDefault();
-      try {
-        var sess = await sb.auth.getSession();
-        var token = sess.data.session.access_token;
-        await fetch(URL_ + '/rest/v1/notifications?id=eq.' + id, {
-          method: 'PATCH',
-          headers: {
-            'apikey': KEY_,
-            'Authorization': 'Bearer ' + token,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ is_read: true })
-        });
-      } catch (err) { console.warn(err); }
-
-      var unreadLeft = loaded.filter(function(x){ return !x.is_read && String(x.id) !== String(id); }).length;
-      if (count) { count.textContent = unreadLeft; count.hidden = !unreadLeft; }
-      if (dot) dot.hidden = !unreadLeft;
-
-      window.location.href = a.getAttribute('href');
-    });
   });
 })();
 </script>
