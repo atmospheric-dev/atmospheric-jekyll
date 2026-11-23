@@ -228,7 +228,7 @@ permalink: /zines.html
     return list;
   }
 
-  async function openViewer(zine){
+    async function openViewer(zine){
     curZine = zine;
     curIndex = 0;
 
@@ -236,15 +236,20 @@ permalink: /zines.html
       (zine.subtitle || ('Выпуск ' + zine.number)) +
       (zine.title ? ' — ' + zine.title : '');
 
-    show(document.getElementById('zine-viewer'));
-    document.body.classList.add('modal-open');
-
     var imgs = document.getElementById('viewer-img');
     imgs.removeAttribute('src');
     imgs.alt = 'Загружаем…';
 
     var list = await loadPages(zine);
     pages[zine.id] = list;
+
+    if(!list.length || !list[0].path){
+      alert('Страницы не найдены. Проверьте zine_pages и файлы в Storage.');
+      return;
+    }
+
+    show(document.getElementById('zine-viewer'));
+    document.body.classList.add('modal-open');
     paintPage();
   }
 
