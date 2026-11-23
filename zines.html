@@ -1,0 +1,103 @@
+---
+layout: default
+title: Печатный журнал
+permalink: /zines.html
+---
+
+<div class="zine-wrap">
+
+  <p class="zine-status" id="zine-status">Проверяем доступ…</p>
+
+  <!-- ===== ЗАКРЫТО ===== -->
+  <div id="zine-lock" hidden>
+    <div class="zine-lock-box">
+      <div class="zine-lock-icon">🔒</div>
+      <h2 class="zine-lock-title">Материал для своих</h2>
+      <p class="zine-lock-text">
+        Сканы выпусков доступны только зарегистрированным читателям.
+        Вход открывает журнал целиком — и все следующие выпуски.
+      </p>
+      <div class="zine-lock-actions">
+        <a class="zine-btn" href="{{ site.baseurl }}/profile.html">Войти</a>
+        <a class="zine-btn zine-btn-ghost" href="{{ site.baseurl }}/profile.html">Создать аккаунт</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ОТКРЫТО ===== -->
+  <div id="zine-main" hidden>
+
+    <header class="zine-head">
+      <h1 class="zine-title">Печатный журнал</h1>
+      <p class="zine-lead">
+        Zine — это приложение к сайту, но отдельная история:
+        бумага, типографская краска, переплёт. Здесь лежат сканы всех
+        вышедших выпусков — листайте страницы прямо в браузере.
+      </p>
+    </header>
+
+    <div class="zine-grid" id="zine-grid"></div>
+
+    <div class="zine-empty" id="zine-empty" hidden>
+      <p>Выпусков пока нет.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== ЛИСТАЛКА ===== -->
+<div class="zine-viewer" id="zine-viewer" hidden>
+  <div class="zine-viewer-bar">
+    <span class="zine-viewer-title" id="viewer-title"></span>
+    <button type="button" class="zine-viewer-close" id="viewer-close" aria-label="Закрыть">×</button>
+  </div>
+
+  <div class="zine-viewer-stage" id="viewer-stage">
+    <button type="button" class="zine-viewer-nav zine-viewer-prev" id="viewer-prev" aria-label="Назад">‹</button>
+    <img class="zine-viewer-img" id="viewer-img" src="" alt="">
+    <button type="button" class="zine-viewer-nav zine-viewer-next" id="viewer-next" aria-label="Вперёд">›</button>
+  </div>
+
+  <div class="zine-viewer-foot">
+    <span class="zine-viewer-counter" id="viewer-counter">0 / 0</span>
+  </div>
+</div>
+
+<!-- ===== КОММЕНТАРИИ ===== -->
+<div class="zine-comments" id="zine-comments" hidden>
+  <h2 class="zine-sub">Обсуждение выпусков</h2>
+
+  <div class="zine-cmt-form">
+    <textarea id="zine-cmt-body" rows="3" maxlength="2000" placeholder="Что думаете о журнале?"></textarea>
+    <div class="zine-cmt-row">
+      <label class="col-label" for="zine-cmt-issue">К выпуску</label>
+      <select id="zine-cmt-issue" class="col-input"></select>
+      <button type="button" class="zine-btn" id="zine-cmt-send">Отправить</button>
+    </div>
+    <p class="zine-cmt-msg" id="zine-cmt-msg"></p>
+  </div>
+
+  <div class="zine-cmt-list" id="zine-cmt-list"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  var SUPABASE_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+
+  var sb   = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var BASE = '{{ site.baseurl }}';
+  var BUCKET = 'zines';
+
+  var AVATARS = [
+    'archer-f','archer-m','druid-f','druid-m','bard-f','bard-m',
+    'mage-f','mage-m','knight-f','knight-m','necro-f','necro-m'
+  ];
+
+  var me        = null;
+  var zines     = [];
+  var pages     = {};   /* zine_id -> массив путей */
+  var curZine   = null;
+  var curIndex  = 0;
+  var signCache = {};
