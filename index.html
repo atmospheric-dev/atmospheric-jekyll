@@ -307,6 +307,139 @@ layout: default
     });
 })();
 </script>
+
+  <script>
+(function(){
+  var grid = document.getElementById('weekly-grid');
+  var dateEl = document.getElementById('weekly-date');
+  if(!grid) return;
+
+  var SB_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
+  var SB_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+  var TOP = 3;
+
+  /* --- 1. Дата последнего понедельника 20:00 МСК --- */
+  function lastCutoff(){
+    // текущее время по Москве
+    var now = new Date();
+    var msk = new Date(now.getTime() + (now.getTimezoneOffset() + 180) * 60000);
+
+    var day = msk.getDay();            // 0=вс, 1=пн
+    var daysBack = (day === 1 && msk.getHours() >= 20) ? 0
+                 : (day === 1 ? 7 : (day + 6) % 7);
+
+    var cut = new Date(msk);
+    cut.setDate(msk.getDate() - daysBack);
+    cut.setHours(20, 0, 0, 0);
+    if(daysBack === 0 && msk.getHours() < 20) cut.setDate(cut.getDate() - 7);
+    else if(daysBack === 0) {} // сегодня
+    else if(day === 1) cut.setDate(cut.getDate() - 0);
+    return cut;
+  }
+
+  var cutoff = lastCutoff();
+  var iso = cutoff.toISOString();
+
+  function fmtCut(d){
+    var p = function(n){ return n < 10 ? '0' + n : n; };
+    return p(d.getDate()) + '.' + p(d.getMonth() + 1) + '.' + d.getFullYear()
+         + ', 20:00 МСК';
+  }
+  if(dateEl) dateEl.textContent = fmtCut(cutoff);
+
+  /* --- 2. Запросы --- */
+  function sbGet(path){
+    return fetch(SB_URL + '/rest/v1/' + path, {
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY
+      }
+    }).then(function(r){ return r.json(); });
+  }
+
+  Promise.all([
+    sbGet('ratings?select=album,value,created_at&created_at=gte.' + encodeURIComponent(iso)),
+    sbGet('views?select=path,count')
+  ]).then(function(res){
+    var ratings = res[0] || [];
+    var views = res[1] || [];
+
+    /* --- 3. Агрегация оценок --- */
+    var agg = {};
+    ratings.forEach(function(r){
+      if(!r.album) return;
+      var k = r.album;
+      if(!agg[k]) agg[k] = { sum:0, n:0 };
+      agg[k].sum += Number(r.value) || 0;
+      agg[k].n   += 1;
+    });
+
+    /* --- 4. Просмотры: path = "/albums/2026-slug.html" --- */
+    var viewMap = {};
+    views.forEach(function(v){
+      if(!v.path) return;
+      var k = v.path.replace(/^\/albums\//, '').replace(/\.html$/, '');
+      viewMap[k] = (viewMap[k] || 0) + (Number(v.count) || 0);
+    });
+
+    /* --- 5. Балл --- */
+    var list = Object.keys(agg).map(function(k){
+      var avg = agg[k].sum / agg[k].n;
+      var votes = agg[k].n;
+      var vw = viewMap[k] || 0;
+      return {
+        album: k,
+        avg: avg,
+        votes: votes,
+        views: vw,
+        score: avg * 20 + votes * 3 + vw / 10
+      };
+    }).sort(function(a,b){ return b.score - a.score; }).slice(0, TOP);
+
+    if(!list.length){
+      grid.innerHTML = '<p class="weekly-empty">За эту неделю оценок пока нет.</p>';
+      return;
+    }
+
+    /* --- 6. Отрисовка --- */
+    grid.innerHTML = '';
+    list.forEach(function(item){
+      var a = document.createElement('a');
+      a.className = 'lr-card';
+      a.href = '{{ site.baseurl }}/albums/' + item.album + '.html';
+
+      var cover = document.createElement('span');
+      cover.className = 'lr-cover';
+      var img = document.createElement('img');
+      img.src = '{{ site.baseurl }}/covers/' + item.album + '.jpg';
+      img.alt = item.album;
+      img.loading = 'lazy';
+      img.onerror = function(){ img.style.display = 'none'; };
+      cover.appendChild(img);
+
+      var body = document.createElement('span');
+      body.className = 'lr-body';
+
+      var title = document.createElement('span');
+      title.className = 'lr-title';
+      title.textContent = item.album.replace(/^\d{4}-/, '').replace(/-/g, ' ');
+
+      var meta = document.createElement('span');
+      meta.className = 'lr-year';
+      meta.textContent = item.avg.toFixed(1) + ' · голосов ' + item.votes
+                       + ' · просмотров ' + item.views;
+
+      body.appendChild(title);
+      body.appendChild(meta);
+      a.appendChild(cover);
+      a.appendChild(body);
+      grid.appendChild(a);
+    });
+  }).catch(function(){
+    grid.innerHTML = '<p class="weekly-empty">Не удалось посчитать рейтинг.</p>';
+  });
+})();
+</script>
   
 </main>
 
