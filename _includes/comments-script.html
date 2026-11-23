@@ -126,7 +126,8 @@
           + encodeURIComponent(currentUser.id) + '">' + esc(nick) + '</a></span>';
       }
     }
-        /* ---------- загрузка ---------- */
+
+    /* ---------- загрузка ---------- */
     async function load() {
       try {
         var url = SUPABASE_URL + '/rest/v1/comments?select=id,parent_id,name,body,created_at,user_id'
@@ -255,11 +256,38 @@
 
       list.innerHTML = roots.map(function (r) { return node(r, 0); }).join('');
 
-            var hint = section.querySelector('.comment-reactions-hint');
+      var hint = section.querySelector('.comment-reactions-hint');
       if (hint) hint.hidden = !!currentUser;
 
       /* ---------- переход к комментарию из уведомления ---------- */
       if (location.hash.indexOf('#comment-') === 0) {
+        var cid = location.hash.slice(1).replace('comment-', '');
+
+        /* помечаем уведомление прочитанным прямо здесь — надёжнее, чем при переходе */
+        if (currentUser && cid) {
+          (async function () {
+            try {
+              var sess  = await sb.auth.getSession();
+              var token = (sess && sess.data && sess.data.session && sess.data.session.access_token) || SUPABASE_KEY;
+              var r = await fetch(SUPABASE_URL + '/rest/v1/notifications'
+                + '?comment_id=eq.' + encodeURIComponent(cid)
+                + '&user_id=eq.' + encodeURIComponent(currentUser.id)
+                + '&is_read=eq.false', {
+                method: 'PATCH',
+                headers: {
+                  'apikey': SUPABASE_KEY,
+                  'Authorization': 'Bearer ' + token,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({ is_read: true })
+              });
+              if (!r.ok) console.warn('notif patch', r.status, await r.text());
+              else console.log('notification read for comment', cid);
+            } catch (err) { console.warn(err); }
+          })();
+        }
+
         var target = document.getElementById(location.hash.slice(1));
         if (target) {
           target.classList.add('is-highlight');
@@ -274,7 +302,8 @@
     }
 
     load();
-        /* ---------- клик по реакции ---------- */
+
+    /* ---------- клик по реакции ---------- */
     list.addEventListener('click', async function (e) {
       var addBtn = e.target.closest('.reaction-add');
       if (addBtn) {
@@ -403,7 +432,7 @@
 
         if (!r.ok) {
           note.textContent = r.error === 'rate'
-            ? 'Слишком часто. Попробуйте через час.'
+            ? 'Слишком часто. Подождите минуту.'
             : 'Не получилось отправить.';
           return;
         }
