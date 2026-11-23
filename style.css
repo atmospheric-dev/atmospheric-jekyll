@@ -5043,3 +5043,18 @@ body.modal-open{
 }
 .radio-play:hover,.radio-stop:hover{color:var(--accent);border-color:var(--accent);}
 .radio-play.is-playing{color:var(--accent);border-color:var(--accent);}
+/* ===== РЕТРОСПЕКТИВА: ТЕГИ ===== */
+.retro-tags{
+  display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 0;
+}
+.retro-tags a,
+.retro-tags span{
+  font-family:'Courier New',monospace;
+  font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text-dim);
+  padding:5px 10px;border:1px solid var(--line);
+  transition:color .2s,border-color .2s;
+}
+.retro-tags a:hover{
+  color:var(--accent);border-color:var(--accent);opacity:1;
+}
