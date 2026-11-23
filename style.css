@@ -3811,6 +3811,19 @@ body.modal-open{
   color:var(--text-dim);
   opacity:.7;
 }
+/* ====== ПОДСВЕТКА КОММЕНТАРИЯ ИЗ УВЕДОМЛЕНИЯ ====== */
+.comment{
+  scroll-margin-top:100px;
+}
+
+.comment.is-highlight{
+  animation:commentFlash 2.4s ease-out;
+}
+
+@keyframes commentFlash{
+  0%   { background:rgba(176,142,90,.22); }
+  100% { background:transparent; }
+}
 /* ====== КОЛОКОЛЬЧИК УВЕДОМЛЕНИЙ ====== */
 .bell-wrap{
   position:absolute;
