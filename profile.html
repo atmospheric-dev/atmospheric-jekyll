@@ -35,6 +35,10 @@ permalink: /profile.html
         <label>Пароль
           <input type="password" name="password" required minlength="6" autocomplete="new-password">
         </label>
+        <label class="auth-consent">
+          <input type="checkbox" name="consent" required>
+          <span>Согласен с <a href="{{ site.baseurl }}/privacy.html" target="_blank" rel="noopener">политикой конфиденциальности</a></span>
+        </label>
         <button type="submit">Создать аккаунт</button>
       </form>
     </div>
