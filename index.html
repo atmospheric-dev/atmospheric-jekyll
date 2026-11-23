@@ -63,18 +63,35 @@ layout: default
               </span>
             </a>
 
-            <a class="shop-card" href="https://vk.ru/market/product/atmospheric-drugs-6-188962763-13212145" target="_blank" rel="noopener">
-              <span class="shop-img">
-                <img src="{{ site.baseurl }}/covers/shop/03.jpg" alt="Atmospheric Zine #6" loading="lazy">
-              </span>
-              <span class="shop-body">
-                <span class="shop-title">Atmospheric Zine #6</span>
-                <span class="shop-note">печатный зин</span>
-              </span>
-            </a>
+          </div>
 
+          <div class="radio-box">
+            <p class="section-heading">Радио</p>
+
+            <div class="radio-card">
+              <span class="radio-art" id="radio-art"></span>
+
+              <div class="radio-info">
+                <span class="radio-title" id="radio-title">Сибирская Станция 2.0</span>
+                <span class="radio-artist" id="radio-artist">нажмите play</span>
+              </div>
+
+              <div class="radio-controls">
+                <button class="radio-play" id="radio-play" type="button" aria-label="Включить">
+                  <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+                </button>
+                <button class="radio-stop" id="radio-stop" type="button" aria-label="Стоп">
+                  <svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><rect x="6" y="6" width="12" height="12" fill="currentColor"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <audio id="radio-audio" preload="none"
+                   src="https://s1.sibstation2.ru/listen/sibstation2/radio.mp3"></audio>
           </div>
         </aside>
+
+        <!-- ЦЕНТР: РЕЦЕНЗИИ + ЛУЧШИЕ -->
 
         <!-- ЦЕНТР: РЕЦЕНЗИИ + ЛУЧШИЕ -->
         <div class="front-main">
