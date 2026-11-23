@@ -4983,3 +4983,63 @@ body.modal-open{
   .side-right{order:2;grid-column:auto;flex-direction:column;}
   .latest-releases,.weekly-grid{grid-template-columns:repeat(2,1fr);gap:20px 12px;}
 }
+/* ====== РАДИО В ЛЕВОЙ КОЛОНКЕ ====== */
+.radio-box{margin-top:34px;}
+
+.radio-card{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:12px;
+  border:1px solid var(--line);
+  background:rgba(0,0,0,.35);
+  transition:border-color .2s;
+}
+.radio-card:hover{border-color:rgba(176,142,90,.4);}
+
+.radio-art{
+  display:block;
+  width:100%;
+  aspect-ratio:1/1;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.04) center/cover no-repeat;
+}
+
+.radio-info{display:flex;flex-direction:column;gap:4px;min-width:0;}
+
+.radio-title{
+  font-family:Georgia,serif;
+  font-size:.86rem;
+  line-height:1.3;
+  color:var(--text);
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+}
+
+.radio-artist{
+  font-family:'Courier New',monospace;
+  font-size:.56rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.radio-controls{display:flex;gap:8px;align-items:center;padding-top:2px;}
+
+.radio-play,.radio-stop{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:30px;
+  background:transparent;
+  border:1px solid var(--line);
+  border-radius:50%;
+  color:var(--text-dim);
+  cursor:pointer;
+  transition:color .2s,border-color .2s;
+}
+.radio-play:hover,.radio-stop:hover{color:var(--accent);border-color:var(--accent);}
+.radio-play.is-playing{color:var(--accent);border-color:var(--accent);}
