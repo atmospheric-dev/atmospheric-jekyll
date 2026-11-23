@@ -1,0 +1,97 @@
+---
+layout: null
+---
+[
+{% assign first = true %}
+{% for a in site.albums %}
+{% unless first %},{% endunless %}{% assign first = false %}
+{
+  "type": "release",
+  "rubric": "Обзоры релизов",
+  "title": {{ a.title | jsonify }},
+  "subtitle": {{ a.artist | jsonify }},
+  "url": {{ a.url | relative_url | jsonify }},
+  "year": {{ a.year | jsonify }},
+  "date": {{ a.date | date: "%Y-%m-%d" | jsonify }},
+  "tags": {{ a.genres | jsonify }},
+  "label": {{ a.label | jsonify }},
+  "crows": {{ a.crows | default: 0 | jsonify }},
+  "text": {{ a.excerpt | strip_html | strip_newlines | truncate: 200 | jsonify }}
+}
+{% endfor %}
+{% for p in site.interviews %}
+,{
+  "type": "interview",
+  "rubric": "Интервью",
+  "title": {{ p.title | jsonify }},
+  "subtitle": {{ p.guests | default: "" | jsonify }},
+  "url": {{ p.url | relative_url | jsonify }},
+  "year": {{ p.date | date: "%Y" | jsonify }},
+  "date": {{ p.date | date: "%Y-%m-%d" | jsonify }},
+  "tags": [],
+  "label": "",
+  "crows": 0,
+  "text": {{ p.description | default: "" | strip_html | strip_newlines | truncate: 200 | jsonify }}
+}
+{% endfor %}
+{% for p in site.notes %}
+,{
+  "type": "note",
+  "rubric": "Заметки с концертов",
+  "title": {{ p.title | jsonify }},
+  "subtitle": {{ p.artist | default: "" | jsonify }},
+  "url": {{ p.url | relative_url | jsonify }},
+  "year": {{ p.date | date: "%Y" | jsonify }},
+  "date": {{ p.date | date: "%Y-%m-%d" | jsonify }},
+  "tags": [],
+  "label": "",
+  "crows": 0,
+  "text": {{ p.description | default: "" | strip_html | strip_newlines | truncate: 200 | jsonify }}
+}
+{% endfor %}
+{% for p in site.articles %}
+,{
+  "type": "article",
+  "rubric": "Статьи",
+  "title": {{ p.title | jsonify }},
+  "subtitle": "",
+  "url": {{ p.url | relative_url | jsonify }},
+  "year": {{ p.date | date: "%Y" | jsonify }},
+  "date": {{ p.date | date: "%Y-%m-%d" | jsonify }},
+  "tags": [],
+  "label": "",
+  "crows": 0,
+  "text": {{ p.description | default: "" | strip_html | strip_newlines | truncate: 200 | jsonify }}
+}
+{% endfor %}
+{% for p in site.retrospectives %}
+,{
+  "type": "retro",
+  "rubric": "Ретроспектива",
+  "title": {{ p.title | jsonify }},
+  "subtitle": {{ p.artist | default: "" | jsonify }},
+  "url": {{ p.url | relative_url | jsonify }},
+  "year": {{ p.date | date: "%Y" | jsonify }},
+  "date": {{ p.date | date: "%Y-%m-%d" | jsonify }},
+  "tags": [],
+  "label": "",
+  "crows": 0,
+  "text": {{ p.description | default: "" | strip_html | strip_newlines | truncate: 200 | jsonify }}
+}
+{% endfor %}
+{% for p in site.places %}
+,{
+  "type": "place",
+  "rubric": "Атмосферные места",
+  "title": {{ p.title | jsonify }},
+  "subtitle": {{ p.region | default: "" | jsonify }},
+  "url": {{ p.url | relative_url | jsonify }},
+  "year": {{ p.date | date: "%Y" | jsonify }},
+  "date": {{ p.date | date: "%Y-%m-%d" | jsonify }},
+  "tags": [],
+  "label": "",
+  "crows": 0,
+  "text": {{ p.description | default: "" | strip_html | strip_newlines | truncate: 200 | jsonify }}
+}
+{% endfor %}
+]
