@@ -9,7 +9,7 @@ genres:
   - doom metal
   - black metal
   - industrial
-cover: /covers/bethlehem/01.jpg
+cover: /covers/bethlehem/16.jpg
 date: 2025-11-18
 tags: ["Bethlehem", "dark metal", "doom metal", "Юрген Барч"]
 toc:
