@@ -3747,3 +3747,66 @@ body.modal-open{
 .diary-back{
   margin:0 0 28px;
 }
+/* ====== РЕАКЦИИ КОММЕНТАРИЕВ ====== */
+.comment-reactions{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  flex-wrap:wrap;
+  margin:8px 0 6px;
+}
+
+.reaction{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:2px 7px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:transparent;
+  cursor:pointer;
+  font-family:'Courier New',monospace;
+  font-size:.72rem;
+  color:var(--text-dim);
+  transition:border-color .18s, background .18s, color .18s;
+}
+.reaction:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+.reaction.is-mine{
+  border-color:var(--accent);
+  background:rgba(176,142,90,.14);
+  color:var(--accent);
+}
+.reaction-em{font-size:.9rem;line-height:1;}
+.reaction-n{line-height:1;}
+
+.reaction-add{
+  padding:2px 8px;
+  border:1px dashed var(--line);
+  border-radius:20px;
+  background:transparent;
+  color:var(--text-dim);
+  cursor:pointer;
+  font-size:.75rem;
+  line-height:1.2;
+  transition:border-color .18s, color .18s;
+}
+.reaction-add:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+/* раскрытый набор — показать все */
+.comment-reactions.is-open .reaction[hidden]{display:inline-flex;}
+
+.comment-reactions-hint{
+  margin:14px 0 0;
+  font-family:'Courier New',monospace;
+  font-size:.66rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  opacity:.7;
+}
