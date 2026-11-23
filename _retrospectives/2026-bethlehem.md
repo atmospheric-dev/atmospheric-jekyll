@@ -11,6 +11,7 @@ genres:
   - industrial
 cover: /covers/bethlehem/01.jpg
 date: 2025-11-18
+tags: ["Bethlehem", "dark metal", "doom metal", "Юрген Барч"]
 toc:
 
   - { id: "dark-metal",   label: "Dark Metal (1994)" }
