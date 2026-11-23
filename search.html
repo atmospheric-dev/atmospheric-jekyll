@@ -1,0 +1,256 @@
+---
+layout: default
+title: Поиск
+permalink: /search.html
+---
+
+<div class="page-head">
+  <div class="wrap">
+    <h1>Поиск</h1>
+    <p>Ищите по обзорам, интервью, статьям, заметкам, ретроспективам и местам.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="search-page">
+
+    <div class="search-field">
+      <input type="search" id="s-q" class="search-input" placeholder="Название, артист, жанр…" autocomplete="off">
+      <button type="button" class="search-clear" id="s-clear" aria-label="Очистить">×</button>
+    </div>
+
+    <div class="search-filters">
+      <div class="search-fgroup">
+        <p class="search-flabel">Рубрика</p>
+        <div class="search-chips" id="s-rubrics">
+          <button type="button" class="chip is-on" data-val="">Все</button>
+          <button type="button" class="chip" data-val="release">Обзоры</button>
+          <button type="button" class="chip" data-val="interview">Интервью</button>
+          <button type="button" class="chip" data-val="note">Заметки</button>
+          <button type="button" class="chip" data-val="article">Статьи</button>
+          <button type="button" class="chip" data-val="retro">Ретроспективы</button>
+          <button type="button" class="chip" data-val="place">Места</button>
+        </div>
+      </div>
+
+      <div class="search-fgroup">
+        <p class="search-flabel">Год</p>
+        <select id="s-year" class="search-select">
+          <option value="">Любой</option>
+        </select>
+      </div>
+
+      <div class="search-fgroup">
+        <p class="search-flabel">Лейбл</p>
+        <select id="s-label" class="search-select">
+          <option value="">Любой</option>
+        </select>
+      </div>
+
+      <div class="search-fgroup">
+        <p class="search-flabel">Порядок</p>
+        <select id="s-sort" class="search-select">
+          <option value="new">Сначала новые</option>
+          <option value="old">Сначала старые</option>
+          <option value="az">По алфавиту</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="search-tags" id="s-tags"></div>
+
+    <p class="search-count" id="s-count"></p>
+    <div class="search-results" id="s-results"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var INDEX_URL = '{{ site.baseurl }}/search.json';
+  var data = [];
+  var st = { q:'', rubric:'', year:'', label:'', tags:[], sort:'new' };
+
+  var inp = document.getElementById('s-q');
+  var res = document.getElementById('s-results');
+  var cnt = document.getElementById('s-count');
+
+  function norm(s){ return (s || '').toString().toLowerCase(); }
+
+  function matches(item){
+    if(st.rubric && item.type !== st.rubric) return false;
+    if(st.year && String(item.year) !== String(st.year)) return false;
+    if(st.label && item.label !== st.label) return false;
+    if(st.tags.length){
+      var it = (item.tags || []).map(norm);
+      for(var i=0;i<st.tags.length;i++){
+        if(it.indexOf(norm(st.tags[i])) === -1) return false;
+      }
+    }
+    if(!st.q) return true;
+    var hay = norm([item.title, item.subtitle, item.text, (item.tags||[]).join(' '), item.label].join(' '));
+    return st.q.split(/\s+/).every(function(w){ return !w || hay.indexOf(w) !== -1; });
+  }
+
+  function sorted(list){
+    return list.slice().sort(function(a,b){
+      if(st.sort === 'az') return String(a.title).localeCompare(String(b.title),'ru');
+      var da = a.date || '', db = b.date || '';
+      return st.sort === 'old' ? da.localeCompare(db) : db.localeCompare(da);
+    });
+  }
+
+  function render(){
+    var list = sorted(data.filter(matches));
+    res.innerHTML = '';
+
+    cnt.textContent = list.length
+      ? 'Найдено: ' + list.length
+      : 'Ничего не найдено.';
+
+    list.forEach(function(item){
+      var a = document.createElement('a');
+      a.className = 'search-hit';
+      a.href = '{{ site.baseurl }}' + item.url;
+
+      var h = document.createElement('div');
+      h.className = 'search-hit-title';
+      h.textContent = item.subtitle
+        ? item.subtitle + ' — ' + item.title
+        : item.title;
+      a.appendChild(h);
+
+      var meta = document.createElement('div');
+      meta.className = 'search-hit-meta';
+      var bits = [item.rubric];
+      if(item.year) bits.push(item.year);
+      if(item.label) bits.push(item.label);
+      if(item.tags && item.tags.length) bits.push(item.tags.slice(0,2).join(', '));
+      if(item.date) bits.push(item.date.split('-').reverse().join('.'));
+      meta.textContent = bits.join(' · ');
+      a.appendChild(meta);
+
+      if(item.text){
+        var t = document.createElement('p');
+        t.className = 'search-hit-text';
+        t.textContent = item.text;
+        a.appendChild(t);
+      }
+
+      res.appendChild(a);
+    });
+  }
+
+  function fillFilters(){
+    var years = {}, labels = {}, tags = {};
+    data.forEach(function(i){
+      if(i.year) years[i.year] = 1;
+      if(i.label) labels[i.label] = 1;
+      (i.tags || []).forEach(function(t){ tags[t] = 1; });
+    });
+
+    var ys = document.getElementById('s-year');
+    Object.keys(years).sort().reverse().forEach(function(y){
+      var o = document.createElement('option');
+      o.value = y; o.textContent = y;
+      ys.appendChild(o);
+    });
+
+    var ls = document.getElementById('s-label');
+    Object.keys(labels).sort(function(a,b){ return a.localeCompare(b,'ru'); }).forEach(function(l){
+      var o = document.createElement('option');
+      o.value = l; o.textContent = l;
+      ls.appendChild(o);
+    });
+
+    var box = document.getElementById('s-tags');
+    Object.keys(tags).sort(function(a,b){ return a.localeCompare(b,'ru'); }).forEach(function(t){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.dataset.val = t;
+      b.textContent = t;
+      b.addEventListener('click', function(){
+        var i = st.tags.indexOf(t);
+        if(i === -1){ st.tags.push(t); b.classList.add('is-on'); }
+        else { st.tags.splice(i,1); b.classList.remove('is-on'); }
+        render();
+      });
+      box.appendChild(b);
+    });
+  }
+
+  function readUrl(){
+    var p = new URLSearchParams(location.search);
+    st.q = p.get('q') || '';
+    st.rubric = p.get('rubric') || '';
+    st.year = p.get('year') || '';
+    st.label = p.get('label') || '';
+    st.sort = p.get('sort') || 'new';
+    st.tags = (p.get('tags') || '').split(',').filter(Boolean);
+    inp.value = st.q;
+  }
+
+  function writeUrl(){
+    var p = new URLSearchParams();
+    if(st.q) p.set('q', st.q);
+    if(st.rubric) p.set('rubric', st.rubric);
+    if(st.year) p.set('year', st.year);
+    if(st.label) p.set('label', st.label);
+    if(st.tags.length) p.set('tags', st.tags.join(','));
+    if(st.sort !== 'new') p.set('sort', st.sort);
+    var qs = p.toString();
+    history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
+  }
+
+  inp.addEventListener('input', function(){
+    st.q = norm(inp.value.trim());
+    writeUrl(); render();
+  });
+
+  document.getElementById('s-clear').addEventListener('click', function(){
+    st.q=''; inp.value=''; writeUrl(); render(); inp.focus();
+  });
+
+  document.querySelectorAll('#s-rubrics .chip').forEach(function(c){
+    c.addEventListener('click', function(){
+      document.querySelectorAll('#s-rubrics .chip').forEach(function(x){ x.classList.remove('is-on'); });
+      c.classList.add('is-on');
+      st.rubric = c.dataset.val;
+      writeUrl(); render();
+    });
+  });
+
+  document.getElementById('s-year').addEventListener('change', function(e){
+    st.year = e.target.value; writeUrl(); render();
+  });
+  document.getElementById('s-label').addEventListener('change', function(e){
+    st.label = e.target.value; writeUrl(); render();
+  });
+  document.getElementById('s-sort').addEventListener('change', function(e){
+    st.sort = e.target.value; writeUrl(); render();
+  });
+
+  fetch(INDEX_URL).then(function(r){ return r.json(); }).then(function(json){
+    data = json || [];
+    readUrl();
+    fillFilters();
+
+    document.querySelectorAll('#s-rubrics .chip').forEach(function(c){
+      if(c.dataset.val === st.rubric) c.classList.add('is-on');
+      else if(st.rubric) c.classList.remove('is-on');
+    });
+    if(st.year) document.getElementById('s-year').value = st.year;
+    if(st.label) document.getElementById('s-label').value = st.label;
+    document.getElementById('s-sort').value = st.sort;
+
+    st.tags.forEach(function(t){
+      var b = document.querySelector('#s-tags .chip[data-val="' + CSS.escape(t) + '"]');
+      if(b) b.classList.add('is-on');
+    });
+
+    render();
+  }).catch(function(){
+    cnt.textContent = 'Не удалось загрузить индекс поиска.';
+  });
+})();
+</script>
