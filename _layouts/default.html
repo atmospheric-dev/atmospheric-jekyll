@@ -10,6 +10,19 @@
 {{ content }}
 
 {% include footer.html %}
+<div class="qsearch" id="qsearch" hidden>
+  <div class="qsearch-wrap">
+    <div class="qsearch-top">
+      <input type="search" id="qsearch-input" class="qsearch-input"
+             placeholder="Найти рецензию, группу, интервью…" autocomplete="off">
+      <a class="qsearch-adv" id="qsearch-adv" href="{{ site.baseurl }}/search.html">Фильтры</a>
+      <button type="button" class="qsearch-close" id="qsearch-close" aria-label="Закрыть">×</button>
+    </div>
+    <div class="qsearch-hits" id="qsearch-hits"></div>
+    <div class="qsearch-foot">Enter — открыть поиск целиком · Esc — закрыть</div>
+  </div>
+</div>
+  
 <script>
 (function(){
   var drop = document.querySelector('.nav-drop');
