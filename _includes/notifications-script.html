@@ -73,55 +73,67 @@
         var a = e.target.closest('.bell-item');
         if (!a) return;
 
+        e.preventDefault();
+
+        var href = a.getAttribute('href');
         var id  = a.dataset.id;
         var one = null;
         for (var i = 0; i < loaded.length; i++) {
           if (String(loaded[i].id) === String(id)) one = loaded[i];
         }
-        if (one && one.is_read) return;
 
-        e.preventDefault();
+        var left = false;
+        function leave() {
+          if (left) return;
+          left = true;
+          window.location.href = href;
+        }
+        setTimeout(leave, 1500);
 
-        try {
-          var sess  = await sb.auth.getSession();
-          var token = sess.data.session.access_token;
-          await fetch(URL_ + '/rest/v1/notifications?id=eq.' + id, {
-            method: 'PATCH',
-            headers: {
-              'apikey': KEY_,
-              'Authorization': 'Bearer ' + token,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=minimal'
-            },
-            body: JSON.stringify({ is_read: true })
-          });
-        } catch (err) { console.warn(err); }
+        if (!(one && one.is_read)) {
+          try {
+            var sess  = await sb.auth.getSession();
+            var token = (sess && sess.data && sess.data.session && sess.data.session.access_token) || KEY_;
 
-        if (one) one.is_read = true;
+            var res = await fetch(URL_ + '/rest/v1/notifications?id=eq.' + id, {
+              method: 'PATCH',
+              headers: {
+                'apikey': KEY_,
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify({ is_read: true })
+            });
+
+            if (!res.ok) console.warn('mark read', res.status, await res.text());
+            else console.log('marked read id', id);
+          } catch (err) { console.warn(err); }
+
+          if (one) one.is_read = true;
+        }
+
+        a.classList.remove('is-unread');
         paintBadges();
 
-        /* обновляем и класс элемента в списке, чтобы он перестал быть непрочитанным */
-        a.classList.remove('is-unread');
-
-        window.location.href = a.getAttribute('href');
+        requestAnimationFrame(leave);
       });
     }
 
-    /* ---- мини-аватарка в шапке ---- */
-    var tu  = document.getElementById('topbar-user');
-    var tav = document.getElementById('topbar-avatar');
+    /* ---- аватарка на главной (head-socials) ---- */
+    var tu  = document.getElementById('footer-avatar-link');
+    var tav = document.getElementById('footer-avatar-img');
 
     if (tu && tav) {
       sb.from('profiles').select('avatar,username').eq('id', user.id).maybeSingle()
         .then(function (res) {
           var p = res && res.data;
-          tav.src = BASE + '/images/goblins/' + (GOBLIN_FILES[p && p.avatar] || GOBLIN_FILES[0]) + '.jpg';
+          if (!p) return;
+          if (p.username) tu.title = p.username;
+          var idx = typeof p.avatar === 'number' ? p.avatar : 0;
+          tav.src = BASE + '/images/goblins/' + (GOBLIN_FILES[idx] || GOBLIN_FILES[0]) + '.jpg';
           tav.onerror = function(){ tav.src = BASE + '/logo.png'; };
-          if (p && p.username) tu.title = p.username;
-          tu.hidden = false;
-
-          var prof = document.querySelector('.topbar-profile');
-          if (prof) prof.hidden = true;
+          tu.href = BASE + '/u.html?id=' + encodeURIComponent(user.id);
         })
         .catch(function(){});
     }
@@ -130,40 +142,50 @@
     function paintBadges(){
       var unread = 0;
       for (var i = 0; i < loaded.length; i++) {
-        if (!loaded[i].is_read) unread++;
+        if (loaded[i].is_read !== true) unread++;
       }
 
       if (onProfile && count) {
         count.textContent = unread;
-        count.hidden = !unread;
+        count.hidden = (unread === 0);
       }
-      if (dot) dot.hidden = !unread;
+      if (dot) dot.hidden = (unread === 0);
     }
 
     function render(items){
-      loaded = items;
+      loaded = (items || []).map(function (n) {
+        return {
+          id: n.id,
+          comment_id: n.comment_id,
+          actor_name: n.actor_name,
+          body: n.body,
+          page: n.page,
+          created_at: n.created_at,
+          is_read: (n.is_read === true)
+        };
+      });
       paintBadges();
 
       if (!onProfile) return;
 
-      if (!items.length) {
+      if (!loaded.length) {
         list.innerHTML = '<div class="bell-empty">Пока тихо.</div>';
         return;
       }
 
-      list.innerHTML = items.map(function (n) {
+      list.innerHTML = loaded.map(function (n) {
         var page = n.page || '/';
         var href = BASE + page + '#comment-' + n.comment_id;
         return '<a class="bell-item' + (n.is_read ? '' : ' is-unread') + '"'
           + ' href="' + esc(href) + '" data-id="' + n.id + '">'
           + '<div class="bell-item-who">' + esc(n.actor_name || 'Кто-то') + ' ответил вам</div>'
           + '<div class="bell-item-body">' + esc(n.body || '') + '</div>'
-          + '<div class="bell-item-where">' + esc(page) + ' · ' + fmt(n.created_at) + '</div>'
+          + '<div class="bell-item-where">' + fmt(n.created_at) + '</div>'
           + '</a>';
       }).join('');
     }
 
-    /* ---- загрузка: ВАЖНО — с токеном сессии, а не publishable ---- */
+    /* ---- загрузка с токеном сессии ---- */
     async function load(){
       try {
         var sess  = await sb.auth.getSession();
@@ -187,6 +209,9 @@
         render(await res.json());
       } catch (e) { console.warn(e); }
     }
+
+    /* обновляем индикатор, когда возвращаешься на вкладку */
+    window.addEventListener('focus', function(){ load(); });
 
     load();
   });
