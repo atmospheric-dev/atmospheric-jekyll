@@ -9,6 +9,9 @@
   var sb = null;
   var currentUser = null;
 
+  var REACTIONS = ['🖤','💀','🔥','💩','🤡','👎'];
+  var myReactions = {};
+
   async function initUser() {
     var tries = 0;
     while (!window.supabase && tries < 40) {
@@ -123,8 +126,7 @@
           + encodeURIComponent(currentUser.id) + '">' + esc(nick) + '</a></span>';
       }
     }
-
-    /* ---------- загрузка ---------- */
+        /* ---------- загрузка ---------- */
     async function load() {
       try {
         var url = SUPABASE_URL + '/rest/v1/comments?select=id,parent_id,name,body,created_at,user_id'
@@ -138,8 +140,63 @@
         });
         if (!res.ok) throw new Error('load: ' + res.status);
         var rows = await res.json();
-        render(rows);
+        var agg = await loadReactions(rows);
+        render(rows, agg);
       } catch (e) { console.warn(e); }
+    }
+
+    /* ---------- реакции ---------- */
+    async function loadReactions(rows) {
+      myReactions = {};
+      if (!rows.length) return {};
+
+      var ids = rows.map(function (r) { return r.id; }).join(',');
+      var url = SUPABASE_URL + '/rest/v1/comment_reactions'
+        + '?select=id,comment_id,user_id,emoji&comment_id=in.(' + ids + ')';
+
+      var res = await fetch(url, {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY
+        }
+      });
+      if (!res.ok) return {};
+
+      var data = await res.json();
+      var agg = {};
+
+      data.forEach(function (r) {
+        if (!agg[r.comment_id]) agg[r.comment_id] = {};
+        agg[r.comment_id][r.emoji] = agg[r.comment_id][r.emoji] || { n: 0, mine: false };
+        agg[r.comment_id][r.emoji].n++;
+
+        if (currentUser && r.user_id === currentUser.id) {
+          agg[r.comment_id][r.emoji].mine = true;
+          myReactions[r.comment_id + '|' + r.emoji] = r.id;
+        }
+      });
+
+      return agg;
+    }
+
+    function reactionsBar(cid, agg) {
+      var mine = agg[cid] || {};
+
+      var html = '<div class="comment-reactions" data-id="' + cid + '">';
+      REACTIONS.forEach(function (em) {
+        var st = mine[em] || { n: 0, mine: false };
+        html += '<button type="button" class="reaction' + (st.mine ? ' is-mine' : '') + '"'
+              + ' data-emoji="' + em + '"'
+              + (st.n ? '' : ' hidden')
+              + ' title="' + em + '">'
+              + '<span class="reaction-em">' + em + '</span>'
+              + '<span class="reaction-n">' + (st.n || '') + '</span>'
+              + '</button>';
+      });
+      html += '<button type="button" class="reaction-add" title="Добавить реакцию">＋</button>';
+      html += '</div>';
+
+      return html;
     }
 
     function fmtDate(iso) {
@@ -151,7 +208,8 @@
       return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ', ' + hh + ':' + mm;
     }
 
-    function render(rows) {
+    function render(rows, agg) {
+      agg = agg || {};
       num.textContent = rows.length;
       if (!rows.length) {
         list.innerHTML = '<p class="comment-empty">Пока никто не высказался. Будьте первым.</p>';
@@ -181,7 +239,9 @@
           +   author
           +   '<span class="comment-date">' + fmtDate(c.created_at) + '</span>'
           + '</div>'
-          + '<div class="comment-text">' + esc(c.body).replace(/\n/g, '<br>') + '</div>';
+          + '<div class="comment-text">' + esc(c.body).replace(/\n/g, '<br>') + '</div>'
+          + reactionsBar(c.id, agg);
+
         if (depth < 1) {
           html += '<button type="button" class="comment-reply" data-id="' + c.id
                 + '" data-name="' + esc(c.name) + '">Ответить</button>';
@@ -195,9 +255,78 @@
       }
 
       list.innerHTML = roots.map(function (r) { return node(r, 0); }).join('');
+
+      var hint = section.querySelector('.comment-reactions-hint');
+      if (hint) hint.hidden = !!currentUser;
     }
 
     load();
+        /* ---------- клик по реакции ---------- */
+    list.addEventListener('click', async function (e) {
+      var addBtn = e.target.closest('.reaction-add');
+      if (addBtn) {
+        var bar0 = addBtn.closest('.comment-reactions');
+        bar0.classList.toggle('is-open');
+        return;
+      }
+
+      var btn = e.target.closest('.reaction');
+      if (!btn) return;
+
+      if (!currentUser) {
+        var hint = section.querySelector('.comment-reactions-hint');
+        if (hint) hint.hidden = false;
+        return;
+      }
+
+      var bar = btn.closest('.comment-reactions');
+      var cid = bar.dataset.id;
+      var emoji = btn.dataset.emoji;
+      var key = cid + '|' + emoji;
+
+      btn.disabled = true;
+
+      try {
+        var sess = await sb.auth.getSession();
+        var token = sess.data.session.access_token;
+
+        if (myReactions[key]) {
+          var del = await fetch(SUPABASE_URL + '/rest/v1/comment_reactions?id=eq.' + myReactions[key], {
+            method: 'DELETE',
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': 'Bearer ' + token
+            }
+          });
+          if (!del.ok) throw new Error('unreact');
+          delete myReactions[key];
+        } else {
+          var ins = await fetch(SUPABASE_URL + '/rest/v1/comment_reactions', {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': 'Bearer ' + token,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=representation'
+            },
+            body: JSON.stringify({
+              comment_id: Number(cid),
+              user_id: currentUser.id,
+              emoji: emoji
+            })
+          });
+          if (!ins.ok) throw new Error('react');
+          var created = await ins.json();
+          myReactions[key] = created[0].id;
+        }
+
+        load();
+      } catch (err) {
+        console.warn(err);
+      } finally {
+        btn.disabled = false;
+      }
+    });
 
     /* ---------- ответ ---------- */
     list.addEventListener('click', function (e) {
