@@ -473,6 +473,60 @@ layout: default
   });
 })();
 </script>
+
+<script>
+(function(){
+  var audio = document.getElementById('radio-audio');
+  var play  = document.getElementById('radio-play');
+  var stop  = document.getElementById('radio-stop');
+  var art   = document.getElementById('radio-art');
+  var tEl   = document.getElementById('radio-title');
+  var aEl   = document.getElementById('radio-artist');
+  if(!audio || !play) return;
+
+  var API = 'https://s1.sibstation2.ru/api/nowplaying/sibstation2';
+
+  function loadNow(){
+    fetch(API)
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var np = d.now_playing && d.now_playing.song;
+        if(!np) return;
+        if(np.title) tEl.textContent = np.title;
+        aEl.textContent = np.artist || (d.station && d.station.name) || '';
+        if(np.art && art){
+          art.style.backgroundImage = 'url("' + np.art + '")';
+        }
+      })
+      .catch(function(){});
+  }
+  loadNow();
+  setInterval(loadNow, 30000);
+
+  play.addEventListener('click', function(){
+    if(audio.paused){
+      audio.src = audio.src;
+      audio.play();
+    } else {
+      audio.pause();
+    }
+  });
+
+  audio.addEventListener('play', function(){
+    play.classList.add('is-playing');
+    play.setAttribute('aria-label', 'Пауза');
+  });
+  audio.addEventListener('pause', function(){
+    play.classList.remove('is-playing');
+    play.setAttribute('aria-label', 'Включить');
+  });
+
+  stop.addEventListener('click', function(){
+    audio.pause();
+    audio.currentTime = 0;
+  });
+})();
+</script>
   
 </main>
 
