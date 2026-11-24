@@ -73,6 +73,22 @@ layout: default
               </span>
             </a>
 
+            <a class="shop-card shop-ad" href="{{ site.baseurl }}/about.html" aria-label="Место для вашей рекламы">
+              <span class="shop-img shop-ad-img"></span>
+              <span class="shop-body">
+                <span class="shop-title">Место для вашей рекламы</span>
+                <span class="shop-note">напишите нам</span>
+              </span>
+            </a>
+
+            <a class="shop-card shop-ad" href="{{ site.baseurl }}/about.html" aria-label="Место для вашей рекламы">
+              <span class="shop-img shop-ad-img"></span>
+              <span class="shop-body">
+                <span class="shop-title">Место для вашей рекламы</span>
+                <span class="shop-note">напишите нам</span>
+              </span>
+            </a>
+
           </div>
 
           <div class="radio-box">
@@ -100,43 +116,31 @@ layout: default
           </div>
         </aside>
 
-        <!-- ЦЕНТР: РЕЦЕНЗИИ + ЛУЧШИЕ ЗА НЕДЕЛЮ -->
+        <!-- ЦЕНТР: РЕЦЕНЗИИ -->
         <div class="front-main">
 
-          <div class="front-main-top">
-            <h2>Рецензии</h2>
+          <h2>Рецензии</h2>
 
-            <div class="latest-releases">
-              {% assign recent = site.albums | sort: "date" | reverse %}
-              {% for album in recent limit: 6 %}
-              <a class="lr-card" href="{{ site.baseurl }}{{ album.url }}">
-                <span class="lr-cover">
-                  <img src="{{ site.baseurl }}/{{ album.cover }}"
-                       alt="{{ album.artist }} — {{ album.title }}" loading="lazy">
-                </span>
-                <span class="lr-body">
-                  <span class="lr-artist">{{ album.artist }}</span>
-                  <span class="lr-title">{{ album.title }}</span>
-                  <span class="lr-year">{{ album.year }}</span>
-                </span>
-              </a>
-              {% endfor %}
-            </div>
-
-            <p class="front-more">
-              <a class="back" href="{{ site.baseurl }}/releases.html">Все обзоры →</a>
-            </p>
+          <div class="latest-releases">
+            {% assign recent = site.albums | sort: "date" | reverse %}
+            {% for album in recent limit: 9 %}
+            <a class="lr-card" href="{{ site.baseurl }}{{ album.url }}">
+              <span class="lr-cover">
+                <img src="{{ site.baseurl }}/{{ album.cover }}"
+                     alt="{{ album.artist }} — {{ album.title }}" loading="lazy">
+              </span>
+              <span class="lr-body">
+                <span class="lr-artist">{{ album.artist }}</span>
+                <span class="lr-title">{{ album.title }}</span>
+                <span class="lr-year">{{ album.year }}</span>
+              </span>
+            </a>
+            {% endfor %}
           </div>
 
-          <div class="weekly">
-            <h2>Лучшие альбомы за неделю</h2>
-            <p class="weekly-note">
-              обновлено <span id="weekly-date">—</span>
-            </p>
-            <div class="weekly-grid" id="weekly-grid">
-              <p class="weekly-empty">Считаем…</p>
-            </div>
-          </div>
+          <p class="front-more">
+            <a class="back" href="{{ site.baseurl }}/releases.html">Все обзоры →</a>
+          </p>
 
         </div>
 
@@ -331,155 +335,6 @@ layout: default
     .catch(function(){
       box.innerHTML = '<p class="latest-empty">Не удалось загрузить список.</p>';
     });
-})();
-</script>
-
-  <script>
-(function(){
-  var grid = document.getElementById('weekly-grid');
-  var dateEl = document.getElementById('weekly-date');
-  if(!grid) return;
-
-  var SB_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
-  var SB_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
-  var TOP = 3;
-
-  /* --- 1. Последний понедельник 20:00 МСК --- */
-  function lastCutoff(){
-    var now = new Date();
-    var msk = new Date(now.getTime() + (now.getTimezoneOffset() + 180) * 60000);
-
-    var day = msk.getDay();                       // 0=вс, 1=пн
-    var daysBack;
-    if(day === 1){
-      daysBack = msk.getHours() >= 20 ? 0 : 7;
-    } else {
-      daysBack = (day + 6) % 7;                   // пн=0, вт=1, ... вс=6
-    }
-
-    var cut = new Date(msk);
-    cut.setDate(msk.getDate() - daysBack);
-    cut.setHours(20, 0, 0, 0);
-    return cut;
-  }
-
-  var cutoff = lastCutoff();
-  var iso = cutoff.toISOString();
-
-  function p2(n){ return n < 10 ? '0' + n : n; }
-  if(dateEl){
-    dateEl.textContent = p2(cutoff.getDate()) + '.' + p2(cutoff.getMonth() + 1)
-      + '.' + cutoff.getFullYear() + ', 20:00 МСК';
-  }
-
-  /* --- 2. Запросы --- */
-  function sbGet(path){
-    return fetch(SB_URL + '/rest/v1/' + path, {
-      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
-    }).then(function(r){ return r.json(); });
-  }
-
-  Promise.all([
-    sbGet('ratings?select=album,value,created_at&created_at=gte.' + encodeURIComponent(iso)),
-    sbGet('views?select=path,count'),
-    fetch('{{ site.baseurl }}/search.json').then(function(r){ return r.json(); })
-  ]).then(function(res){
-    var ratings = res[0] || [];
-    var views   = res[1] || [];
-    var index   = res[2] || [];
-
-    /* --- 3. Карта альбомов из search.json --- */
-    var meta = {};
-    index.forEach(function(i){
-      if(i.type !== 'release' || !i.slug) return;
-      meta[i.slug] = {
-        url: i.url,
-        artist: i.artist || i.subtitle || '',
-        title: i.title || '',
-        cover: i.cover || ''
-      };
-    });
-
-    /* --- 4. Агрегация оценок за неделю --- */
-    var agg = {};
-    ratings.forEach(function(r){
-      if(!r.album) return;
-      if(!agg[r.album]) agg[r.album] = { sum: 0, n: 0 };
-      agg[r.album].sum += Number(r.value) || 0;
-      agg[r.album].n   += 1;
-    });
-
-    /* --- 5. Просмотры --- */
-    var viewMap = {};
-    views.forEach(function(v){
-      if(!v.path) return;
-      var k = v.path.replace(/^\/albums\//, '').replace(/\.html$/, '');
-      viewMap[k] = (viewMap[k] || 0) + (Number(v.count) || 0);
-    });
-
-    /* --- 6. Балл --- */
-    var list = Object.keys(agg).map(function(k){
-      var avg   = agg[k].sum / agg[k].n;
-      var votes = agg[k].n;
-      var vw    = viewMap[k] || 0;
-      return {
-        slug: k, avg: avg, votes: votes, views: vw,
-        score: avg * 20 + votes * 3 + vw / 10
-      };
-    }).sort(function(a,b){ return b.score - a.score; }).slice(0, TOP);
-
-    if(!list.length){
-      grid.innerHTML = '<p class="weekly-empty">За эту неделю оценок пока нет.</p>';
-      return;
-    }
-
-    /* --- 7. Отрисовка --- */
-    grid.innerHTML = '';
-    list.forEach(function(item){
-      var m = meta[item.slug] || {};
-
-      var a = document.createElement('a');
-      a.className = 'lr-card';
-      a.href = m.url ? '{{ site.baseurl }}' + m.url
-                     : '{{ site.baseurl }}/albums/' + item.slug + '.html';
-
-      var cover = document.createElement('span');
-      cover.className = 'lr-cover';
-      var img = document.createElement('img');
-      img.src = m.cover ? '{{ site.baseurl }}/' + m.cover
-                        : '{{ site.baseurl }}/logo.png';
-      img.alt = (m.artist ? m.artist + ' — ' : '') + (m.title || '');
-      img.loading = 'lazy';
-      cover.appendChild(img);
-
-      var body = document.createElement('span');
-      body.className = 'lr-body';
-
-      if(m.artist){
-        var art = document.createElement('span');
-        art.className = 'lr-artist';
-        art.textContent = m.artist;
-        body.appendChild(art);
-      }
-
-      var title = document.createElement('span');
-      title.className = 'lr-title';
-      title.textContent = m.title || item.slug.replace(/^\d{4}-/, '').replace(/-/g, ' ');
-      body.appendChild(title);
-
-      var metaEl = document.createElement('span');
-      metaEl.className = 'lr-year';
-      metaEl.textContent = item.avg.toFixed(1) + ' · ' + item.votes + ' гол. · '
-                         + item.views + ' просм.';
-      body.appendChild(metaEl);
-
-      a.appendChild(cover);
-      a.appendChild(body);
-      grid.appendChild(a);
-    });
-  }).catch(function(){
-    grid.innerHTML = '<p class="weekly-empty">Не удалось посчитать рейтинг.</p>';
-  });
 })();
 </script>
 
