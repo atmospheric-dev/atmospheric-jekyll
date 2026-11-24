@@ -4976,6 +4976,8 @@ body.modal-open{
   flex-direction:column;
   gap:10px;
   padding:12px;
+  max-width:230px;
+  margin:0 auto;
   border:1px solid var(--line);
   background:rgba(0,0,0,.35);
   transition:border-color .2s;
@@ -4985,6 +4987,8 @@ body.modal-open{
 .radio-art{
   display:block;
   width:100%;
+  max-width:190px;
+  margin:0 auto;
   aspect-ratio:1/1;
   border:1px solid var(--line);
   background:rgba(255,255,255,.04) center/cover no-repeat;
@@ -5069,9 +5073,7 @@ body.modal-open{
 }
 
 .side-left .radio-box{
-  flex:1 1 auto;
-  display:flex;
-  flex-direction:column;
+  flex:0 0 auto;
   margin-top:32px;
 }
 
