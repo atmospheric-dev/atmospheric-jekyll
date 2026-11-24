@@ -22,15 +22,13 @@ module Atmospheric
         artists[slug] ||= { "name" => a.data["artist"], "items" => [] }
         artists[slug]["items"] << a
 
-        c = a.data["country"].to_s
-        unless c.empty?
+        country_list(a).each do |c|
           slug = make_slug(c)
           countries[slug] ||= { "name" => c, "items" => [] }
           countries[slug]["items"] << a
         end
 
-        l = a.data["label"].to_s
-        unless l.empty?
+        label_list(a).each do |l|
           slug = make_slug(l)
           labels[slug] ||= { "name" => l, "items" => [] }
           labels[slug]["items"] << a
@@ -44,11 +42,17 @@ module Atmospheric
 
         a.data["artist_url"] = "/bands/#{make_slug(a.data['artist'])}.html"
 
-        c = a.data["country"].to_s
-        a.data["country_url"] = c.empty? ? nil : "/countries/#{make_slug(c)}.html"
+        clist = country_list(a)
+        a.data["country_links"] = clist.map do |c|
+          { "name" => c, "url" => "/countries/#{make_slug(c)}.html" }
+        end
+        a.data["country_url"] = clist.first ? "/countries/#{make_slug(clist.first)}.html" : nil
 
-        l = a.data["label"].to_s
-        a.data["label_url"] = l.empty? ? nil : "/labels/#{make_slug(l)}.html"
+        llist = label_list(a)
+        a.data["label_links"] = llist.map do |l|
+          { "name" => l, "url" => "/labels/#{make_slug(l)}.html" }
+        end
+        a.data["label_url"] = llist.first ? "/labels/#{make_slug(llist.first)}.html" : nil
       end
 
       genres.each    { |slug, data| add_page(site, "tags",      slug, "жанр",   data) }
@@ -58,6 +62,28 @@ module Atmospheric
     end
 
     private
+
+    # Страны: массив "countries" или строка "country" (поддержка старых альбомов).
+    # Строка вида "Франция / Япония" тоже разбивается на две страны.
+    def country_list(album)
+      raw = album.data["countries"]
+      list = raw.is_a?(Array) ? raw : [album.data["country"]]
+
+      list.flat_map { |c| c.to_s.split("/") }
+          .map(&:strip)
+          .reject(&:empty?)
+          .uniq
+    end
+
+    # Лейблы: массив "labels" или строка "label".
+    def label_list(album)
+      raw = album.data["labels"]
+      list = raw.is_a?(Array) ? raw : [album.data["label"]]
+
+      list.map { |l| l.to_s.strip }
+          .reject(&:empty?)
+          .uniq
+    end
 
     def add_page(site, dir, slug, type, data)
       page = Jekyll::PageWithoutAFile.new(site, site.source, dir, "#{slug}.html")
