@@ -4,7 +4,7 @@ layout: default
 <article class="album">
   <div class="wrap">
     <h1 class="album-title">{{ page.artist }} — <span>{{ page.title }}</span></h1>
-    <p class="album-date">{{ page.year }} · {{ page.genres | join: ", " }} · {{ page.country }}</p>
+    <p class="album-date">{{ page.year }} · {{ page.genres | join: ", " }} · {% if page.country_links and page.country_links.size > 0 %}{% for c in page.country_links %}{{ c.name }}{% unless forloop.last %} / {% endunless %}{% endfor %}{% else %}{{ page.country }}{% endif %}</p>
 
     {% include rating.html %}
 
@@ -18,9 +18,21 @@ layout: default
           <li><dt>Группа</dt><dd><a href="{{ site.baseurl }}{{ page.artist_url }}">{{ page.artist }}</a></dd></li>
           <li><dt>Название</dt><dd>{{ page.title }}</dd></li>
           <li><dt>Год</dt><dd>{{ page.year }}</dd></li>
-          <li><dt>Страна</dt><dd>{% if page.country_url %}<a href="{{ site.baseurl }}{{ page.country_url }}">{{ page.country }}</a>{% else %}{{ page.country }}{% endif %}</dd></li>
-          {% if page.label %}
-          <li><dt>Лейбл</dt><dd><a href="{{ site.baseurl }}{{ page.label_url }}">{{ page.label }}</a></dd></li>
+          <li><dt>Страна</dt><dd>
+            {% if page.country_links and page.country_links.size > 0 %}
+              {% for c in page.country_links %}<a href="{{ site.baseurl }}{{ c.url }}">{{ c.name }}</a>{% unless forloop.last %} / {% endunless %}{% endfor %}
+            {% elsif page.country %}
+              {% if page.country_url %}<a href="{{ site.baseurl }}{{ page.country_url }}">{{ page.country }}</a>{% else %}{{ page.country }}{% endif %}
+            {% endif %}
+          </dd></li>
+          {% if page.label or page.label_links %}
+          <li><dt>Лейбл</dt><dd>
+            {% if page.label_links and page.label_links.size > 0 %}
+              {% for l in page.label_links %}<a href="{{ site.baseurl }}{{ l.url }}">{{ l.name }}</a>{% unless forloop.last %} / {% endunless %}{% endfor %}
+            {% elsif page.label %}
+              {% if page.label_url %}<a href="{{ site.baseurl }}{{ page.label_url }}">{{ page.label }}</a>{% else %}{{ page.label }}{% endif %}
+            {% endif %}
+          </dd></li>
           {% endif %}
         </dl>
 
@@ -66,10 +78,18 @@ layout: default
       <a href="{{ site.baseurl }}{{ g.url }}">{{ g.name }}</a>
       {% endfor %}
       <a href="{{ site.baseurl }}{{ page.artist_url }}">{{ page.artist }}</a>
-      {% if page.country_url %}
+      {% if page.country_links and page.country_links.size > 0 %}
+        {% for c in page.country_links %}
+        <a href="{{ site.baseurl }}{{ c.url }}">{{ c.name }}</a>
+        {% endfor %}
+      {% elsif page.country_url %}
       <a href="{{ site.baseurl }}{{ page.country_url }}">{{ page.country }}</a>
       {% endif %}
-      {% if page.label_url %}
+      {% if page.label_links and page.label_links.size > 0 %}
+        {% for l in page.label_links %}
+        <a href="{{ site.baseurl }}{{ l.url }}">{{ l.name }}</a>
+        {% endfor %}
+      {% elsif page.label_url %}
       <a href="{{ site.baseurl }}{{ page.label_url }}">{{ page.label }}</a>
       {% endif %}
     </div>
