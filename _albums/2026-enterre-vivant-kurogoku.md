@@ -3,9 +3,9 @@ layout: album
 title: Kurogoku (黒獄)
 artist: Enterré Vivant
 year: 2026
-date: 2026-11-24
+date: 2026-11-23
 country: Франция / Япония
-label:
+label: Transcendance
 genres:
   - atmospheric black metal
 cover: covers/enterre-vivant.jpg
