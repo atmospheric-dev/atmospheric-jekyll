@@ -5123,3 +5123,36 @@ body.modal-open{
   color:var(--text-dim);
   opacity:.7;
 }
+/* ===== ГЛАВНАЯ: ЦЕНТР НА ВСЮ ВЫСОТУ ===== */
+.front-grid{
+  display:grid;
+  grid-template-columns:300px minmax(0,1fr) 320px;
+  gap:0 36px;
+  align-items:start;      /* колонки не тянутся друг за друга */
+}
+
+.side-left,
+.side-right{
+  display:flex;
+  flex-direction:column;
+  gap:32px;
+  height:100%;
+}
+
+/* блоки 1 и 3 — тянутся, занимают одинаковую долю */
+.side-left .shop-list{
+  flex:1 1 0;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.side-right .side-block-pubs{
+  flex:1 1 0;
+}
+
+/* блоки 4 и 5 — тоже тянутся, равные между собой */
+.side-left .radio-box,
+.side-right .concert-block{
+  flex:1 1 0;
+  margin-top:0;
+}
