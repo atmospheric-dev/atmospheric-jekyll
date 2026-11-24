@@ -5,9 +5,6 @@ artist: Enterré Vivant
 year: 2026
 date: 2026-11-23
 country: Франция / Япония
-countries:
-  - Франция
-  - Япония
 label: Transcendance
 genres:
   - atmospheric black metal
