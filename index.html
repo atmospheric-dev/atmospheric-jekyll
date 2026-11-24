@@ -37,7 +37,7 @@ layout: default
     <div class="wrap">
       <div class="front-grid">
 
-        <!-- ЛЕВО: МЕРЧ -->
+        <!-- ЛЕВО: МЕРЧ + РАДИО -->
         <aside class="side-left">
           <p class="section-heading">Мерч и диски</p>
 
@@ -100,31 +100,33 @@ layout: default
           </div>
         </aside>
 
-        <!-- ЦЕНТР: РЕЦЕНЗИИ + ЛУЧШИЕ -->
+        <!-- ЦЕНТР: РЕЦЕНЗИИ + ЛУЧШИЕ ЗА НЕДЕЛЮ -->
         <div class="front-main">
 
-          <h2>Рецензии</h2>
+          <div class="front-main-top">
+            <h2>Рецензии</h2>
 
-          <div class="latest-releases">
-            {% assign recent = site.albums | sort: "date" | reverse %}
-            {% for album in recent limit: 6 %}
-            <a class="lr-card" href="{{ site.baseurl }}{{ album.url }}">
-              <span class="lr-cover">
-                <img src="{{ site.baseurl }}/{{ album.cover }}"
-                     alt="{{ album.artist }} — {{ album.title }}" loading="lazy">
-              </span>
-              <span class="lr-body">
-                <span class="lr-artist">{{ album.artist }}</span>
-                <span class="lr-title">{{ album.title }}</span>
-                <span class="lr-year">{{ album.year }}</span>
-              </span>
-            </a>
-            {% endfor %}
+            <div class="latest-releases">
+              {% assign recent = site.albums | sort: "date" | reverse %}
+              {% for album in recent limit: 6 %}
+              <a class="lr-card" href="{{ site.baseurl }}{{ album.url }}">
+                <span class="lr-cover">
+                  <img src="{{ site.baseurl }}/{{ album.cover }}"
+                       alt="{{ album.artist }} — {{ album.title }}" loading="lazy">
+                </span>
+                <span class="lr-body">
+                  <span class="lr-artist">{{ album.artist }}</span>
+                  <span class="lr-title">{{ album.title }}</span>
+                  <span class="lr-year">{{ album.year }}</span>
+                </span>
+              </a>
+              {% endfor %}
+            </div>
+
+            <p class="front-more">
+              <a class="back" href="{{ site.baseurl }}/releases.html">Все обзоры →</a>
+            </p>
           </div>
-
-          <p class="front-more">
-            <a class="back" href="{{ site.baseurl }}/releases.html">Все обзоры →</a>
-          </p>
 
           <div class="weekly">
             <h2>Лучшие альбомы за неделю</h2>
@@ -141,7 +143,7 @@ layout: default
         <!-- ПРАВО: ПОСЛЕДНИЕ ПУБЛИКАЦИИ + КОНЦЕРТЫ -->
         <aside class="side-right">
 
-          <div class="side-block">
+          <div class="side-block side-block-pubs">
             <p class="section-heading">Последние публикации</p>
             <div class="latest" id="latest-list">
               <p class="latest-empty">Загружаем…</p>
@@ -185,7 +187,7 @@ layout: default
       </div>
     </div>
   </section>
-   
+
   <section>
     <div class="wrap">
       <h2>О нас</h2>
