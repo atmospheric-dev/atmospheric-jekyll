@@ -5098,3 +5098,28 @@ body.modal-open{
   .front-main{height:auto;}
   .front-main .weekly{margin-top:36px;}
 }
+/* ===== МЕСТО ДЛЯ РЕКЛАМЫ ===== */
+.shop-card.shop-ad{
+  border:1px dashed var(--line);
+  background:transparent;
+}
+.shop-card.shop-ad:hover{
+  border-color:var(--accent);
+  opacity:1;
+}
+.shop-ad-img{
+  background:repeating-linear-gradient(
+    45deg,
+    rgba(176,142,90,.03) 0 6px,
+    rgba(176,142,90,.08) 6px 12px
+  );
+  border-right:1px solid var(--line);
+}
+.shop-ad .shop-title{
+  color:var(--text-dim);
+  font-style:italic;
+}
+.shop-ad .shop-note{
+  color:var(--text-dim);
+  opacity:.7;
+}
