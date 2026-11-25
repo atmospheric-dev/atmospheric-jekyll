@@ -57,7 +57,7 @@ layout: null
   "subtitle": "",
   "url": {{ p.url | relative_url | jsonify }},
   "year": {{ p.date | date: "%Y" | jsonify }},
-  "date": {{ p.date | date: "%Y-%m-%d" | jsonify }},
+  {% if p.published %}"date": {{ p.published | date: "%Y-%m-%d" | jsonify }}{% else %}"date": {{ p.date | date: "%Y-%m-%d" | jsonify }}{% endif %},
   "tags": [],
   "label": "",
   "text": {{ p.description | default: "" | strip_html | strip_newlines | truncate: 200 | jsonify }}
