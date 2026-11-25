@@ -22,17 +22,16 @@ layout: null
 }
 {% endfor %}
 {% for p in site.interviews %}
+{% assign pub = p.published | default: p.date %}
 ,{
   "type": "interview",
   "rubric": "Интервью",
   "title": {{ p.title | jsonify }},
   "subtitle": {{ p.guests | default: "" | jsonify }},
   "url": {{ p.url | relative_url | jsonify }},
-  "year": {{ p.date | date: "%Y" | jsonify }},
-  "date": {{ p.date | date: "%Y-%m-%d" | jsonify }},
-  "tags": [],
-  "label": "",
-  "text": {{ p.description | default: "" | strip_html | strip_newlines | truncate: 200 | jsonify }}
+  "year": {{ pub | date: "%Y" | jsonify }},
+  "date": {{ pub | date: "%Y-%m-%d" | jsonify }},
+  "real_date": {{ p.date | date: "%Y-%m-%d" | jsonify }},
 }
 {% endfor %}
 {% for p in site.notes %}
