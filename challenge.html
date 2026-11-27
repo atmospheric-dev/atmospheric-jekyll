@@ -36,6 +36,8 @@ description: "31 день — 31 тёмный альбом. Один альбо�
     <p class="ch-note" id="chMakeupNote"></p>
   </div>
 
+  <div class="ch-makeup-box" id="chMakeupBox" hidden></div>
+
   <div class="ch-msg" id="chMsg" hidden></div>
 </div>
 
@@ -71,9 +73,9 @@ description: "31 день — 31 тёмный альбом. Один альбо�
   var todayISO = function () { return iso(new Date()); };
 
   var user = null, token = KEY_;
-  var CHALLENGE_ID = '';           /* заполняется из базы по slug */
+  var CHALLENGE_ID = '';
   var prompts = [], entries = {}, startISO = '';
-  var makeupUsed = 0, selected = null, busy = false;
+  var makeupUsed = 0, selected = null, busy = false, makeupDay = null;
 
   var msgEl = $('chMsg');
   function msg(text, kind) {
@@ -96,7 +98,6 @@ description: "31 день — 31 тёмный альбом. Один альбо�
     return iso(s);
   }
 
-  /* Универсальный запрос: без токена, если его нет */
   function rest(path, opts) {
     opts = opts || {};
     var headers = {
@@ -104,13 +105,9 @@ description: "31 день — 31 тёмный альбом. Один альбо�
       'Authorization': 'Bearer ' + token,
       'Content-Type': 'application/json'
     };
-    if (opts.headers) {
-      for (var k in opts.headers) headers[k] = opts.headers[k];
-    }
+    if (opts.headers) { for (var k in opts.headers) headers[k] = opts.headers[k]; }
     return fetch(URL_ + '/rest/v1/' + path, {
-      method: opts.method || 'GET',
-      headers: headers,
-      body: opts.body
+      method: opts.method || 'GET', headers: headers, body: opts.body
     }).then(function (res) {
       return res.text().then(function (txt) {
         if (!res.ok) throw new Error(txt || ('HTTP ' + res.status));
@@ -138,12 +135,53 @@ description: "31 день — 31 тёмный альбом. Один альбо�
     });
   }
 
+  /* ---------- visitor: тот же ключ, что у оценок и дневника ---------- */
+
+  function visitorId() {
+    var k = 'atmos_visitor';
+    var v = localStorage.getItem(k);
+    if (!v) {
+      v = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : 'v-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      localStorage.setItem(k, v);
+    }
+    return v;
+  }
+
+  function weekRange() {
+    var ws = weekStart();
+    var from = new Date(ws + 'T00:00:00');
+    var to = new Date(from.getTime() + 7 * 864e5);
+    return { from: from.toISOString(), to: to.toISOString(), ws: ws };
+  }
+
+  async function tasksDone() {
+    var v = visitorId();
+    var r = weekRange();
+
+    function check(table, dateCol, extra) {
+      var q = table + '?select=id&visitor=eq.' + encodeURIComponent(v)
+        + '&' + dateCol + '=gte.' + r.from
+        + '&' + dateCol + '=lt.' + r.to + (extra || '');
+      return rest(q).then(function (rows) { return (rows || []).length; })
+                    .catch(function () { return 0; });
+    }
+
+    return {
+      rating:  await check('ratings',   'created_at'),
+      diary:   await check('album_log', 'logged_at', '&mark=eq.done'),
+      comment: await check('comments',  'created_at')
+    };
+  }
+
+  /* ---------- загрузка ---------- */
+
   async function init() {
     try {
       var sb = await waitClient();
       if (!sb) { msg('Supabase не загрузился на странице.', 'err'); return; }
 
-      /* сессия нужна для записи, но её отсутствие не блокирует чтение */
       try {
         var s = await sb.auth.getSession();
         var sess = s && s.data && s.data.session;
@@ -154,7 +192,6 @@ description: "31 день — 31 тёмный альбом. Один альбо�
         var chs = await rest('challenges?select=*&slug=eq.' + CHALLENGE_SLUG);
         var ch = chs && chs[0];
         if (!ch) { msg('Челлендж ' + CHALLENGE_SLUG + ' не найден в базе.', 'err'); return; }
-
         CHALLENGE_ID = ch.id;
         startISO = ch.starts_on;
         $('chTitle').textContent = ch.title || 'Челлендж';
@@ -208,6 +245,8 @@ description: "31 день — 31 тёмный альбом. Один альбо�
     makeupUsed = (rows || []).length;
   }
 
+  /* ---------- календарь ---------- */
+
   function render() {
     var cal = $('chCal');
     cal.innerHTML = '';
@@ -246,9 +285,7 @@ description: "31 день — 31 тёмный альбом. Один альбо�
         cell.disabled = true;
       }
 
-      if (!cell.disabled) {
-        cell.addEventListener('click', function () { openDay(p); });
-      }
+      if (!cell.disabled) cell.addEventListener('click', function () { openDay(p); });
       cal.appendChild(cell);
     });
 
@@ -265,6 +302,8 @@ description: "31 день — 31 тёмный альбом. Один альбо�
       : '';
   }
 
+  /* ---------- форма дня ---------- */
+
   function openDay(p) {
     selected = p;
     $('chModalDay').textContent = 'День ' + p.day;
@@ -276,7 +315,7 @@ description: "31 день — 31 тёмный альбом. Один альбо�
     $('chOthers').innerHTML = '';
     loadOthers(p);
     $('chModal').hidden = false;
-    $('chArtist').focus();
+    setTimeout(function () { $('chArtist').focus(); }, 50);
   }
 
   function esc(s) {
@@ -341,14 +380,19 @@ description: "31 день — 31 тёмный альбом. Один альбо�
         user_id: user.id,
         artist: artist,
         album: album,
-        is_makeup: false
+        is_makeup: !!selected.__makeup
       })
     }).then(function () {
       return loadEntries();
     }).then(function () {
       closeModal();
       render();
-      msg('Записано: ' + artist + ' — ' + album, 'info');
+      if (selected.__makeup) {
+        selected.__makeup = false;
+        msg('Восполнение записано: ' + artist + ' — ' + album, 'info');
+      } else {
+        msg('Записано: ' + artist + ' — ' + album, 'info');
+      }
     }).catch(function (e) {
       msg('Не сохранилось: ' + e.message, 'err');
     }).then(function () {
@@ -356,6 +400,91 @@ description: "31 день — 31 тёмный альбом. Один альбо�
       $('chSubmit').disabled = false;
     });
   });
+
+  /* ---------- восполнения ---------- */
+
+  function taskRow(key, title, hint, count) {
+    return '<li class="ch-task' + (count ? ' is-done' : '') + '">'
+      + '<div class="ch-task-txt"><b>' + title + '</b><span>' + hint + '</span></div>'
+      + (count ? '<span class="ch-task-ok">выполнено</span>'
+               : '<a class="ch-task-go" href="/releases.html">Перейти</a>')
+      + '</li>';
+  }
+
+  $('chMakeupBtn').addEventListener('click', async function () {
+    var boxEl = $('chMakeupBox');
+    if (!boxEl.hidden) { boxEl.hidden = true; return; }
+
+    var missed = prompts.filter(function (p) {
+      return !entries[p.id] && dayDate(p.day) < todayISO();
+    });
+    if (!missed.length) { msg('Пропусков нет.', 'info'); return; }
+
+    makeupDay = missed[0];
+    var t = await tasksDone();
+    var left = Math.max(0, 3 - makeupUsed);
+
+    boxEl.innerHTML =
+      '<p class="ch-makeup-head">Пропущен день ' + makeupDay.day + ' — «'
+      + esc(makeupDay.text) + '»</p>'
+      + '<p class="ch-makeup-hint">Выполните любое действие на этой неделе и нажмите «Проверить». '
+      + 'Осталось восполнений: ' + left + ' из 3.</p>'
+      + '<ul class="ch-makeup-tasks">'
+      + taskRow('rating',  'Оценить альбом',      'поставьте оценку на странице любой рецензии', t.rating)
+      + taskRow('diary',   'Отметить «Послушал»', 'нажмите «Послушал» на странице альбома',       t.diary)
+      + taskRow('comment', 'Оставить комментарий','напишите комментарий под любой рецензией',      t.comment)
+      + '</ul>'
+      + '<button class="ch-btn" type="button" id="chCheckTasks">Проверить</button>';
+
+    boxEl.hidden = false;
+    $('chCheckTasks').addEventListener('click', checkTasks);
+  });
+
+  async function checkTasks() {
+    var t = await tasksDone();
+    var task = t.rating ? 'rating' : t.diary ? 'diary' : t.comment ? 'comment' : null;
+
+    if (!task) {
+      msg('На этой неделе не найдено ни одного выполненного действия. Оцените альбом, отметьте «Послушал» или оставьте комментарий.', 'err');
+      return;
+    }
+
+    var r = weekRange();
+    try {
+      await rest('makeups', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          challenge_id: CHALLENGE_ID,
+          user_id: user.id,
+          prompt_id: makeupDay.id,
+          week_start: r.ws,
+          task: task
+        })
+      });
+    } catch (e) {
+      msg('Не удалось засчитать восполнение: ' + e.message, 'err');
+      return;
+    }
+
+    $('chMakeupBox').hidden = true;
+    await loadMakeups();
+    render();
+
+    /* вариант (а): сразу открываем форму для пропущенного дня */
+    var day = prompts.filter(function (p) { return p.id === makeupDay.id; })[0];
+    day.__makeup = true;
+    selected = day;
+    $('chModalDay').textContent = 'День ' + day.day + ' · восполнение';
+    $('chModalPrompt').textContent = day.text;
+    $('chArtist').value = '';
+    $('chAlbum').value = '';
+    $('chSubmit').textContent = 'Записать';
+    $('chOthers').innerHTML = '';
+    loadOthers(day);
+    $('chModal').hidden = false;
+    setTimeout(function () { $('chArtist').focus(); }, 50);
+  }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
