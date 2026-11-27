@@ -41,15 +41,29 @@
     return v;
   }
 
+  /* токен сессии, если человек вошёл */
+  function authToken() {
+    return new Promise(function (resolve) {
+      var sb = window.__atm;
+      if (!sb || !sb.auth) return resolve(null);
+      sb.auth.getSession().then(function (r) {
+        var t = r && r.data && r.data.session && r.data.session.access_token;
+        resolve(t || null);
+      }).catch(function () { resolve(null); });
+    });
+  }
+
   function rpc(fn, body) {
-    return fetch(BASE + '/rest/v1/rpc/' + fn, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': KEY,
-        'Authorization': 'Bearer ' + KEY
-      },
-      body: JSON.stringify(body)
+    return authToken().then(function (token) {
+      return fetch(BASE + '/rest/v1/rpc/' + fn, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': KEY,
+          'Authorization': 'Bearer ' + (token || KEY)
+        },
+        body: JSON.stringify(body)
+      });
     }).then(function (r) {
       if (!r.ok) throw new Error('rpc ' + fn + ' ' + r.status);
       return r.json();
