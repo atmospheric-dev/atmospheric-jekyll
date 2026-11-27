@@ -55,11 +55,40 @@ permalink: /u.html
     <h2 class="profile-sub">Коллекция</h2>
     <div class="u-collection" id="u-collection"></div>
 
+    <div class="u-challenge" id="u-challenge" hidden>
+      <h2 class="profile-sub">Челлендж</h2>
+
+      <div class="u-challenge-in">
+        <span class="u-challenge-name" id="u-challenge-name">—</span>
+        <span class="u-challenge-bar"><span id="u-challenge-fill"></span></span>
+        <span class="u-challenge-meta">
+          <b id="u-challenge-done">0</b> / <span id="u-challenge-total">0</span>
+        </span>
+      </div>
+
+      <div class="u-ch-grid" id="u-ch-grid"></div>
+
+      <button class="u-ch-toggle" type="button" id="u-ch-toggle">
+        Показать все дни
+      </button>
+    </div>
+
     <div class="u-badges" id="u-badges"></div>
 
   </div>
 
   <p class="profile-note" id="u-error" hidden>Такого профиля нет.</p>
+</div>
+
+<!-- ===== ОКНО ДНЯ ЧЕЛЛЕНДЖА ===== -->
+<div class="u-ch-modal" id="u-ch-modal" hidden>
+  <div class="u-ch-modal-box" role="dialog" aria-modal="true">
+    <button class="u-ch-modal-x" id="u-ch-modal-close" type="button" aria-label="Закрыть">×</button>
+    <p class="u-ch-modal-day" id="u-ch-modal-day"></p>
+    <p class="u-ch-modal-prompt" id="u-ch-modal-prompt"></p>
+    <p class="u-ch-modal-artist" id="u-ch-modal-artist"></p>
+    <p class="u-ch-modal-album" id="u-ch-modal-album"></p>
+  </div>
 </div>
 
 <!-- ===== ПРОСМОТР ФОТО ===== -->
@@ -235,6 +264,7 @@ permalink: /u.html
         showActions(p.id);
         loadCollection(p.id);
         loadMedals(p.id);
+        loadChallenge(p.id);
       })
       .catch(function(){ fail(); });
   }
@@ -515,9 +545,11 @@ permalink: /u.html
     wrap.appendChild(grid);
   }
 
-    /* ================= ЧЕЛЛЕНДЖ ================= */
+  /* ================= ЧЕЛЛЕНДЖ ================= */
 
   var CH_SLUG = '2026-12';
+  var chDays = [];
+  var chOpen = false;
 
   function loadChallenge(id){
     var wrap = document.getElementById('u-challenge');
@@ -531,36 +563,110 @@ permalink: /u.html
         var ch = res && res.data;
         if(!ch) return null;
 
-        return sb.from('entries')
-          .select('prompt_id,is_makeup')
+        return sb.from('prompts')
+          .select('id,day,text')
           .eq('challenge_id', ch.id)
-          .eq('user_id', id)
-          .then(function(er){
-            var rows = (er && er.data) || [];
-            return sb.from('prompts')
-              .select('id')
+          .order('day')
+          .then(function(pr){
+            var prompts = (pr && pr.data) || [];
+
+            return sb.from('entries')
+              .select('prompt_id,artist,album')
               .eq('challenge_id', ch.id)
-              .then(function(pr){
-                var total = ((pr && pr.data) || []).length;
-                var done  = rows.length;
-                var mk    = rows.filter(function(r){ return r.is_makeup; }).length;
+              .eq('user_id', id)
+              .then(function(er){
+                var rows = (er && er.data) || [];
+                var byPrompt = {};
+                rows.forEach(function(r){ byPrompt[r.prompt_id] = r; });
+
+                chDays = prompts.map(function(p){
+                  var e = byPrompt[p.id];
+                  return {
+                    day: p.day,
+                    text: p.text,
+                    artist: e ? (e.artist || '') : '',
+                    album:  e ? (e.album || '') : '',
+                    filled: !!e
+                  };
+                });
 
                 document.getElementById('u-challenge-name').textContent =
                   ch.title || 'Челлендж';
-                document.getElementById('u-challenge-done').textContent = done;
-                document.getElementById('u-challenge-total').textContent = total;
+                document.getElementById('u-challenge-done').textContent = rows.length;
+                document.getElementById('u-challenge-total').textContent = prompts.length;
                 document.getElementById('u-challenge-fill').style.width =
-                  Math.round((done / (total || 1)) * 100) + '%';
-                document.getElementById('u-challenge-makeup').textContent =
-                  mk ? 'восполнений ' + mk : 'без восполнений';
+                  Math.round((rows.length / (prompts.length || 1)) * 100) + '%';
 
+                renderChGrid();
                 wrap.hidden = false;
               });
           });
       })
-      .catch(function(){ /* молча */ });
+      .catch(function(e){ if(window.console) console.warn('challenge:', e); });
   }
-  
+
+  function renderChGrid(){
+    var grid = document.getElementById('u-ch-grid');
+    if(!grid) return;
+
+    grid.innerHTML = '';
+
+    chDays.forEach(function(d){
+      var cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'u-ch-cell';
+
+      var num = document.createElement('span');
+      num.className = 'u-ch-cell-num';
+      num.textContent = d.day;
+
+      var txt = document.createElement('span');
+      txt.className = 'u-ch-cell-txt';
+      txt.textContent = d.filled ? (d.album || '—') : '· · ·';
+
+      cell.appendChild(num);
+      cell.appendChild(txt);
+
+      if(d.filled){
+        cell.classList.add('is-filled');
+        cell.addEventListener('click', function(){ openChDay(d); });
+      } else {
+        cell.classList.add('is-empty');
+        cell.disabled = true;
+      }
+
+      grid.appendChild(cell);
+    });
+
+    grid.classList.toggle('is-open', chOpen);
+  }
+
+  function openChDay(d){
+    document.getElementById('u-ch-modal-day').textContent = 'День ' + d.day;
+    document.getElementById('u-ch-modal-prompt').textContent = d.text || '';
+    document.getElementById('u-ch-modal-artist').textContent = d.artist || '';
+    document.getElementById('u-ch-modal-album').textContent = d.album || '';
+    document.getElementById('u-ch-modal').hidden = false;
+  }
+
+  function closeChModal(){
+    document.getElementById('u-ch-modal').hidden = true;
+  }
+
+  document.getElementById('u-ch-modal-close').addEventListener('click', closeChModal);
+  document.getElementById('u-ch-modal').addEventListener('click', function(e){
+    if(e.target === document.getElementById('u-ch-modal')) closeChModal();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && !document.getElementById('u-ch-modal').hidden) closeChModal();
+  });
+
+  document.getElementById('u-ch-toggle').addEventListener('click', function(){
+    chOpen = !chOpen;
+    this.textContent = chOpen ? 'Свернуть' : 'Показать все дни';
+    document.getElementById('u-ch-grid').classList.toggle('is-open', chOpen);
+  });
+
   /* ================= ЗНАЧКИ ================= */
 
   var MEDALS = {
