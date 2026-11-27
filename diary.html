@@ -54,6 +54,7 @@ permalink: /diary.html
   var BASE = 'https://ojqefhakkmwmztxplcqv.supabase.co';
   var KEY  = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
   var SLUG = '2026-12';
+  var PAGE = 10;
 
   var box   = document.getElementById('diary');
   var base  = box.dataset.base || '/albums';
@@ -63,6 +64,7 @@ permalink: /diary.html
 
   var allRows = [];
   var filter  = 'all';
+  var curPage = 0;
 
   function visitor() { return localStorage.getItem('atmos_visitor') || ''; }
 
@@ -98,16 +100,85 @@ permalink: /diary.html
     return d.album.replace(/^\d{4}-/, '').replace(/-/g, ' ');
   }
 
+  /* ---------- привязка visitor к профилю ---------- */
+
+  async function bindVisitor(sb) {
+    var k = 'atmos_visitor';
+    var local = localStorage.getItem(k) || '';
+
+    if (!local) {
+      local = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : 'v-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      localStorage.setItem(k, local);
+    }
+
+    try {
+      var s = await sb.auth.getSession();
+      var sess = s && s.data && s.data.session;
+      if (!sess) return local;
+
+      var auth = {
+        'apikey': KEY,
+        'Authorization': 'Bearer ' + sess.access_token
+      };
+
+      var r = await fetch(BASE + '/rest/v1/profiles?id=eq.' + sess.user.id +
+                          '&select=visitor_id', { headers: auth })
+        .then(function (x) { return x.ok ? x.json() : null; });
+
+      var saved = r && r[0] && r[0].visitor_id;
+
+      if (saved) {
+        if (saved !== local) localStorage.setItem(k, saved);
+        return saved;
+      }
+
+      await fetch(BASE + '/rest/v1/profiles?id=eq.' + sess.user.id, {
+        method: 'PATCH',
+        headers: {
+          'apikey': KEY,
+          'Authorization': 'Bearer ' + sess.access_token,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ visitor_id: local })
+      });
+
+      return local;
+    } catch (e) {
+      console.warn('bindVisitor', e);
+      return local;
+    }
+  }
+
   /* ---------- дневник ---------- */
 
-  function render() {
+  function currentList() {
     var rows = allRows;
 
     if (filter !== 'all') {
       rows = rows.filter(function (d) { return d.mark === filter; });
     }
 
-    if (!rows.length) {
+    var seen = {}, out = [];
+
+    rows.forEach(function (d) {
+      var dt = new Date(d.logged_at);
+      if (isNaN(dt.getTime())) return;
+      var id = d.album + '|' + dt.toDateString();
+      if (seen[id]) return;
+      seen[id] = true;
+      out.push({ row: d, dt: dt });
+    });
+
+    return out;
+  }
+
+  function render() {
+    var list = currentList();
+
+    if (!list.length) {
       box.innerHTML = '<p class="my-empty">' +
         (allRows.length
           ? 'Здесь пока ничего нет по этому фильтру.'
@@ -116,20 +187,14 @@ permalink: /diary.html
       return;
     }
 
-    var seen = {}, list = [];
+    var pages = Math.ceil(list.length / PAGE);
+    if (curPage >= pages) curPage = pages - 1;
+    if (curPage < 0) curPage = 0;
 
-    rows.forEach(function (d) {
-      var dt = new Date(d.logged_at);
-      if (isNaN(dt.getTime())) return;
-      var id = d.album + '|' + dt.toDateString();
-      if (seen[id]) return;
-      seen[id] = true;
-      list.push({ row: d, dt: dt });
-    });
-
+    var slice = list.slice(curPage * PAGE, curPage * PAGE + PAGE);
     var html = '', group = '';
 
-    list.forEach(function (item) {
+    slice.forEach(function (item) {
       var d = item.row, dt = item.dt;
       var key = dt.getFullYear() + '-' + dt.getMonth();
       var head = MONTHS[dt.getMonth()] + ' ' + dt.getFullYear();
@@ -146,12 +211,40 @@ permalink: /diary.html
       html += '<li class="diary-item">' +
         '<span class="diary-day">' + (day < 10 ? '0' + day : day) + '</span>' +
         '<a class="my-link" href="' + url + '">' + esc(nameOf(d)) + '</a>' +
-        '<span class="my-mark my-mark-' + esc(d.mark) + '">' + esc(LABEL[d.mark] || d.mark) + '</span>' +
+        '<span class="my-mark my-mark-' + esc(d.mark) + '">' +
+          esc(LABEL[d.mark] || d.mark) + '</span>' +
         '</li>';
     });
 
     if (group) html += '</ul>';
+    if (pages > 1) html += pagerHtml(pages);
+
     box.innerHTML = html;
+    bindPager();
+  }
+
+  function pagerHtml(pages) {
+    var out = '<nav class="diary-pager">';
+    for (var i = 0; i < pages; i++) {
+      out += '<button type="button" class="diary-page' +
+             (i === curPage ? ' is-active' : '') +
+             '" data-p="' + i + '">' + (i + 1) + '</button>';
+    }
+    return out + '</nav>';
+  }
+
+  function bindPager() {
+    var nav = box.querySelector('.diary-pager');
+    if (!nav) return;
+
+    nav.addEventListener('click', function (ev) {
+      var b = ev.target.closest('button');
+      if (!b) return;
+      curPage = parseInt(b.dataset.p, 10) || 0;
+      render();
+      var top = box.getBoundingClientRect().top + window.scrollY - 100;
+      window.scrollTo({ top: top, behavior: 'smooth' });
+    });
   }
 
   function stats(rows) {
@@ -182,6 +275,7 @@ permalink: /diary.html
     return rpc('my_diary', { p_visitor: v, p_limit: 500 })
       .then(function (rows) {
         allRows = rows || [];
+        curPage = 0;
         stats(allRows);
         render();
       })
@@ -224,7 +318,8 @@ permalink: /diary.html
                   var dayNow = Math.floor((today - start) / 864e5) + 1;
                   var miss = 0;
                   (ps || []).forEach(function (p) {
-                    if (p.day < dayNow && !(es || []).some(function (e) { return e.prompt_id === p.id; })) miss++;
+                    if (p.day < dayNow &&
+                        !(es || []).some(function (e) { return e.prompt_id === p.id; })) miss++;
                   });
                   document.getElementById('dchLeft').textContent =
                     dayNow < 1 ? 'стартует ' + ch.starts_on
@@ -243,16 +338,21 @@ permalink: /diary.html
     var b = ev.target.closest('button');
     if (!b) return;
     filter = b.dataset.f;
+    curPage = 0;
     [].forEach.call(this.querySelectorAll('button'), function (x) {
       x.classList.toggle('is-on', x === b);
     });
     render();
   });
 
+  /* ---------- запуск ---------- */
+
   var sb = window.supabase.createClient(BASE, KEY);
   window.__sb = sb;
 
-  loadDiary();
-  loadChallenge();
+  bindVisitor(sb).then(function () {
+    loadDiary();
+    loadChallenge();
+  });
 })();
 </script>
