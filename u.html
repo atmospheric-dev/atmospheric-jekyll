@@ -515,6 +515,52 @@ permalink: /u.html
     wrap.appendChild(grid);
   }
 
+    /* ================= ЧЕЛЛЕНДЖ ================= */
+
+  var CH_SLUG = '2026-12';
+
+  function loadChallenge(id){
+    var wrap = document.getElementById('u-challenge');
+    if(!wrap) return;
+
+    sb.from('challenges')
+      .select('id,title,starts_on')
+      .eq('slug', CH_SLUG)
+      .maybeSingle()
+      .then(function(res){
+        var ch = res && res.data;
+        if(!ch) return null;
+
+        return sb.from('entries')
+          .select('prompt_id,is_makeup')
+          .eq('challenge_id', ch.id)
+          .eq('user_id', id)
+          .then(function(er){
+            var rows = (er && er.data) || [];
+            return sb.from('prompts')
+              .select('id')
+              .eq('challenge_id', ch.id)
+              .then(function(pr){
+                var total = ((pr && pr.data) || []).length;
+                var done  = rows.length;
+                var mk    = rows.filter(function(r){ return r.is_makeup; }).length;
+
+                document.getElementById('u-challenge-name').textContent =
+                  ch.title || 'Челлендж';
+                document.getElementById('u-challenge-done').textContent = done;
+                document.getElementById('u-challenge-total').textContent = total;
+                document.getElementById('u-challenge-fill').style.width =
+                  Math.round((done / (total || 1)) * 100) + '%';
+                document.getElementById('u-challenge-makeup').textContent =
+                  mk ? 'восполнений ' + mk : 'без восполнений';
+
+                wrap.hidden = false;
+              });
+          });
+      })
+      .catch(function(){ /* молча */ });
+  }
+  
   /* ================= ЗНАЧКИ ================= */
 
   var MEDALS = {
