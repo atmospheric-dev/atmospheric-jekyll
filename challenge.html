@@ -150,6 +150,49 @@ description: "31 день — 31 тёмный альбом. Один альбо�
     return v;
   }
 
+  /* привязка visitor к профилю: один человек — один visitor на всех устройствах */
+  async function bindVisitor(sb) {
+    var local = visitorId();
+
+    try {
+      var s = await sb.auth.getSession();
+      var sess = s && s.data && s.data.session;
+      if (!sess) return local;
+
+      var auth = {
+        'apikey': KEY_,
+        'Authorization': 'Bearer ' + sess.access_token
+      };
+
+      var r = await fetch(URL_ + '/rest/v1/profiles?id=eq.' + sess.user.id +
+                          '&select=visitor_id', { headers: auth })
+        .then(function (x) { return x.ok ? x.json() : null; });
+
+      var saved = r && r[0] && r[0].visitor_id;
+
+      if (saved) {
+        if (saved !== local) localStorage.setItem('atmos_visitor', saved);
+        return saved;
+      }
+
+      await fetch(URL_ + '/rest/v1/profiles?id=eq.' + sess.user.id, {
+        method: 'PATCH',
+        headers: {
+          'apikey': KEY_,
+          'Authorization': 'Bearer ' + sess.access_token,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ visitor_id: local })
+      });
+
+      return local;
+    } catch (e) {
+      console.warn('bindVisitor', e);
+      return local;
+    }
+  }
+
   function weekRange() {
     var ws = weekStart();
     var from = new Date(ws + 'T00:00:00');
@@ -188,6 +231,9 @@ description: "31 день — 31 тёмный альбом. Один альбо�
         var sess = s && s.data && s.data.session;
         if (sess) { user = sess.user; token = sess.access_token; }
       } catch (e) { console.warn('session', e); }
+
+      /* до всего остального: подтянуть общий visitor из профиля */
+      await bindVisitor(sb);
 
       try {
         var chs = await rest('challenges?select=*&slug=eq.' + CHALLENGE_SLUG);
