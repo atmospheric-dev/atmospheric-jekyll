@@ -306,6 +306,8 @@ description: "31 день — 31 тёмный альбом. Один альбо�
 
   function openDay(p) {
     selected = p;
+    selected.__makeup = false;
+    selected.__task = null;
     $('chModalDay').textContent = 'День ' + p.day;
     $('chModalPrompt').textContent = p.text;
     var e = entries[p.id];
@@ -359,6 +361,8 @@ description: "31 день — 31 тёмный альбом. Один альбо�
     if (ev.key === 'Escape') closeModal();
   });
 
+  /* ---------- сохранение записи (обычной и восполнения) ---------- */
+
   $('chForm').addEventListener('submit', function (ev) {
     ev.preventDefault();
     if (busy) return;
@@ -368,31 +372,51 @@ description: "31 день — 31 тёмный альбом. Один альбо�
     var album = $('chAlbum').value.trim();
     if (!artist || !album || !selected) return;
 
+    var isMakeup = !!selected.__makeup;
+    var task = selected.__task;
+    var dayIdx = selected.day;
+
     busy = true;
     $('chSubmit').disabled = true;
 
     rest('entries?on_conflict=user_id,prompt_id', {
       method: 'POST',
-      headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' },
       body: JSON.stringify({
         prompt_id: selected.id,
         challenge_id: CHALLENGE_ID,
         user_id: user.id,
         artist: artist,
         album: album,
-        is_makeup: !!selected.__makeup
+        is_makeup: isMakeup
       })
+    }).then(function (rows) {
+      var saved = rows && rows[0];
+      if (!isMakeup) return null;
+      if (!saved || !saved.id) throw new Error('запись не вернула id');
+
+      /* восполнение привязывается к уже сохранённой записи */
+      return rest('makeups', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          challenge_id: CHALLENGE_ID,
+          user_id: user.id,
+          entry_id: saved.id,
+          week_start: weekRange().ws,
+          task: task
+        })
+      });
+    }).then(function () {
+      return loadMakeups();
     }).then(function () {
       return loadEntries();
     }).then(function () {
       closeModal();
       render();
-      if (selected.__makeup) {
-        selected.__makeup = false;
-        msg('Восполнение записано: ' + artist + ' — ' + album, 'info');
-      } else {
-        msg('Записано: ' + artist + ' — ' + album, 'info');
-      }
+      msg((isMakeup ? 'Восполнение записано, день ' + dayIdx + ': ' : 'Записано: ')
+          + artist + ' — ' + album, 'info');
+      selected = null;
     }).catch(function (e) {
       msg('Не сохранилось: ' + e.message, 'err');
     }).then(function () {
@@ -403,11 +427,11 @@ description: "31 день — 31 тёмный альбом. Один альбо�
 
   /* ---------- восполнения ---------- */
 
-  function taskRow(key, title, hint, count) {
+  function taskRow(title, hint, count) {
     return '<li class="ch-task' + (count ? ' is-done' : '') + '">'
       + '<div class="ch-task-txt"><b>' + title + '</b><span>' + hint + '</span></div>'
       + (count ? '<span class="ch-task-ok">выполнено</span>'
-               : '<a class="ch-task-go" href="/releases.html">Перейти</a>')
+               : '<a class="ch-task-go" href="' + String.fromCharCode(47) + 'releases.html">Перейти</a>')
       + '</li>';
   }
 
@@ -430,9 +454,9 @@ description: "31 день — 31 тёмный альбом. Один альбо�
       + '<p class="ch-makeup-hint">Выполните любое действие на этой неделе и нажмите «Проверить». '
       + 'Осталось восполнений: ' + left + ' из 3.</p>'
       + '<ul class="ch-makeup-tasks">'
-      + taskRow('rating',  'Оценить альбом',      'поставьте оценку на странице любой рецензии', t.rating)
-      + taskRow('diary',   'Отметить «Послушал»', 'нажмите «Послушал» на странице альбома',       t.diary)
-      + taskRow('comment', 'Оставить комментарий','напишите комментарий под любой рецензией',      t.comment)
+      + taskRow('Оценить альбом',       'поставьте оценку на странице любой рецензии', t.rating)
+      + taskRow('Отметить «Послушал»',  'нажмите «Послушал» на странице альбома',       t.diary)
+      + taskRow('Оставить комментарий', 'напишите комментарий под любой рецензией',     t.comment)
       + '</ul>'
       + '<button class="ch-btn" type="button" id="chCheckTasks">Проверить</button>';
 
@@ -445,43 +469,22 @@ description: "31 день — 31 тёмный альбом. Один альбо�
     var task = t.rating ? 'rating' : t.diary ? 'diary' : t.comment ? 'comment' : null;
 
     if (!task) {
-      msg('На этой неделе не найдено ни одного выполненного действия. Оцените альбом, отметьте «Послушал» или оставьте комментарий.', 'err');
+      msg('На этой неделе нет выполненных действий. Оцените альбом, отметьте «Послушал» или оставьте комментарий.', 'err');
       return;
     }
 
-    var r = weekRange();
-    try {
-      await rest('makeups', {
-        method: 'POST',
-        headers: { 'Prefer': 'return=minimal' },
-        body: JSON.stringify({
-          challenge_id: CHALLENGE_ID,
-          user_id: user.id,
-          prompt_id: makeupDay.id,
-          week_start: r.ws,
-          task: task
-        })
-      });
-    } catch (e) {
-      msg('Не удалось засчитать восполнение: ' + e.message, 'err');
-      return;
-    }
+    makeupDay.__makeup = true;
+    makeupDay.__task = task;
+    selected = makeupDay;
 
     $('chMakeupBox').hidden = true;
-    await loadMakeups();
-    render();
-
-    /* вариант (а): сразу открываем форму для пропущенного дня */
-    var day = prompts.filter(function (p) { return p.id === makeupDay.id; })[0];
-    day.__makeup = true;
-    selected = day;
-    $('chModalDay').textContent = 'День ' + day.day + ' · восполнение';
-    $('chModalPrompt').textContent = day.text;
+    $('chModalDay').textContent = 'День ' + makeupDay.day + ' · восполнение';
+    $('chModalPrompt').textContent = makeupDay.text;
     $('chArtist').value = '';
     $('chAlbum').value = '';
     $('chSubmit').textContent = 'Записать';
     $('chOthers').innerHTML = '';
-    loadOthers(day);
+    loadOthers(makeupDay);
     $('chModal').hidden = false;
     setTimeout(function () { $('chArtist').focus(); }, 50);
   }
