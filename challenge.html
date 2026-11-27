@@ -63,7 +63,7 @@ description: "31 день — 31 тёмный альбом. Один альбо�
 
   var URL_  = 'https://ojqefhakkmwmztxplcqv.supabase.co';
   var KEY_  = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
-  var CHALLENGE_ID = '02fbd88b-3612-4a09-8ad2-59f154a95f7c';
+  var CHALLENGE_SLUG = '2026-12';
 
   var $ = function (id) { return document.getElementById(id); };
   var pad = function (n) { return (n < 10 ? '0' : '') + n; };
@@ -71,6 +71,7 @@ description: "31 день — 31 тёмный альбом. Один альбо�
   var todayISO = function () { return iso(new Date()); };
 
   var user = null, token = KEY_;
+  var CHALLENGE_ID = '';           /* заполняется из базы по slug */
   var prompts = [], entries = {}, startISO = '';
   var makeupUsed = 0, selected = null, busy = false;
 
@@ -150,10 +151,11 @@ description: "31 день — 31 тёмный альбом. Один альбо�
       } catch (e) { console.warn('session', e); }
 
       try {
-        var chs = await rest('challenges?select=*&id=eq.' + CHALLENGE_ID);
+        var chs = await rest('challenges?select=*&slug=eq.' + CHALLENGE_SLUG);
         var ch = chs && chs[0];
-        if (!ch) { msg('Челлендж не найден в базе.', 'err'); return; }
+        if (!ch) { msg('Челлендж ' + CHALLENGE_SLUG + ' не найден в базе.', 'err'); return; }
 
+        CHALLENGE_ID = ch.id;
         startISO = ch.starts_on;
         $('chTitle').textContent = ch.title || 'Челлендж';
         $('chDesc').textContent = ch.description || '';
