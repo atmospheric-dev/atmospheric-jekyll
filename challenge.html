@@ -1,0 +1,280 @@
+---
+layout: default
+title: Челлендж
+permalink: /challenge/
+description: "31 день — 31 тёмный альбом. Один альбом в день, тема от нас, выбор от тебя."
+---
+
+<link rel="stylesheet" href="{{ site.baseurl }}/assets/css/challenge.css">
+
+<div class="ch-wrap">
+
+  <header class="ch-head">
+    <p class="ch-kicker">Атмосферный челлендж</p>
+    <h1 class="ch-title" id="chTitle">Декабрь: 31 день — 31 тёмный альбом</h1>
+    <p class="ch-desc" id="chDesc"></p>
+    <div class="ch-stats" id="chStats">
+      <span><b id="chDone">0</b> / <span id="chTotal">31</span></span>
+      <span id="chLeft"></span>
+    </div>
+    <div class="ch-bar"><div class="ch-bar-fill" id="chBar"></div></div>
+  </header>
+
+  <div class="ch-legend">
+    <span class="ch-key ch-key-done">заполнено</span>
+    <span class="ch-key ch-key-open">открыт</span>
+    <span class="ch-key ch-key-miss">пропуск</span>
+    <span class="ch-key ch-key-shut">закрыт</span>
+  </div>
+
+  <div class="ch-cal" id="chCal"></div>
+
+  <div class="ch-makeup">
+    <button class="ch-btn" id="chMakeupBtn" type="button" disabled>
+      Восполнить пропуски <span id="chLeftCount"></span>
+    </button>
+    <p class="ch-note" id="chMakeupNote"></p>
+  </div>
+
+  <div class="ch-msg" id="chMsg" hidden></div>
+</div>
+
+<!-- Модальное окно дня -->
+<div class="ch-modal" id="chModal" hidden>
+  <div class="ch-modal-box" role="dialog" aria-modal="true">
+    <button class="ch-modal-x" id="chModalClose" type="button" aria-label="Закрыть">×</button>
+    <p class="ch-modal-day" id="chModalDay"></p>
+    <p class="ch-modal-prompt" id="chModalPrompt"></p>
+    <form id="chForm" autocomplete="off">
+      <label class="ch-label">Группа
+        <input class="ch-input" id="chArtist" type="text" maxlength="120" required>
+      </label>
+      <label class="ch-label">Альбом
+        <input class="ch-input" id="chAlbum" type="text" maxlength="160" required>
+      </label>
+      <button class="ch-btn" type="submit" id="chSubmit">Отметить</button>
+    </form>
+    <div class="ch-others" id="chOthers"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const SUPABASE_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
+  const SUPABASE_KEY = 'ТВОЙ_PUBLISHABLE_KEY';
+  const CHALLENGE_ID = '02fbd88b-3612-4a09-8ad2-59f154a95f7c';
+
+  const $ = (id) => document.getElementById(id);
+
+  let sb = null, user = null, prompts = [], entries = {};
+  let makeupUsed = 0, selected = null;
+
+  // ---------- утилиты ----------
+  const pad = (n) => String(n).padStart(2, '0');
+  const todayISO = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+  const weekStart = (d = new Date()) => {
+    const x = new Date(d);
+    const day = (x.getDay() + 6) % 7;      // 0 = понедельник
+    x.setDate(x.getDate() - day);
+    return `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}`;
+  };
+  const dayDate = (day) => {
+    const s = new Date(startISO + 'T00:00:00');
+    s.setDate(s.getDate() + day - 1);
+    return `${s.getFullYear()}-${pad(s.getMonth() + 1)}-${pad(s.getDate())}`;
+  };
+  let startISO = '', endISO = '';
+
+  function msg(text, kind) {
+    const el = $('chMsg');
+    el.hidden = false;
+    el.textContent = text;
+    el.className = 'ch-msg ch-msg-' + (kind || 'info');
+  }
+
+  // ---------- старт ----------
+  async function init() {
+    if (!window.supabase) {
+      msg('Клиент Supabase не загружен на странице.', 'err');
+      return;
+    }
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const { data: ch, error: chErr } = await sb
+      .from('challenges').select('*').eq('id', CHALLENGE_ID).single();
+    if (chErr || !ch) { msg('Челлендж не найден.', 'err'); return; }
+
+    startISO = ch.starts_on;
+    endISO = ch.ends_on;
+    $('chTitle').textContent = ch.title;
+    $('chDesc').textContent = ch.description || '';
+
+    const { data: pr, error: prErr } = await sb
+      .from('prompts').select('id,day,text,note')
+      .eq('challenge_id', CHALLENGE_ID).order('day');
+    if (prErr) { msg('Не удалось загрузить темы.', 'err'); return; }
+    prompts = pr;
+    $('chTotal').textContent = prompts.length;
+
+    const { data: sess } = await sb.auth.getSession();
+    user = sess && sess.session ? sess.session.user : null;
+
+    if (user) {
+      await loadEntries();
+      await loadMakeups();
+    }
+    render();
+  }
+
+  async function loadEntries() {
+    const { data } = await sb.from('entries')
+      .select('prompt_id,artist,album,is_makeup')
+      .eq('challenge_id', CHALLENGE_ID)
+      .eq('user_id', user.id);
+    entries = {};
+    (data || []).forEach((e) => { entries[e.prompt_id] = e; });
+  }
+
+  async function loadMakeups() {
+    const { count } = await sb.from('makeups')
+      .select('id', { count: 'exact', head: true })
+      .eq('challenge_id', CHALLENGE_ID)
+      .eq('user_id', user.id)
+      .eq('week_start', weekStart());
+    makeupUsed = count || 0;
+  }
+
+  // ---------- отрисовка ----------
+  function render() {
+    const cal = $('chCal');
+    cal.innerHTML = '';
+    const today = todayISO();
+    let done = 0, missed = 0;
+
+    prompts.forEach((p) => {
+      const d = dayDate(p.day);
+      const filled = !!entries[p.id];
+      if (filled) done++;
+
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'ch-cell';
+      cell.dataset.day = p.day;
+
+      const num = document.createElement('span');
+      num.className = 'ch-cell-num';
+      num.textContent = p.day;
+      cell.appendChild(num);
+
+      const txt = document.createElement('span');
+      txt.className = 'ch-cell-txt';
+      txt.textContent = filled ? entries[p.id].album : (d <= today ? p.text : '· · ·');
+      cell.appendChild(txt);
+
+      if (filled) {
+        cell.classList.add('is-done');
+      } else if (d > today) {
+        cell.classList.add('is-shut');
+        cell.disabled = true;
+      } else if (d === today) {
+        cell.classList.add('is-open');
+      } else {
+        cell.classList.add('is-miss');
+        missed++;
+      }
+
+      cell.addEventListener('click', () => openDay(p));
+      cal.appendChild(cell);
+    });
+
+    const total = prompts.length;
+    $('chDone').textContent = done;
+    $('chBar').style.width = Math.round((done / total) * 100) + '%';
+    $('chLeft').textContent = missed ? `пропущено ${missed}` : 'пропусков нет';
+
+    if (!user) {
+      $('chMakeupNote').textContent = 'Войдите, чтобы отмечать альбомы.';
+      return;
+    }
+    const left = Math.max(0, 3 - makeupUsed);
+    $('chLeftCount').textContent = left ? `(${left} на эту неделю)` : '(лимит исчерпан)';
+    $('chMakeupBtn').disabled = !left || !missed;
+    $('chMakeupNote').textContent = missed
+      ? 'Восполнение закрывает один пропущенный день. Задание нужно выполнить по-настоящему — отметка, запись в дневник или комментарий.'
+      : '';
+  }
+
+  // ---------- окно дня ----------
+  function openDay(p) {
+    selected = p;
+    $('chModalDay').textContent = 'День ' + p.day;
+    $('chModalPrompt').textContent = p.text;
+    const e = entries[p.id];
+    $('chArtist').value = e ? e.artist : '';
+    $('chAlbum').value = e ? e.album : '';
+    $('chSubmit').textContent = e ? 'Сохранить' : 'Отметить';
+    $('chOthers').innerHTML = '';
+    loadOthers(p);
+    $('chModal').hidden = false;
+    $('chArtist').focus();
+  }
+
+  async function loadOthers(p) {
+    const { data } = await sb.from('entries')
+      .select('artist,album,user_id')
+      .eq('prompt_id', p.id)
+      .limit(12);
+    if (!data || !data.length) {
+      $('chOthers').innerHTML = '<p class="ch-others-empty">Пока никто не ответил.</p>';
+      return;
+    }
+    const counts = {};
+    data.forEach((r) => {
+      const k = r.artist + ' — ' + r.album;
+      counts[k] = (counts[k] || 0) + 1;
+    });
+    const rows = Object.entries(counts).sort((a, b) => b[1] - a[1])
+      .map(([k, n]) => `<li><span>${k}</span><b>${n}</b></li>`).join('');
+    $('chOthers').innerHTML = '<p class="ch-others-head">Что вписывают</p><ul>' + rows + '</ul>';
+  }
+
+  $('chModalClose').addEventListener('click', () => { $('chModal').hidden = true; });
+  $('chModal').addEventListener('click', (ev) => {
+    if (ev.target === $('chModal')) $('chModal').hidden = true;
+  });
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape') $('chModal').hidden = true;
+  });
+
+  $('chForm').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    if (!user) { msg('Войдите, чтобы отмечать альбомы.', 'err'); return; }
+
+    const artist = $('chArtist').value.trim();
+    const album = $('chAlbum').value.trim();
+    if (!artist || !album) return;
+
+    $('chSubmit').disabled = true;
+    const payload = {
+      prompt_id: selected.id,
+      challenge_id: CHALLENGE_ID,
+      user_id: user.id,
+      artist, album,
+      is_makeup: false
+    };
+    const { error } = await sb.from('entries')
+      .upsert(payload, { onConflict: 'user_id,prompt_id' });
+    $('chSubmit').disabled = false;
+
+    if (error) { msg(error.message, 'err'); return; }
+    $('chModal').hidden = true;
+    await loadEntries();
+    render();
+  });
+
+  init();
+})();
+</script>
