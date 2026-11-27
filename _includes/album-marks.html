@@ -2,7 +2,7 @@
 <div class="album-marks" data-album="{{ marks_key }}"
      data-supabase="https://ojqefhakkmwmztxplcqv.supabase.co"
      data-key="sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ">
-  <div class="marks-row" hidden>
+  <div class="marks-row">
     <button class="mark-btn" data-mark="now" type="button">
       Слушаю сейчас <span class="mark-count">0</span>
     </button>
@@ -82,7 +82,7 @@
     });
 
     var total = (counts.now || 0) + (counts.done || 0) + (counts.later || 0);
-    row.hidden = total === 0;
+    row.hidden = false;
   }
 
   function load() {
