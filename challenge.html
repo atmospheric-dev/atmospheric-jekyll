@@ -66,6 +66,7 @@ description: "31 день — 31 тёмный альбом. Один альбо�
   var URL_  = 'https://ojqefhakkmwmztxplcqv.supabase.co';
   var KEY_  = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
   var CHALLENGE_SLUG = '2026-12';
+  var TOP_N = 5;
 
   var $ = function (id) { return document.getElementById(id); };
   var pad = function (n) { return (n < 10 ? '0' : '') + n; };
@@ -327,26 +328,50 @@ description: "31 день — 31 тёмный альбом. Один альбо�
     return d.innerHTML;
   }
 
+  function plural(n, one, few, many) {
+    var t = n % 10, h = n % 100;
+    if (h >= 11 && h <= 14) return many;
+    if (t === 1) return one;
+    if (t >= 2 && t <= 4) return few;
+    return many;
+  }
+
   async function loadOthers(p) {
     try {
-      var rows = await rest('entries?select=artist,album&prompt_id=eq.' + p.id + '&limit=60');
+      var rows = await rest('entries?select=artist,album&prompt_id=eq.' + p.id + '&limit=500');
       if (!rows || !rows.length) {
         $('chOthers').innerHTML = '<p class="ch-others-empty">Пока никто не ответил.</p>';
         return;
       }
+
       var counts = {};
       rows.forEach(function (r) {
-        var k = (r.artist || '') + ' — ' + (r.album || '');
+        var k = (r.artist || '').trim() + ' — ' + (r.album || '').trim();
         counts[k] = (counts[k] || 0) + 1;
       });
-      var list = Object.keys(counts)
-        .sort(function (a, b) { return counts[b] - counts[a]; })
-        .slice(0, 10)
-        .map(function (k) {
-          return '<li><span>' + esc(k) + '</span><b>' + counts[k] + '</b></li>';
-        })
-        .join('');
-      $('chOthers').innerHTML = '<p class="ch-others-head">Что вписывают</p><ul>' + list + '</ul>';
+
+      var all = Object.keys(counts).sort(function (a, b) {
+        return counts[b] - counts[a];
+      });
+
+      var top = all.slice(0, TOP_N);
+      var more = all.length - top.length;
+
+      var list = top.map(function (k, i) {
+        return '<li><span class="ch-others-i">' + (i + 1) + '</span>'
+             + '<span class="ch-others-n">' + esc(k) + '</span>'
+             + '<b>' + counts[k] + '</b></li>';
+      }).join('');
+
+      var html = '<p class="ch-others-head">Что вписывают</p>'
+        + '<ul class="ch-others-list">' + list + '</ul>';
+
+      if (more > 0) {
+        html += '<p class="ch-others-more">и ещё ' + more + ' '
+              + plural(more, 'вариант', 'варианта', 'вариантов') + '</p>';
+      }
+
+      $('chOthers').innerHTML = html;
     } catch (e) {
       $('chOthers').innerHTML = '<p class="ch-others-empty">Не удалось загрузить ответы.</p>';
     }
