@@ -277,6 +277,7 @@ description: "31 день — 31 тёмный альбом. Один альбо�
         cell.classList.add('is-done');
       } else if (d > today) {
         cell.classList.add('is-shut');
+        cell.disabled = true;
       } else if (d === today) {
         cell.classList.add('is-open');
       } else {
