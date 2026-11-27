@@ -59,90 +59,138 @@ description: "31 день — 31 тёмный альбом. Один альбо�
 
 <script>
 (function () {
+  'use strict';
+
   var URL_  = 'https://ojqefhakkmwmztxplcqv.supabase.co';
   var KEY_  = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
   var CHALLENGE_ID = '02fbd88b-3612-4a09-8ad2-59f154a95f7c';
 
   var $ = function (id) { return document.getElementById(id); };
+  var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+  var iso = function (d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+  var todayISO = function () { return iso(new Date()); };
 
-  var sb = null, user = null, token = KEY_;
-  var prompts = [], entries = {}, startISO = '', endISO = '';
-  var makeupUsed = 0, selected = null;
+  var user = null, token = KEY_;
+  var prompts = [], entries = {}, startISO = '';
+  var makeupUsed = 0, selected = null, busy = false;
 
-  function pad(n) { return String(n).padStart(2, '0'); }
-  function iso(d) {
-    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  var msgEl = $('chMsg');
+  function msg(text, kind) {
+    if (!msgEl) return;
+    msgEl.hidden = false;
+    msgEl.textContent = text;
+    msgEl.className = 'ch-msg ch-msg-' + (kind || 'info');
   }
-  function todayISO() { return iso(new Date()); }
+
   function weekStart(d) {
     var x = new Date(d || new Date());
-    x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+    var shift = (x.getDay() + 6) % 7;
+    x.setDate(x.getDate() - shift);
     return iso(x);
   }
+
   function dayDate(day) {
     var s = new Date(startISO + 'T00:00:00');
     s.setDate(s.getDate() + day - 1);
     return iso(s);
   }
 
-  function msg(text, kind) {
-    var el = $('chMsg');
-    el.hidden = false;
-    el.textContent = text;
-    el.className = 'ch-msg ch-msg-' + (kind || 'info');
-  }
-
-  async function rest(path, opts) {
+  /* Универсальный запрос: без токена, если его нет */
+  function rest(path, opts) {
     opts = opts || {};
-    opts.headers = Object.assign({
+    var headers = {
       'apikey': KEY_,
       'Authorization': 'Bearer ' + token,
       'Content-Type': 'application/json'
-    }, opts.headers || {});
-    var res = await fetch(URL_ + '/rest/v1/' + path, opts);
-    if (!res.ok) throw new Error((await res.text()) || ('HTTP ' + res.status));
-    var txt = await res.text();
-    return txt ? JSON.parse(txt) : null;
+    };
+    if (opts.headers) {
+      for (var k in opts.headers) headers[k] = opts.headers[k];
+    }
+    return fetch(URL_ + '/rest/v1/' + path, {
+      method: opts.method || 'GET',
+      headers: headers,
+      body: opts.body
+    }).then(function (res) {
+      return res.text().then(function (txt) {
+        if (!res.ok) throw new Error(txt || ('HTTP ' + res.status));
+        return txt ? JSON.parse(txt) : null;
+      });
+    });
   }
 
-  async function waitSupabase() {
-    var tries = 0;
-    while (!window.supabase && tries < 60) {
-      await new Promise(function (r) { setTimeout(r, 50); });
-      tries++;
-    }
-    return !!window.supabase;
+  function getClient() {
+    if (!window.supabase || typeof window.supabase.createClient !== 'function') return null;
+    if (window.__atm) return window.__atm;
+    window.__atm = window.supabase.createClient(URL_, KEY_);
+    return window.__atm;
+  }
+
+  function waitClient() {
+    return new Promise(function (resolve) {
+      var tries = 0;
+      (function loop() {
+        var c = getClient();
+        if (c || tries > 60) return resolve(c);
+        tries++;
+        setTimeout(loop, 50);
+      })();
+    });
   }
 
   async function init() {
-    if (!(await waitSupabase())) {
-      msg('Supabase не загрузился.', 'err');
-      return;
+    try {
+      var sb = await waitClient();
+      if (!sb) { msg('Supabase не загрузился на странице.', 'err'); return; }
+
+      /* сессия нужна для записи, но её отсутствие не блокирует чтение */
+      try {
+        var s = await sb.auth.getSession();
+        var sess = s && s.data && s.data.session;
+        if (sess) { user = sess.user; token = sess.access_token; }
+      } catch (e) { console.warn('session', e); }
+
+      try {
+        var chs = await rest('challenges?select=*&id=eq.' + CHALLENGE_ID);
+        var ch = chs && chs[0];
+        if (!ch) { msg('Челлендж не найден в базе.', 'err'); return; }
+
+        startISO = ch.starts_on;
+        $('chTitle').textContent = ch.title || 'Челлендж';
+        $('chDesc').textContent = ch.description || '';
+      } catch (e) {
+        msg('Не удалось прочитать челлендж: ' + e.message, 'err');
+        return;
+      }
+
+      try {
+        prompts = await rest('prompts?select=id,day,text,note&challenge_id=eq.'
+          + CHALLENGE_ID + '&order=day');
+        prompts = prompts || [];
+        $('chTotal').textContent = prompts.length;
+      } catch (e) {
+        msg('Не удалось прочитать темы: ' + e.message, 'err');
+        return;
+      }
+
+      if (!prompts.length) {
+        msg('Темы для челленджа не найдены — проверьте таблицу prompts.', 'err');
+        return;
+      }
+
+      if (user) {
+        try { await loadEntries(); } catch (e) { console.warn('entries', e); }
+        try { await loadMakeups(); } catch (e) { console.warn('makeups', e); }
+      }
+
+      render();
+
+      if (!user) {
+        $('chMakeupNote').textContent = 'Войдите в профиль, чтобы отмечать альбомы.';
+      }
+    } catch (e) {
+      msg('Ошибка загрузки: ' + e.message, 'err');
+      console.error(e);
     }
-    sb = window.supabase.createClient(URL_, KEY_);
-
-    var s = await sb.auth.getSession();
-    var sess = s && s.data && s.data.session;
-    user  = sess ? sess.user : null;
-    token = sess ? sess.access_token : KEY_;
-
-    var ch = (await rest('challenges?select=*&id=eq.' + CHALLENGE_ID))[0];
-    if (!ch) { msg('Челлендж не найден.', 'err'); return; }
-
-    startISO = ch.starts_on;
-    endISO   = ch.ends_on;
-    $('chTitle').textContent = ch.title;
-    $('chDesc').textContent  = ch.description || '';
-
-    prompts = await rest('prompts?select=id,day,text,note&challenge_id=eq.'
-      + CHALLENGE_ID + '&order=day');
-    $('chTotal').textContent = prompts.length;
-
-    if (user) {
-      await loadEntries();
-      await loadMakeups();
-    }
-    render();
   }
 
   async function loadEntries() {
@@ -181,7 +229,7 @@ description: "31 день — 31 тёмный альбом. Один альбо�
       var txt = document.createElement('span');
       txt.className = 'ch-cell-txt';
       txt.textContent = filled ? entries[p.id].album
-                              : (d <= today ? p.text : '· · ·');
+                               : (d <= today ? p.text : '· · ·');
       cell.appendChild(txt);
 
       if (filled) {
@@ -193,10 +241,12 @@ description: "31 день — 31 тёмный альбом. Один альбо�
       } else {
         cell.classList.add('is-miss');
         missed++;
-        cell.disabled = true;      /* пропуск закрывается через «Восполнить» */
+        cell.disabled = true;
       }
 
-      if (!cell.disabled) cell.addEventListener('click', function () { openDay(p); });
+      if (!cell.disabled) {
+        cell.addEventListener('click', function () { openDay(p); });
+      }
       cal.appendChild(cell);
     });
 
@@ -205,14 +255,9 @@ description: "31 день — 31 тёмный альбом. Один альбо�
     $('chBar').style.width = Math.round((done / total) * 100) + '%';
     $('chLeft').textContent = missed ? 'пропущено ' + missed : 'пропусков нет';
 
-    if (!user) {
-      $('chMakeupNote').textContent = 'Войдите, чтобы отмечать альбомы.';
-      return;
-    }
-
     var left = Math.max(0, 3 - makeupUsed);
     $('chLeftCount').textContent = left ? '(' + left + ' на эту неделю)' : '(лимит исчерпан)';
-    $('chMakeupBtn').disabled = !left || !missed;
+    $('chMakeupBtn').disabled = !user || !left || !missed;
     $('chMakeupNote').textContent = missed
       ? 'Восполнение закрывает один пропущенный день. Задание нужно выполнить по-настоящему.'
       : '';
@@ -224,7 +269,7 @@ description: "31 день — 31 тёмный альбом. Один альбо�
     $('chModalPrompt').textContent = p.text;
     var e = entries[p.id];
     $('chArtist').value = e ? e.artist : '';
-    $('chAlbum').value  = e ? e.album  : '';
+    $('chAlbum').value = e ? e.album : '';
     $('chSubmit').textContent = e ? 'Сохранить' : 'Отметить';
     $('chOthers').innerHTML = '';
     loadOthers(p);
@@ -232,24 +277,35 @@ description: "31 день — 31 тёмный альбом. Один альбо�
     $('chArtist').focus();
   }
 
+  function esc(s) {
+    var d = document.createElement('div');
+    d.textContent = s == null ? '' : String(s);
+    return d.innerHTML;
+  }
+
   async function loadOthers(p) {
-    var rows = await rest('entries?select=artist,album&prompt_id=eq.' + p.id + '&limit=50');
-    if (!rows || !rows.length) {
-      $('chOthers').innerHTML = '<p class="ch-others-empty">Пока никто не ответил.</p>';
-      return;
+    try {
+      var rows = await rest('entries?select=artist,album&prompt_id=eq.' + p.id + '&limit=60');
+      if (!rows || !rows.length) {
+        $('chOthers').innerHTML = '<p class="ch-others-empty">Пока никто не ответил.</p>';
+        return;
+      }
+      var counts = {};
+      rows.forEach(function (r) {
+        var k = (r.artist || '') + ' — ' + (r.album || '');
+        counts[k] = (counts[k] || 0) + 1;
+      });
+      var list = Object.keys(counts)
+        .sort(function (a, b) { return counts[b] - counts[a]; })
+        .slice(0, 10)
+        .map(function (k) {
+          return '<li><span>' + esc(k) + '</span><b>' + counts[k] + '</b></li>';
+        })
+        .join('');
+      $('chOthers').innerHTML = '<p class="ch-others-head">Что вписывают</p><ul>' + list + '</ul>';
+    } catch (e) {
+      $('chOthers').innerHTML = '<p class="ch-others-empty">Не удалось загрузить ответы.</p>';
     }
-    var counts = {};
-    rows.forEach(function (r) {
-      var k = r.artist + ' — ' + r.album;
-      counts[k] = (counts[k] || 0) + 1;
-    });
-    var list = Object.keys(counts)
-      .sort(function (a, b) { return counts[b] - counts[a]; })
-      .slice(0, 10)
-      .map(function (k) { return '<li><span>' + k + '</span><b>' + counts[k] + '</b></li>'; })
-      .join('');
-    $('chOthers').innerHTML =
-      '<p class="ch-others-head">Что вписывают</p><ul>' + list + '</ul>';
   }
 
   function closeModal() { $('chModal').hidden = true; }
@@ -262,38 +318,47 @@ description: "31 день — 31 тёмный альбом. Один альбо�
     if (ev.key === 'Escape') closeModal();
   });
 
-  $('chForm').addEventListener('submit', async function (ev) {
+  $('chForm').addEventListener('submit', function (ev) {
     ev.preventDefault();
-    if (!user) { msg('Войдите, чтобы отмечать альбомы.', 'err'); return; }
+    if (busy) return;
+    if (!user) { msg('Войдите в профиль, чтобы отмечать альбомы.', 'err'); return; }
 
     var artist = $('chArtist').value.trim();
-    var album  = $('chAlbum').value.trim();
-    if (!artist || !album) return;
+    var album = $('chAlbum').value.trim();
+    if (!artist || !album || !selected) return;
 
+    busy = true;
     $('chSubmit').disabled = true;
-    try {
-      await rest('entries?on_conflict=user_id,prompt_id', {
-        method: 'POST',
-        headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
-        body: JSON.stringify({
-          prompt_id: selected.id,
-          challenge_id: CHALLENGE_ID,
-          user_id: user.id,
-          artist: artist,
-          album: album,
-          is_makeup: false
-        })
-      });
+
+    rest('entries?on_conflict=user_id,prompt_id', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({
+        prompt_id: selected.id,
+        challenge_id: CHALLENGE_ID,
+        user_id: user.id,
+        artist: artist,
+        album: album,
+        is_makeup: false
+      })
+    }).then(function () {
+      return loadEntries();
+    }).then(function () {
       closeModal();
-      await loadEntries();
       render();
-    } catch (e) {
+      msg('Записано: ' + artist + ' — ' + album, 'info');
+    }).catch(function (e) {
       msg('Не сохранилось: ' + e.message, 'err');
-    } finally {
+    }).then(function () {
+      busy = false;
       $('chSubmit').disabled = false;
-    }
+    });
   });
 
-  init();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
 </script>
