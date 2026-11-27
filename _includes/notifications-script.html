@@ -30,7 +30,7 @@
     }
     if(!window.supabase) return null;
 
-    var sb = window.supabase.createClient(URL_, KEY_);
+    var sb = window.__atm || (window.__atm = window.supabase.createClient(URL_, KEY_));
     var s = await sb.auth.getSession();
     var user = (s && s.data && s.data.session && s.data.session.user) || null;
     if(!user) return null;
