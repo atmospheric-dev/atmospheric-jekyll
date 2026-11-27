@@ -10,25 +10,61 @@ permalink: /diary.html
   <p class="diary-back">
     <a class="u-action" href="{{ site.baseurl }}/u.html">← В профиль</a>
   </p>
-  
+
+  <!-- сводка -->
+  <div class="diary-stats">
+    <div class="diary-stat"><b id="dStatAll">0</b><span>в дневнике</span></div>
+    <div class="diary-stat"><b id="dStatDone">0</b><span>послушал</span></div>
+    <div class="diary-stat"><b id="dStatNow">0</b><span>слушаю</span></div>
+    <div class="diary-stat"><b id="dStatMonth">0</b><span>за месяц</span></div>
+  </div>
+
+  <!-- челлендж -->
+  <a class="diary-challenge" href="{{ site.baseurl }}/challenge/">
+    <span class="diary-challenge-kicker">Атмосферный челлендж</span>
+    <span class="diary-challenge-title" id="dchTitle">31 день — 31 тёмный альбом</span>
+    <span class="diary-challenge-bar"><span id="dchBar"></span></span>
+    <span class="diary-challenge-meta">
+      <b id="dchDone">—</b> / <span id="dchTotal">—</span>
+      <em id="dchLeft">день не начат</em>
+    </span>
+    <span class="diary-challenge-go">Открыть календарь →</span>
+  </a>
+
+  <!-- фильтр -->
+  <div class="diary-filter" id="dFilter">
+    <button class="is-on" data-f="all" type="button">Всё</button>
+    <button data-f="done" type="button">Послушал</button>
+    <button data-f="now" type="button">Слушаю</button>
+    <button data-f="later" type="button">Хочу</button>
+  </div>
+
   <div class="my-marks" id="diary" data-base="{{ site.baseurl }}/albums">
     <p class="my-empty">Пока пусто. Каждая отметка на странице рецензии записывается сюда с датой.</p>
   </div>
+
+  <p class="diary-add">
+    <a class="u-action" href="{{ site.baseurl }}/releases.html">+ В дневник</a>
+  </p>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function () {
   var BASE = 'https://ojqefhakkmwmztxplcqv.supabase.co';
-  var KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
-  var box = document.getElementById('diary');
-  var base = box.dataset.base || '/albums';
+  var KEY  = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+  var SLUG = '2026-12';
+
+  var box   = document.getElementById('diary');
+  var base  = box.dataset.base || '/albums';
   var LABEL = { now: 'Слушаю сейчас', done: 'Послушал', later: 'Хочу послушать' };
   var MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь',
                 'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 
-  function visitor() {
-    return localStorage.getItem('atmos_visitor') || '';
-  }
+  var allRows = [];
+  var filter  = 'all';
+
+  function visitor() { return localStorage.getItem('atmos_visitor') || ''; }
 
   function rpc(fn, body) {
     return fetch(BASE + '/rest/v1/rpc/' + fn, {
@@ -45,12 +81,16 @@ permalink: /diary.html
     });
   }
 
+  function get(path) {
+    return fetch(BASE + '/rest/v1/' + path, {
+      headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }
+    }).then(function (r) { return r.ok ? r.json() : null; });
+  }
+
   function esc(s) {
     return String(s == null ? '' : s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   function nameOf(d) {
@@ -58,15 +98,25 @@ permalink: /diary.html
     return d.album.replace(/^\d{4}-/, '').replace(/-/g, ' ');
   }
 
-  function render(rows) {
+  /* ---------- дневник ---------- */
+
+  function render() {
+    var rows = allRows;
+
+    if (filter !== 'all') {
+      rows = rows.filter(function (d) { return d.mark === filter; });
+    }
+
     if (!rows.length) {
-      box.innerHTML = '<p class="my-empty">Пока пусто. Каждая отметка на странице рецензии записывается сюда с датой.</p>';
+      box.innerHTML = '<p class="my-empty">' +
+        (allRows.length
+          ? 'Здесь пока ничего нет по этому фильтру.'
+          : 'Пока пусто. Каждая отметка на странице рецензии записывается сюда с датой.') +
+        '</p>';
       return;
     }
 
-    // один альбом — одна запись за день (оставляем самую свежую)
-    var seen = {};
-    var list = [];
+    var seen = {}, list = [];
 
     rows.forEach(function (d) {
       var dt = new Date(d.logged_at);
@@ -77,12 +127,10 @@ permalink: /diary.html
       list.push({ row: d, dt: dt });
     });
 
-    var html = '';
-    var group = '';
+    var html = '', group = '';
 
     list.forEach(function (item) {
-      var d = item.row;
-      var dt = item.dt;
+      var d = item.row, dt = item.dt;
       var key = dt.getFullYear() + '-' + dt.getMonth();
       var head = MONTHS[dt.getMonth()] + ' ' + dt.getFullYear();
 
@@ -106,17 +154,105 @@ permalink: /diary.html
     box.innerHTML = html;
   }
 
-  function load() {
-    var v = visitor();
-    if (!v) return;
+  function stats(rows) {
+    var now = new Date();
+    var done = 0, nowc = 0, month = 0;
 
-    rpc('my_diary', { p_visitor: v, p_limit: 500 }).then(function (rows) {
-      render(rows || []);
-    }).catch(function () {
-      box.innerHTML = '<p class="my-empty">Не удалось загрузить дневник. Обнови страницу.</p>';
+    rows.forEach(function (d) {
+      if (d.mark === 'done') done++;
+      if (d.mark === 'now') nowc++;
+      var dt = new Date(d.logged_at);
+      if (!isNaN(dt.getTime()) &&
+          dt.getMonth() === now.getMonth() &&
+          dt.getFullYear() === now.getFullYear()) month++;
     });
+
+    document.getElementById('dStatAll').textContent   = rows.length;
+    document.getElementById('dStatDone').textContent  = done;
+    document.getElementById('dStatNow').textContent   = nowc;
+    document.getElementById('dStatMonth').textContent = month;
   }
 
-  load();
+  function loadDiary() {
+    var v = visitor();
+    if (!v) {
+      box.innerHTML = '<p class="my-empty">Войдите в профиль, чтобы вести дневник.</p>';
+      return;
+    }
+    return rpc('my_diary', { p_visitor: v, p_limit: 500 })
+      .then(function (rows) {
+        allRows = rows || [];
+        stats(allRows);
+        render();
+      })
+      .catch(function () {
+        box.innerHTML = '<p class="my-empty">Не удалось загрузить дневник. Обнови страницу.</p>';
+      });
+  }
+
+  /* ---------- челлендж ---------- */
+
+  function loadChallenge() {
+    get('challenges?select=id,title,starts_on&slug=eq.' + SLUG)
+      .then(function (chs) {
+        var ch = chs && chs[0];
+        if (!ch) return null;
+        document.getElementById('dchTitle').textContent = ch.title || 'Челлендж';
+
+        return get('prompts?select=id,day&challenge_id=eq.' + ch.id + '&order=day')
+          .then(function (ps) {
+            ps = ps || [];
+            document.getElementById('dchTotal').textContent = ps.length;
+
+            return sb.auth.getSession().then(function (s) {
+              var sess = s && s.data && s.data.session;
+              if (!sess) {
+                document.getElementById('dchDone').textContent = '—';
+                document.getElementById('dchLeft').textContent = 'войдите, чтобы видеть прогресс';
+                return;
+              }
+              return get('entries?select=prompt_id&challenge_id=eq.' + ch.id +
+                         '&user_id=eq.' + sess.user.id)
+                .then(function (es) {
+                  var doneCount = (es || []).length;
+                  document.getElementById('dchDone').textContent = doneCount;
+                  document.getElementById('dchBar').style.width =
+                    Math.round((doneCount / (ps.length || 1)) * 100) + '%';
+
+                  var today = new Date();
+                  var start = new Date(ch.starts_on + 'T00:00:00');
+                  var dayNow = Math.floor((today - start) / 864e5) + 1;
+                  var miss = 0;
+                  (ps || []).forEach(function (p) {
+                    if (p.day < dayNow && !(es || []).some(function (e) { return e.prompt_id === p.id; })) miss++;
+                  });
+                  document.getElementById('dchLeft').textContent =
+                    dayNow < 1 ? 'стартует ' + ch.starts_on
+                    : miss ? 'пропущено ' + miss
+                    : 'пропусков нет';
+                });
+            });
+          });
+      })
+      .catch(function () {});
+  }
+
+  /* ---------- фильтр ---------- */
+
+  document.getElementById('dFilter').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button');
+    if (!b) return;
+    filter = b.dataset.f;
+    [].forEach.call(this.querySelectorAll('button'), function (x) {
+      x.classList.toggle('is-on', x === b);
+    });
+    render();
+  });
+
+  var sb = window.supabase.createClient(BASE, KEY);
+  window.__sb = sb;
+
+  loadDiary();
+  loadChallenge();
 })();
 </script>
