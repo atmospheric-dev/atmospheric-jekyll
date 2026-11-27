@@ -5312,3 +5312,24 @@ body.modal-open{
   .u-ch-grid{grid-template-columns:repeat(4,1fr);}
   .u-ch-cell{min-height:56px;}
 }
+/* ====== ПАГИНАЦИЯ ДНЕВНИКА ====== */
+.diary-pager{
+  display:flex;flex-wrap:wrap;gap:6px;
+  margin-top:22px;padding-top:18px;
+  border-top:1px solid var(--line);
+}
+.diary-page{
+  min-width:34px;height:34px;padding:0 8px;
+  border:1px solid var(--line);background:none;
+  color:var(--text-dim);
+  font-family:'Courier New',monospace;font-size:.72rem;
+  letter-spacing:.06em;cursor:pointer;
+  transition:border-color .2s,color .2s,background .2s;
+}
+.diary-page:hover{border-color:var(--accent);color:var(--accent);}
+.diary-page.is-active{
+  border-color:var(--accent);background:var(--accent);color:var(--bg);
+}
+@media(max-width:520px){
+  .diary-page{min-width:30px;height:30px;font-size:.68rem;}
+}
