@@ -5154,3 +5154,67 @@ body.modal-open{
   flex:1 1 0;
   margin-top:0;
 }
+/* ====== ДНЕВНИК: СВОДКА ====== */
+.diary-stats{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border:1px solid var(--line);margin:0 0 26px;
+}
+.diary-stat{padding:18px 16px;text-align:center;border-right:1px solid var(--line);}
+.diary-stat:last-child{border-right:0;}
+.diary-stat b{
+  display:block;font-family:Georgia,serif;font-size:1.65rem;
+  font-weight:400;color:var(--accent);line-height:1.1;
+}
+.diary-stat span{
+  display:block;margin-top:6px;font-family:'Courier New',monospace;
+  font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text-dim);
+}
+
+/* ====== ДНЕВНИК: ЧЕЛЛЕНДЖ ====== */
+.diary-challenge{
+  display:block;padding:26px 28px;margin:0 0 30px;
+  border:1px solid var(--line);background:rgba(176,142,90,.04);
+  transition:border-color .25s,background .25s;
+}
+.diary-challenge:hover{border-color:var(--accent);background:rgba(176,142,90,.08);opacity:1;}
+.diary-challenge-kicker{
+  display:block;font-family:'Courier New',monospace;font-size:.66rem;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;
+}
+.diary-challenge-title{
+  display:block;font-family:Georgia,serif;font-size:1.22rem;
+  color:var(--text);line-height:1.35;margin-bottom:16px;
+}
+.diary-challenge-bar{display:block;height:2px;background:var(--line);margin-bottom:12px;}
+.diary-challenge-bar span{display:block;height:100%;width:0;background:var(--accent);transition:width .4s;}
+.diary-challenge-meta{
+  display:block;font-family:'Courier New',monospace;font-size:.72rem;
+  color:var(--text-dim);margin-bottom:16px;
+}
+.diary-challenge-meta b{color:var(--accent);font-weight:400;}
+.diary-challenge-meta em{font-style:normal;color:var(--text-dim);margin-left:8px;}
+.diary-challenge-go{
+  display:block;font-family:'Courier New',monospace;font-size:.68rem;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--accent);
+}
+
+/* ====== ДНЕВНИК: ФИЛЬТР ====== */
+.diary-filter{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;}
+.diary-filter button{
+  padding:7px 14px;border:1px solid var(--line);background:none;
+  color:var(--text-dim);font-family:'Courier New',monospace;font-size:.68rem;
+  letter-spacing:.1em;text-transform:uppercase;cursor:pointer;
+  transition:border-color .2s,color .2s;
+}
+.diary-filter button:hover{border-color:var(--accent);color:var(--accent);}
+.diary-filter button.is-on{border-color:var(--accent);color:var(--accent);background:rgba(176,142,90,.08);}
+
+.diary-add{margin:26px 0 0;}
+
+@media(max-width:640px){
+  .diary-stats{grid-template-columns:repeat(2,1fr);}
+  .diary-stat{border-bottom:1px solid var(--line);}
+  .diary-stat:nth-child(2n){border-right:0;}
+  .diary-stat:nth-last-child(-n+2){border-bottom:0;}
+}
