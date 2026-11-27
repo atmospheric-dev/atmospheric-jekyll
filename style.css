@@ -5218,3 +5218,31 @@ body.modal-open{
   .diary-stat:nth-child(2n){border-right:0;}
   .diary-stat:nth-last-child(-n+2){border-bottom:0;}
 }
+/* ====== ЧЕЛЛЕНДЖ В ПРОФИЛЕ ====== */
+.u-challenge{margin:0 0 34px;}
+
+.u-challenge-in{
+  display:block;padding:22px 24px;
+  border:1px solid var(--line);background:rgba(176,142,90,.04);
+  transition:border-color .25s,background .25s;
+}
+.u-challenge-in:hover{border-color:var(--accent);background:rgba(176,142,90,.08);opacity:1;}
+
+.u-challenge-name{
+  display:block;font-family:Georgia,serif;font-size:1.1rem;
+  color:var(--text);line-height:1.35;margin-bottom:14px;
+}
+
+.u-challenge-bar{
+  display:block;height:2px;background:var(--line);margin-bottom:12px;
+}
+.u-challenge-bar span{
+  display:block;height:100%;width:0;background:var(--accent);
+  transition:width .4s;
+}
+
+.u-challenge-meta{
+  display:block;font-family:'Courier New',monospace;font-size:.7rem;
+  letter-spacing:.08em;color:var(--text-dim);
+}
+.u-challenge-meta b{color:var(--accent);font-weight:400;}
