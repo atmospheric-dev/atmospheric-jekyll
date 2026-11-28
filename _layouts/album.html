@@ -139,7 +139,8 @@ layout: default
   (function () {
     var ALBUM = {{ page.slug | default: page.url | jsonify }};
     var sb = window.__atm || (window.__atm = window.supabase.createClient(
-      window.SUPABASE_URL, window.SUPABASE_KEY));
+      window.SUPABASE_URL || 'https://ojqefhakkmwmztxplcqv.supabase.co',
+      window.SUPABASE_KEY));
 
     /* ---------- вкладки ---------- */
     var tabs = document.querySelectorAll('.album-tab');
