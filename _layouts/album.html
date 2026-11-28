@@ -9,7 +9,7 @@ layout: default
     {% include rating.html %}
 
     {% include album-marks.html %}
-    
+
     <div class="album-layout">
       <img class="album-cover" src="{{ site.baseurl }}/{{ page.cover }}" alt="{{ page.artist }} — {{ page.title }}">
 
@@ -112,9 +112,9 @@ layout: default
     </div>
 
     {% include comments.html %}
-    
+
     <p class="album-back"><a class="back" href="{{ site.baseurl }}/releases.html">← Все обзоры</a></p>
-    
+
   </div>
 
   <div class="review-modal" id="review-modal" hidden>
@@ -138,9 +138,11 @@ layout: default
   <script>
   (function () {
     var ALBUM = {{ page.slug | default: page.url | jsonify }};
-    var sb = window.__atm || (window.__atm = window.supabase.createClient(
-      window.SUPABASE_URL || 'https://ojqefhakkmwmztxplcqv.supabase.co',
-      window.SUPABASE_KEY));
+
+    var SB_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
+    var SB_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+
+    var sb = window.__atm || (window.__atm = window.supabase.createClient(SB_URL, SB_KEY));
 
     /* ---------- вкладки ---------- */
     var tabs = document.querySelectorAll('.album-tab');
@@ -295,11 +297,11 @@ layout: default
           errBox.hidden = false;
           return;
         }
-        return fetch(window.SUPABASE_URL + '/rest/v1/rpc/add_review', {
+        return fetch(SB_URL + '/rest/v1/rpc/add_review', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'apikey': window.SUPABASE_KEY,
+            'apikey': SB_KEY,
             'Authorization': 'Bearer ' + s.data.session.access_token
           },
           body: JSON.stringify({ p_album: ALBUM, p_body: body })
