@@ -5496,3 +5496,85 @@ body.modal-open{
   gap:.7rem;
   margin:1.1rem 0 0;
 }
+/* ====== МОДЕРАЦИЯ РЕЦЕНЗИЙ ====== */
+.mod-wrap{padding:0 0 60px;}
+.mod-note{
+  font-family:'Courier New',monospace;
+  font-size:.72rem;
+  letter-spacing:.08em;
+  color:var(--text-dim);
+  margin:0 0 22px;
+}
+.mod-tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0;
+  margin:0 0 26px;
+  border-bottom:1px solid var(--line);
+}
+.mod-tab{
+  font-family:'Courier New',monospace;
+  font-size:.66rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  background:none;
+  border:0;
+  border-bottom:2px solid transparent;
+  padding:.65rem 1rem;
+  cursor:pointer;
+  transition:color .2s,border-color .2s;
+}
+.mod-tab:hover{color:var(--text);}
+.mod-tab.is-active{
+  color:var(--accent);
+  border-bottom-color:var(--accent);
+}
+.mod-tab span{opacity:.6;}
+
+.mod-card{
+  padding:22px 0;
+  border-bottom:1px solid var(--line);
+}
+.mod-head{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:6px 16px;
+  margin:0 0 12px;
+}
+.mod-author{font-size:.92rem;color:var(--text);}
+.mod-album{
+  font-family:'Courier New',monospace;
+  font-size:.68rem;
+  letter-spacing:.06em;
+  color:var(--accent);
+  opacity:.75;
+}
+.mod-date{
+  font-family:'Courier New',monospace;
+  font-size:.66rem;
+  color:var(--text-dim);
+  margin-left:auto;
+}
+.mod-body p{
+  margin:0 0 14px;
+  max-width:740px;
+  line-height:1.7;
+}
+.mod-reason{
+  font-size:.74rem;
+  font-style:italic;
+  color:var(--text-dim);
+  margin:10px 0 0;
+}
+.mod-acts{
+  display:flex;
+  gap:10px;
+  margin:16px 0 0;
+}
+.mod-empty{
+  color:var(--text-dim);
+  font-style:italic;
+  padding:20px 0;
+}
