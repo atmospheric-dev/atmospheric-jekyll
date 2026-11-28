@@ -1,0 +1,191 @@
+---
+layout: default
+permalink: /moderation.html
+---
+<article class="mod-wrap">
+  <div class="wrap">
+    <h1>Модерация рецензий</h1>
+    <p class="mod-note" id="mod-note">Загрузка…</p>
+
+    <div class="mod-tabs">
+      <button type="button" class="mod-tab is-active" data-status="pending">На проверке <span id="c-pending">0</span></button>
+      <button type="button" class="mod-tab" data-status="published">Опубликованные <span id="c-published">0</span></button>
+      <button type="button" class="mod-tab" data-status="rejected">Отклонённые <span id="c-rejected">0</span></button>
+    </div>
+
+    <div id="mod-list"></div>
+  </div>
+</article>
+
+<script>
+(function () {
+  var SB_URL = 'https://ojqefhakkmwmztxplcqv.supabase.co';
+  var SB_KEY = 'sb_publishable_AKddWEkn4NKRScV70we-dg_HDeKR-yZ';
+  var sb = window.__atm || (window.__atm = window.supabase.createClient(SB_URL, SB_KEY));
+
+  var items = [];
+  var filter = 'pending';
+  var list = document.getElementById('mod-list');
+  var note = document.getElementById('mod-note');
+
+  function render() {
+    list.textContent = '';
+    var shown = items.filter(function (r) { return r.status === filter; });
+
+    if (!shown.length) {
+      var e = document.createElement('p');
+      e.className = 'mod-empty';
+      e.textContent = filter === 'pending'
+        ? 'Очередь пуста — всё проверено.'
+        : 'Здесь пока ничего нет.';
+      list.appendChild(e);
+      return;
+    }
+
+    shown.forEach(function (r) {
+      var card = document.createElement('article');
+      card.className = 'mod-card';
+
+      var head = document.createElement('div');
+      head.className = 'mod-head';
+
+      var who = document.createElement('span');
+      who.className = 'mod-author';
+      who.textContent = r.username || 'аноним';
+
+      var alb = document.createElement('span');
+      alb.className = 'mod-album';
+      alb.textContent = r.album;
+
+      var date = document.createElement('span');
+      date.className = 'mod-date';
+      date.textContent = new Date(r.created_at).toLocaleString('ru-RU');
+
+      head.appendChild(who);
+      head.appendChild(alb);
+      head.appendChild(date);
+
+      var body = document.createElement('div');
+      body.className = 'mod-body';
+      String(r.body || '').split(/\n{2,}/).forEach(function (chunk) {
+        var p = document.createElement('p');
+        p.textContent = chunk.trim();
+        if (p.textContent) body.appendChild(p);
+      });
+
+      card.appendChild(head);
+      card.appendChild(body);
+
+      if (r.status === 'rejected' && r.reject_reason) {
+        var rr = document.createElement('p');
+        rr.className = 'mod-reason';
+        rr.textContent = 'Причина: ' + r.reject_reason;
+        card.appendChild(rr);
+      }
+
+      if (!r.is_mine) {
+        var acts = document.createElement('div');
+        acts.className = 'mod-acts';
+
+        if (r.status !== 'published') {
+          var ok = document.createElement('button');
+          ok.type = 'button';
+          ok.className = 'review-btn';
+          ok.textContent = 'Опубликовать';
+          ok.addEventListener('click', function () { act('publish_review', r.id, null); });
+          acts.appendChild(ok);
+        }
+
+        if (r.status !== 'rejected') {
+          var no = document.createElement('button');
+          no.type = 'button';
+          no.className = 'review-btn ghost';
+          no.textContent = 'Отклонить';
+          no.addEventListener('click', function () {
+            var reason = prompt('Причина отклонения (увидит автор):', '');
+            if (reason === null) return;
+            act('reject_review', r.id, reason.trim() || null);
+          });
+          acts.appendChild(no);
+        }
+
+        card.appendChild(acts);
+      } else {
+        var own = document.createElement('p');
+        own.className = 'mod-reason';
+        own.textContent = 'Своя рецензия — одобрять её может только владелец через отдельную роль.';
+        card.appendChild(own);
+      }
+
+      list.appendChild(card);
+    });
+  }
+
+  function counts() {
+    ['pending', 'published', 'rejected'].forEach(function (s) {
+      var n = items.filter(function (r) { return r.status === s; }).length;
+      document.getElementById('c-' + s).textContent = n;
+    });
+  }
+
+  function load() {
+    return sb.rpc('moderation_queue').then(function (res) {
+      if (res.error) { note.textContent = 'Ошибка: ' + res.error.message; return; }
+      var out = res.data || {};
+      if (!out.ok) {
+        note.textContent = out.error === 'forbidden'
+          ? 'У вас нет прав модератора.'
+          : 'Войдите в профиль.';
+        document.querySelectorAll('.mod-tab').forEach(function (b) { b.disabled = true; });
+        return;
+      }
+      items = out.items || [];
+      counts();
+      render();
+      note.textContent = 'Всего рецензий: ' + items.length;
+    });
+  }
+
+  function act(fn, id, reason) {
+    sb.auth.getSession().then(function (s) {
+      if (!s.data.session) { alert('Войдите заново.'); return; }
+      var body = fn === 'publish_review'
+        ? { p_id: id }
+        : { p_id: id, p_reason: reason };
+      return fetch(SB_URL + '/rest/v1/rpc/' + fn, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SB_KEY,
+          'Authorization': 'Bearer ' + s.data.session.access_token
+        },
+        body: JSON.stringify(body)
+      }).then(function (r) { return r.json(); });
+    }).then(function (out) {
+      if (!out) return;
+      if (!out.ok) {
+        var map = {
+          forbidden: 'Нет прав модератора.',
+          own_review: 'Свою рецензию одобрить нельзя.',
+          not_found: 'Рецензия не найдена.',
+          auth: 'Войдите заново.'
+        };
+        alert(map[out.error] || 'Не получилось.');
+        return;
+      }
+      load();
+    });
+  }
+
+  document.querySelectorAll('.mod-tab').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.mod-tab').forEach(function (x) { x.classList.remove('is-active'); });
+      b.classList.add('is-active');
+      filter = b.getAttribute('data-status');
+      render();
+    });
+  });
+
+  load();
+})();
+</script>
