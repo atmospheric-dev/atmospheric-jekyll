@@ -5333,3 +5333,166 @@ body.modal-open{
 @media(max-width:520px){
   .diary-page{min-width:30px;height:30px;font-size:.68rem;}
 }
+/* ====== ВКЛАДКИ РЕЦЕНЗИЙ ====== */
+.album-tabs{
+  display:flex;
+  gap:0;
+  margin:2.2rem 0 0;
+  border-bottom:1px solid rgba(176,142,90,.28);
+}
+.album-tab{
+  font-family:'Courier New',monospace;
+  font-size:.68rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#8d857a;
+  background:none;
+  border:0;
+  border-bottom:2px solid transparent;
+  padding:.7rem 1.1rem;
+  cursor:pointer;
+  transition:color .18s, border-color .18s;
+}
+.album-tab:hover{color:#ded8cc;}
+.album-tab.is-active{
+  color:#b08e5a;
+  border-bottom-color:#b08e5a;
+}
+.album-tab span{opacity:.6;}
+
+.album-panel{padding:1.6rem 0 0;}
+
+/* ====== РЕЦЕНЗИИ ЧИТАТЕЛЕЙ ====== */
+.reviews-head{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  flex-wrap:wrap;
+  margin:0 0 1.6rem;
+}
+.review-btn{
+  font-family:'Courier New',monospace;
+  font-size:.64rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#0b0b0a;
+  background:#b08e5a;
+  border:1px solid #b08e5a;
+  padding:.55rem 1rem;
+  cursor:pointer;
+  transition:opacity .18s;
+}
+.review-btn:hover{opacity:.85;}
+.review-btn.ghost{
+  background:transparent;
+  color:#b08e5a;
+}
+.review-note{
+  font-size:.72rem;
+  color:#7d7469;
+  margin:0;
+}
+
+.review-card{
+  padding:1.2rem 0;
+  border-bottom:1px solid rgba(176,142,90,.16);
+}
+.review-head{
+  display:flex;
+  align-items:center;
+  gap:.7rem;
+  flex-wrap:wrap;
+  margin:0 0 .7rem;
+}
+.review-avatar{
+  width:34px;height:34px;
+  border-radius:50%;
+  object-fit:cover;
+  border:1px solid rgba(176,142,90,.4);
+}
+.review-author{
+  font-family:'Courier New',monospace;
+  font-size:.8rem;
+  color:#ded8cc;
+  text-decoration:none;
+  border-bottom:1px dotted rgba(176,142,90,.5);
+}
+.review-author:hover{color:#b08e5a;}
+.review-meta{
+  font-size:.7rem;
+  color:#7d7469;
+  font-style:italic;
+}
+.review-body p{
+  margin:0 0 .9rem;
+  line-height:1.7;
+}
+.reviews-empty{
+  color:#7d7469;
+  font-style:italic;
+}
+
+/* ====== МОДАЛЬНОЕ ОКНО ====== */
+.review-modal{
+  position:fixed;inset:0;
+  z-index:90;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:1rem;
+}
+.review-modal[hidden]{display:none;}
+.review-modal-bg{
+  position:absolute;inset:0;
+  background:rgba(6,6,5,.82);
+}
+.review-modal-box{
+  position:relative;
+  width:min(640px,100%);
+  max-height:90vh;
+  overflow:auto;
+  background:#0d0c0b;
+  border:1px solid rgba(176,142,90,.4);
+  padding:1.6rem;
+}
+.review-modal-box h3{
+  margin:0 0 1rem;
+  font-weight:normal;
+  color:#b08e5a;
+  font-size:1rem;
+  letter-spacing:.04em;
+}
+.review-modal-box textarea{
+  width:100%;
+  min-height:220px;
+  resize:vertical;
+  background:#0b0b0a;
+  color:#ded8cc;
+  border:1px solid rgba(176,142,90,.3);
+  padding:.8rem;
+  font-family:Georgia,serif;
+  font-size:.92rem;
+  line-height:1.6;
+}
+.review-modal-box textarea:focus{
+  outline:none;
+  border-color:#b08e5a;
+}
+.review-modal-meta{
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  font-size:.7rem;
+  color:#7d7469;
+  margin:.5rem 0 0;
+}
+.review-error{
+  color:#c9705a;
+  font-size:.75rem;
+  margin:.7rem 0 0;
+}
+.review-modal-actions{
+  display:flex;
+  gap:.7rem;
+  margin:1.1rem 0 0;
+}
