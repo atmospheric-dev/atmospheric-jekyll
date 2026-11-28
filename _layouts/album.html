@@ -208,7 +208,8 @@ layout: default
           var av = document.createElement('img');
           av.className = 'review-avatar';
           av.alt = '';
-          av.src = r.avatar || '{{ site.baseurl }}/images/avatar-default.png';
+          av.src = r.avatar ? ('{{ site.baseurl }}' + r.avatar) : ('{{ site.baseurl }}/logo.png');
+          av.onerror = function () { av.src = '{{ site.baseurl }}/logo.png'; };
 
           var who = document.createElement('a');
           who.className = 'review-author';
